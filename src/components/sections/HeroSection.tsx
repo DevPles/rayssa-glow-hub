@@ -63,7 +63,7 @@ const HeroSection = () => {
           {/* Left content */}
           <div>
 
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
               <span className="animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema de </span>
               <span className="animate-fade-in text-primary" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>Experiência Exclusiva </span>
               <span className="animate-fade-in" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>de Parto </span>
