@@ -1,0 +1,25 @@
+services:
+  estetica-leslie:
+    container_name: estetica-leslie
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - e258techmozambique
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.estetica-leslie.rule=Host(`esteticaleslie.com`) || Host(`www.esteticaleslie.com`)
+      - traefik.http.routers.estetica-leslie.entrypoints=web
+      - traefik.http.routers.estetica-leslie.middlewares=estetica-leslie-redirect
+      - traefik.http.middlewares.estetica-leslie-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.estetica-leslie-secure.rule=Host(`esteticaleslie.com`) || Host(`www.esteticaleslie.com`)
+      - traefik.http.routers.estetica-leslie-secure.entrypoints=websecure
+      - traefik.http.routers.estetica-leslie-secure.tls=true
+      - traefik.http.routers.estetica-leslie-secure.tls.certresolver=letsencrypt
+      - traefik.http.services.estetica-leslie.loadbalancer.server.port=80
+      - traefik.docker.network=e258techmozambique
+
+networks:
+  e258techmozambique:
+    external: true

@@ -1,0 +1,3 @@
+ALTER TABLE public.system_settings ALTER COLUMN hero_description SET DEFAULT 'Estética avançada e cuidado materno integrados por meio de protocolos seguros e personalizados, sustentados por ampla experiência clínica — por Rayssa Leslie, Esteticista Avançada e Enfermeira Obstetra.';
+
+UPDATE public.system_settings SET hero_description = 'Estética avançada e cuidado materno integrados por meio de protocolos seguros e personalizados, sustentados por ampla experiência clínica — por Rayssa Leslie, Esteticista Avançada e Enfermeira Obstetra.' WHERE hero_description = 'Estética avançada e cuidado materno integrados por meio de protocolos seguros e personalizados, sustentados por ampla experiência clínica.';

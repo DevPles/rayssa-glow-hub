@@ -1,0 +1,1 @@
+ALTER TABLE public.system_settings ADD COLUMN hero_description text NOT NULL DEFAULT 'Estética avançada e cuidado materno integrados por meio de protocolos seguros e personalizados, sustentados por ampla experiência clínica.';

@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Lato:wght@300;400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 96%;
+    --foreground: 0 0% 17%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 17%;
+
+    --primary: 324 52% 81%;
+    --primary-foreground: 0 0% 17%;
+
+    --secondary: 274 22% 52%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 338 83% 81%;
+    --accent-foreground: 0 0% 17%;
+
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 122 39% 49%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 36 100% 50%;
+    --warning-foreground: 0 0% 17%;
+
+    --border: 324 30% 90%;
+    --input: 324 30% 90%;
+    --ring: 274 22% 52%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 274 22% 52%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 324 52% 95%;
+    --sidebar-accent-foreground: 274 22% 30%;
+    --sidebar-border: 324 30% 90%;
+    --sidebar-ring: 274 22% 52%;
+  }
+
+  .dark {
+    --background: 270 20% 8%;
+    --foreground: 324 20% 95%;
+
+    --card: 270 20% 12%;
+    --card-foreground: 324 20% 95%;
+
+    --popover: 270 20% 12%;
+    --popover-foreground: 324 20% 95%;
+
+    --primary: 324 52% 75%;
+    --primary-foreground: 270 20% 8%;
+
+    --secondary: 274 30% 40%;
+    --secondary-foreground: 324 20% 95%;
+
+    --muted: 270 15% 18%;
+    --muted-foreground: 324 15% 65%;
+
+    --accent: 338 70% 70%;
+    --accent-foreground: 270 20% 8%;
+
+    --destructive: 4 70% 45%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 270 15% 22%;
+    --input: 270 15% 22%;
+    --ring: 324 52% 75%;
+
+    --sidebar-background: 270 20% 10%;
+    --sidebar-foreground: 324 20% 90%;
+    --sidebar-primary: 324 52% 75%;
+    --sidebar-primary-foreground: 270 20% 8%;
+    --sidebar-accent: 270 15% 18%;
+    --sidebar-accent-foreground: 324 20% 90%;
+    --sidebar-border: 270 15% 22%;
+    --sidebar-ring: 324 52% 75%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@keyframes float-blob1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-60px, 80px) scale(1.1); }
+  66% { transform: translate(40px, -50px) scale(0.9); }
+}
+@keyframes float-blob2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(70px, -60px) scale(1.15); }
+  50% { transform: translate(-40px, -100px) scale(0.95); }
+  75% { transform: translate(50px, 40px) scale(1.05); }
+}
+@keyframes float-blob3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(-80px, 60px) scale(1.1); }
+  70% { transform: translate(60px, -40px) scale(0.85); }
+}
+@keyframes float-blob4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  30% { transform: translate(50px, -70px) scale(1.2); }
+  60% { transform: translate(-70px, 30px) scale(0.9); }
+}
+@keyframes float-blob5 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, 80px) scale(1.15); }
+}
+
+/* Remove browser autofill yellow background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}

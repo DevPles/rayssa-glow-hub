@@ -1,0 +1,95 @@
+export const testimonials = [
+  {
+    id: 1,
+    name: "Mariana Silva",
+    role: "Empresária",
+    rating: 5,
+    text: "A Rayssa transformou minha pele! Depois de anos tentando tratamentos, finalmente encontrei uma profissional que entende o que cada mulher precisa.",
+    date: "15/01/2026",
+  },
+  {
+    id: 2,
+    name: "Camila Oliveira",
+    role: "Gestante - 7 meses",
+    rating: 5,
+    text: "Me senti tão acolhida durante toda a gestação. A drenagem linfática foi essencial para meu bem-estar. Recomendo de olhos fechados!",
+    date: "02/02/2026",
+  },
+  {
+    id: 3,
+    name: "Fernanda Costa",
+    role: "Mãe de primeira viagem",
+    rating: 5,
+    text: "O acompanhamento pós-parto da Rayssa foi incrível. Ela me ajudou a recuperar minha autoestima e cuidar do meu corpo com segurança.",
+    date: "20/12/2025",
+  },
+  {
+    id: 4,
+    name: "Ana Paula Mendes",
+    role: "Professora",
+    rating: 5,
+    text: "O tratamento de radiofrequência superou todas as minhas expectativas. Pele rejuvenescida e um atendimento impecável!",
+    date: "10/01/2026",
+  },
+  {
+    id: 5,
+    name: "Juliana Ferreira",
+    role: "Gestante - 5 meses",
+    rating: 5,
+    text: "Encontrar uma esteticista especializada em gestantes foi um presente. Me sinto linda e segura a cada sessão.",
+    date: "28/01/2026",
+  },
+];
+
+export const blogPosts = [
+  {
+    id: 1,
+    title: "Cuidados com a Pele Durante a Gestação: Guia Completo",
+    category: "Gestação",
+    summary: "Descubra quais procedimentos estéticos são seguros durante a gravidez e como manter sua pele radiante nessa fase tão especial.",
+    date: "10/02/2026",
+    readTime: "5 min",
+  },
+  {
+    id: 2,
+    title: "Radiofrequência: O Que é e Como Funciona",
+    category: "Estética",
+    summary: "Conheça os benefícios da radiofrequência para o rejuvenescimento facial e corporal. Um dos tratamentos mais procurados da atualidade.",
+    date: "05/02/2026",
+    readTime: "4 min",
+  },
+  {
+    id: 3,
+    title: "Recuperação Pós-Parto: Quando Iniciar os Cuidados Estéticos",
+    category: "Pós-Parto",
+    summary: "Saiba o momento ideal para retomar os cuidados estéticos após o parto e quais tratamentos são mais indicados para cada fase.",
+    date: "01/02/2026",
+    readTime: "6 min",
+  },
+];
+
+export const services = [
+  // Estética para Mulheres
+  { id: 1, name: "Limpeza de Pele", price: 150, duration: 60, rating: 4.9, reviews: 87, category: "estetica-mulheres", description: "Limpeza profunda para uma pele renovada e luminosa." },
+  { id: 2, name: "Peeling", price: 180, duration: 45, rating: 4.8, reviews: 62, category: "estetica-mulheres", description: "Renovação celular para uma pele mais jovem e uniforme." },
+  { id: 3, name: "Microagulhamento", price: 250, duration: 60, rating: 4.9, reviews: 54, category: "estetica-mulheres", description: "Estímulo de colágeno para tratamento de cicatrizes e rugas." },
+  { id: 4, name: "Radiofrequência", price: 350, duration: 50, rating: 5.0, reviews: 73, category: "estetica-mulheres", description: "Tratamento de flacidez e rejuvenescimento facial." },
+  { id: 5, name: "Harmonização Facial", price: 400, duration: 90, rating: 4.9, reviews: 91, category: "estetica-mulheres", description: "Procedimento completo para harmonizar traços faciais." },
+  { id: 6, name: "Botox", price: 600, duration: 30, rating: 4.8, reviews: 105, category: "estetica-mulheres", description: "Tratamento para suavizar linhas de expressão." },
+  { id: 7, name: "Drenagem Linfática", price: 180, duration: 60, rating: 4.9, reviews: 120, category: "estetica-mulheres", description: "Massagem especializada para redução de inchaço." },
+  { id: 8, name: "Massagem Relaxante", price: 150, duration: 60, rating: 5.0, reviews: 95, category: "estetica-mulheres", description: "Relaxamento profundo para corpo e mente." },
+  { id: 9, name: "Tratamento Corporal", price: 200, duration: 60, rating: 4.7, reviews: 48, category: "estetica-mulheres", description: "Tratamentos corporais para modelagem e firmeza." },
+  { id: 10, name: "Lipo Enzimática", price: 250, duration: 45, rating: 4.8, reviews: 36, category: "estetica-mulheres", description: "Redução de gordura localizada sem cirurgia." },
+  { id: 11, name: "Mesoterapia", price: 300, duration: 40, rating: 4.7, reviews: 29, category: "estetica-mulheres", description: "Injeções vitamínicas para rejuvenescimento da pele." },
+  // Estética para Gestantes
+  { id: 12, name: "Acompanhamento Pré-Natal", price: 250, duration: 60, rating: 5.0, reviews: 67, category: "estetica-gestantes", description: "Acompanhamento estético especializado durante a gestação." },
+  { id: 13, name: "Drenagem Linfática Gestacional", price: 180, duration: 60, rating: 5.0, reviews: 89, category: "estetica-gestantes", description: "Drenagem segura para gestantes, aliviando inchaço." },
+  { id: 14, name: "Massagem Gestacional", price: 200, duration: 60, rating: 5.0, reviews: 78, category: "estetica-gestantes", description: "Massagem relaxante adaptada para gestantes." },
+  { id: 15, name: "Limpeza de Pele Gestacional", price: 150, duration: 50, rating: 4.9, reviews: 45, category: "estetica-gestantes", description: "Limpeza de pele segura para o período gestacional." },
+  { id: 16, name: "Consultoria Pós-Parto", price: 200, duration: 45, rating: 5.0, reviews: 52, category: "estetica-gestantes", description: "Orientação completa para recuperação pós-parto." },
+  { id: 17, name: "Drenagem Pós-Parto", price: 200, duration: 60, rating: 4.9, reviews: 61, category: "estetica-gestantes", description: "Drenagem especializada para o período pós-parto." },
+  { id: 18, name: "Tratamento Diástase", price: 300, duration: 50, rating: 4.8, reviews: 33, category: "estetica-gestantes", description: "Tratamento para separação abdominal pós-parto." },
+  { id: 19, name: "Tratamento de Estrias", price: 250, duration: 45, rating: 4.8, reviews: 41, category: "estetica-gestantes", description: "Tratamento para redução e prevenção de estrias." },
+  { id: 20, name: "Harmonização Facial Gestacional", price: 350, duration: 60, rating: 4.9, reviews: 28, category: "estetica-gestantes", description: "Harmonização segura adaptada para gestantes." },
+  { id: 21, name: "Tratamento Corporal Pós-Parto", price: 250, duration: 60, rating: 4.9, reviews: 37, category: "estetica-gestantes", description: "Tratamento corporal completo para recuperação pós-parto." },
+];
