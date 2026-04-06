@@ -57,7 +57,7 @@ const Header = () => {
           <Link to="/login">
             <Button variant="outline" className="rounded-full font-heading text-secondary border-secondary/30 hover:bg-secondary hover:text-secondary-foreground px-5 gap-2 transition-all">
               <UserCircle className="h-4 w-4" />
-              Entrar
+              Acesse Sistema
             </Button>
           </Link>
         </div>
@@ -87,7 +87,7 @@ const Header = () => {
               </button>
               <Link to="/login" onClick={() => setOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start font-heading text-foreground hover:text-secondary px-4 py-3">
-                  <UserCircle className="h-5 w-5 mr-2" /> Entrar
+                  <UserCircle className="h-5 w-5 mr-2" /> Acesse Sistema
                 </Button>
               </Link>
             </nav>
