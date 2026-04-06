@@ -5,10 +5,13 @@ import { createContext, useContext, useState, ReactNode } from "react";
 export interface Vaccine {
   id: string;
   name: string;
+  customName?: string;
   dose: string;
   date: string;
   lot: string;
   professional: string;
+  manufacturer: string;
+  reaction: string;
 }
 
 export interface PrenatalConsultation {
