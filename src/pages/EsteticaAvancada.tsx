@@ -29,7 +29,7 @@ const EsteticaAvancada = () => {
   const filtered = activeFilter === "Todos" ? pageServices : pageServices.filter((s) => s.category === activeFilter);
 
   const handleAdd = (service: any) => {
-    addToCart({ ...service, origin: "Estética Avançada" });
+    addToCart({ ...service, origin: "Pré-Natal & Consultas" });
   };
 
   return (
@@ -52,11 +52,11 @@ const EsteticaAvancada = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-center">
             <div>
-              <span className="inline-block text-xs font-heading font-semibold text-primary tracking-widest uppercase bg-primary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-primary/30 mb-2">
-                Catálogo de Serviços
-              </span>
-              <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Estética Avançada Feminina"}</h1>
-              <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Selecione os procedimentos desejados e monte seu combo personalizado."}</p>
+               <span className="inline-block text-xs font-heading font-semibold text-primary tracking-widest uppercase bg-primary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-primary/30 mb-2">
+                Catálogo de Consultas
+               </span>
+               <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Pré-Natal & Consultas"}</h1>
+               <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Agende suas consultas pré-natais e exames gestacionais."}</p>
               <Link to="/#servicos">
                 <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm">
                   <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar
@@ -119,8 +119,8 @@ const EsteticaAvancada = () => {
 
         <div className="mt-20 text-center">
           <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-10 md:p-14 border border-white/50">
-            <h3 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-4">Monte seu combo e economize</h3>
-            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">Quanto mais procedimentos você selecionar, maior o desconto. Adicione ao carrinho e confira!</p>
+             <h3 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-4">Monte seu plano pré-natal</h3>
+             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">Combine consultas e exames para um acompanhamento completo e personalizado.</p>
             {totalItems > 0 ? (
               <Button onClick={() => setCartOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading rounded-full px-8 py-3 shadow-md shadow-secondary/20 text-base">Ver Carrinho ({totalItems} {totalItems === 1 ? "item" : "itens"})</Button>
             ) : (
