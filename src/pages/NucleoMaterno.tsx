@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Check } from "lucide-react";
-import GestationalTimeline from "@/components/GestationalTimeline";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +75,7 @@ const NucleoMaterno = () => {
         </div>
       </div>
 
-      <GestationalTimeline />
+      
 
       <div className="relative z-10 container mx-auto px-4 py-16 md:py-20">
         <div className="flex items-center gap-2 flex-wrap mb-10">
