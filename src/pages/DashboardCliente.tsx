@@ -116,7 +116,7 @@ const DashboardCliente = () => {
     doc.setFontSize(8);
     doc.setTextColor(...COL.muted);
     doc.text(`Registro: ${record.prontuarioNumber}  •  ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 47, 30);
-    doc.text(`Tipo: ${record.recordType === "estetica" ? "Estética" : record.recordType === "maternidade" ? "Maternidade" : "Ambos"}  •  Status: ${record.status === "ativo" ? "Ativo" : "Arquivado"}`, 47, 35);
+    doc.text(`Registro Gestacional  •  Status: ${record.status === "ativo" ? "Ativo" : "Arquivado"}`, 47, 35);
 
     // Patient photo on top-right
     if (record.patientPhoto) {
@@ -237,25 +237,23 @@ const DashboardCliente = () => {
       { label: "Histórico Obstétrico", value: record.obstetricHistory || "—" },
     ]);
 
-    // ====== AVALIAÇÃO ESTÉTICA ======
-    if (record.recordType !== "maternidade" && record.aestheticEval.skinType) {
-      addSectionTitle("Avaliação Estética");
+    // ====== CARTÃO GESTACIONAL ======
+    if (record.gestationalCard?.dum) {
+      addSectionTitle("Cartão da Gestante");
       addFieldGrid([
-        { label: "Tipo de Pele", value: record.aestheticEval.skinType },
-        { label: "Condições", value: record.aestheticEval.conditions },
-      ]);
-      addFieldGrid([
-        { label: "Manchas", value: record.aestheticEval.spots ? "Sim" : "Não" },
-        { label: "Rugas", value: record.aestheticEval.wrinkles ? "Sim" : "Não" },
-        { label: "Cicatrizes", value: record.aestheticEval.scars ? "Sim" : "Não" },
-        { label: "Estrias", value: record.aestheticEval.stretchMarks ? "Sim" : "Não" },
-        { label: "Lesões", value: record.aestheticEval.lesions ? "Sim" : "Não" },
-        { label: "Observações", value: record.aestheticEval.observations },
+        { label: "Tipo Sanguíneo", value: `${record.gestationalCard.bloodType} ${record.gestationalCard.rh}` },
+        { label: "G/P/A", value: `G${record.gestationalCard.gravida}P${record.gestationalCard.para}A${record.gestationalCard.abortions}` },
+        { label: "DUM", value: record.gestationalCard.dum },
+        { label: "DPP", value: record.gestationalCard.dpp },
+        { label: "Peso Pré-gestacional", value: record.gestationalCard.preGestationalWeight },
+        { label: "Hospital", value: record.gestationalCard.hospital },
       ], 3);
+    }
 
-      // Photos
-      const beforePhotos = record.aestheticEval.photosBefore || [];
-      const afterPhotos = record.aestheticEval.photosAfter || [];
+    // Placeholder to maintain structure
+    if (false) {
+      const beforePhotos: string[] = [];
+      const afterPhotos: string[] = [];
       if (beforePhotos.length > 0 || afterPhotos.length > 0) {
         const photoSize = 32;
         if (beforePhotos.length > 0) {
