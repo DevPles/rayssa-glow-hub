@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,8 @@ const ClinicalRecordList = ({ records, onOpenRecord, onEditRecord, onDeleteRecor
   const { user, users } = useAuth();
   const professionals = users.filter(u => u.role === "admin" || u.role === "super_admin");
 
-  const [search, setSearch] = __import_useState("");
-  const [filterProfessionalId, setFilterProfessionalId] = __import_useState<string>(user?.role === "admin" ? user.id : "all");
+  const [search, setSearch] = useState("");
+  const [filterProfessionalId, setFilterProfessionalId] = useState<string>(user?.role === "admin" ? user.id : "all");
 
   const filteredRecords = useMemo(() => {
     let result = records;
@@ -112,8 +112,5 @@ const ClinicalRecordList = ({ records, onOpenRecord, onEditRecord, onDeleteRecor
     </div>
   );
 };
-
-// Fix: need to use useState from React
-import { useState as __import_useState } from "react";
 
 export default ClinicalRecordList;
