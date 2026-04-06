@@ -71,6 +71,9 @@ const Login = () => {
           className="absolute inset-0 w-full h-full object-cover scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-black/10" />
+        <div className="absolute top-8 left-8 z-10">
+          <img src={logo} alt="LeMater" className="h-10 md:h-12 w-auto max-w-[10rem] object-contain drop-shadow-2xl" />
+        </div>
         <div className="absolute bottom-10 left-10 right-10">
           <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
             <h2 className="font-heading font-bold text-white text-2xl mb-2 tracking-tight">LeMater</h2>
