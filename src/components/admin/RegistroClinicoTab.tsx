@@ -123,37 +123,78 @@ const handleFileUpload = (accept: string, onFiles: (urls: string[]) => void) => 
   input.click();
 };
 
-// ===== SIMPLE SVG CHART =====
-const SimpleLineChart = ({ data, label, color = "hsl(var(--secondary))" }: { data: { week: number; value: number }[]; label: string; color?: string }) => {
+// ===== CHART WITH PERIOD FILTER =====
+type ChartPeriod = "week" | "month" | "trimester" | "all";
+const periodLabels: Record<ChartPeriod, string> = { week: "Semana", month: "Mês", trimester: "Trimestre", all: "Toda Gravidez" };
+
+const FilterableChart = ({ data, label, color = "hsl(var(--secondary))", currentWeek }: { data: { week: number; value: number }[]; label: string; color?: string; currentWeek?: number }) => {
+  const [period, setPeriod] = useState<ChartPeriod>("all");
+
+  const filteredData = useMemo(() => {
+    if (data.length === 0) return [];
+    const cw = currentWeek || Math.max(...data.map(d => d.week));
+    switch (period) {
+      case "week": return data.filter(d => d.week >= cw - 1 && d.week <= cw);
+      case "month": return data.filter(d => d.week >= cw - 4 && d.week <= cw);
+      case "trimester": {
+        const trimStart = cw <= 13 ? 1 : cw <= 27 ? 14 : 28;
+        const trimEnd = cw <= 13 ? 13 : cw <= 27 ? 27 : 42;
+        return data.filter(d => d.week >= trimStart && d.week <= trimEnd);
+      }
+      default: return data;
+    }
+  }, [data, period, currentWeek]);
+
   if (data.length < 2) return <p className="text-xs text-muted-foreground text-center py-4">Dados insuficientes para gráfico</p>;
-  const minW = Math.min(...data.map(d => d.week));
-  const maxW = Math.max(...data.map(d => d.week));
-  const minV = Math.min(...data.map(d => d.value)) * 0.9;
-  const maxV = Math.max(...data.map(d => d.value)) * 1.1;
+
+  const chartData = filteredData.length >= 2 ? filteredData : data;
+  const minW = Math.min(...chartData.map(d => d.week));
+  const maxW = Math.max(...chartData.map(d => d.week));
+  const minV = Math.min(...chartData.map(d => d.value)) * 0.9;
+  const maxV = Math.max(...chartData.map(d => d.value)) * 1.1;
   const w = 320, h = 160, px = 40, py = 20;
   const scaleX = (wk: number) => px + ((wk - minW) / (maxW - minW || 1)) * (w - 2 * px);
   const scaleY = (v: number) => h - py - ((v - minV) / (maxV - minV || 1)) * (h - 2 * py);
-  const points = data.map(d => `${scaleX(d.week)},${scaleY(d.value)}`).join(" ");
+  const points = chartData.map(d => `${scaleX(d.week)},${scaleY(d.value)}`).join(" ");
 
   return (
     <div>
-      <p className="text-xs font-heading font-semibold text-foreground mb-1">{label}</p>
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full max-w-sm">
-        {/* Grid lines */}
-        {[0, 0.25, 0.5, 0.75, 1].map((f) => {
-          const y = h - py - f * (h - 2 * py);
-          const val = (minV + f * (maxV - minV)).toFixed(1);
-          return <g key={f}><line x1={px} y1={y} x2={w - px} y2={y} stroke="hsl(var(--border))" strokeWidth="0.5" /><text x={px - 4} y={y + 3} textAnchor="end" fill="hsl(var(--muted-foreground))" fontSize="8">{val}</text></g>;
-        })}
-        {/* X axis labels */}
-        {data.map((d) => (
-          <text key={d.week} x={scaleX(d.week)} y={h - 4} textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="8">{d.week}s</text>
-        ))}
-        <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
-        {data.map((d, i) => (
-          <circle key={i} cx={scaleX(d.week)} cy={scaleY(d.value)} r="3" fill={color} />
-        ))}
-      </svg>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-heading font-semibold text-foreground">{label}</p>
+        <div className="flex gap-1">
+          {(Object.keys(periodLabels) as ChartPeriod[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`text-[10px] px-2 py-0.5 rounded-full font-heading transition-colors ${
+                period === p
+                  ? "bg-secondary text-secondary-foreground"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {periodLabels[p]}
+            </button>
+          ))}
+        </div>
+      </div>
+      {filteredData.length < 2 && period !== "all" ? (
+        <p className="text-xs text-muted-foreground text-center py-4">Sem dados suficientes para o período selecionado</p>
+      ) : (
+        <svg viewBox={`0 0 ${w} ${h}`} className="w-full max-w-sm">
+          {[0, 0.25, 0.5, 0.75, 1].map((f) => {
+            const y = h - py - f * (h - 2 * py);
+            const val = (minV + f * (maxV - minV)).toFixed(1);
+            return <g key={f}><line x1={px} y1={y} x2={w - px} y2={y} stroke="hsl(var(--border))" strokeWidth="0.5" /><text x={px - 4} y={y + 3} textAnchor="end" fill="hsl(var(--muted-foreground))" fontSize="8">{val}</text></g>;
+          })}
+          {chartData.map((d) => (
+            <text key={d.week} x={scaleX(d.week)} y={h - 4} textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="8">{d.week}s</text>
+          ))}
+          <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
+          {chartData.map((d, i) => (
+            <circle key={i} cx={scaleX(d.week)} cy={scaleY(d.value)} r="3" fill={color} />
+          ))}
+        </svg>
+      )}
     </div>
   );
 };
