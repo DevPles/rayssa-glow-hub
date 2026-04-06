@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { Plus, Pencil, Trash2, Search, Building2, Stethoscope, FlaskConical, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 
 export type PartnerType = "clinica" | "laboratorio" | "medico" | "enfermeiro";
@@ -27,11 +25,11 @@ export interface Partner {
   createdAt: string;
 }
 
-const partnerTypeMeta: Record<PartnerType, { label: string; icon: typeof Building2; color: string }> = {
-  clinica: { label: "Clínica", icon: Building2, color: "bg-blue-100 text-blue-800 border-blue-300" },
-  laboratorio: { label: "Laboratório", icon: FlaskConical, color: "bg-emerald-100 text-emerald-800 border-emerald-300" },
-  medico: { label: "Médico(a)", icon: Stethoscope, color: "bg-purple-100 text-purple-800 border-purple-300" },
-  enfermeiro: { label: "Enfermeiro(a)", icon: Users, color: "bg-pink-100 text-pink-800 border-pink-300" },
+const partnerTypeMeta: Record<PartnerType, { label: string }> = {
+  clinica: { label: "Clínica" },
+  laboratorio: { label: "Laboratório" },
+  medico: { label: "Médico(a)" },
+  enfermeiro: { label: "Enfermeiro(a)" },
 };
 
 const initialPartners: Partner[] = [
@@ -120,20 +118,15 @@ export const ParceriasTab = () => {
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { icon: Users, label: "Total", value: stats.total, accent: "text-foreground" },
-          { icon: Building2, label: "Clínicas", value: stats.clinicas, accent: "text-blue-600" },
-          { icon: FlaskConical, label: "Laboratórios", value: stats.laboratorios, accent: "text-emerald-600" },
-          { icon: Stethoscope, label: "Profissionais", value: stats.profissionais, accent: "text-purple-600" },
+          { label: "Total", value: stats.total },
+          { label: "Clínicas", value: stats.clinicas },
+          { label: "Laboratórios", value: stats.laboratorios },
+          { label: "Profissionais", value: stats.profissionais },
         ].map((s) => (
-          <Card key={s.label} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-muted/60">
-                <s.icon className={`h-4 w-4 ${s.accent}`} />
-              </div>
-              <div>
-                <p className={`text-xl font-heading font-bold ${s.accent}`}>{s.value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
-              </div>
+          <Card key={s.label} className="bg-card/60 backdrop-blur border-border/40">
+            <CardContent className="p-4">
+              <p className="text-2xl font-heading font-bold text-foreground">{s.value}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -141,10 +134,12 @@ export const ParceriasTab = () => {
 
       {/* Search + Filter + Add */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar parceiro..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 rounded-xl" />
-        </div>
+        <Input
+          placeholder="Buscar parceiro..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 min-w-[200px] max-w-sm rounded-xl"
+        />
         <Select value={filterType} onValueChange={setFilterType}>
           <SelectTrigger className="rounded-xl w-[180px]">
             <SelectValue placeholder="Filtrar tipo" />
@@ -157,35 +152,34 @@ export const ParceriasTab = () => {
             <SelectItem value="enfermeiro">Enfermeiros</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={openNew} className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading gap-1.5 shadow-md shadow-secondary/20 ml-auto">
-          <Plus className="h-4 w-4" /> Nova Parceria
+        <Button onClick={openNew} className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading ml-auto">
+          + Nova Parceria
         </Button>
       </div>
 
       {/* Cards */}
       <div className="space-y-2">
         {filtered.length === 0 ? (
-          <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+          <Card className="bg-card/60 backdrop-blur border-border/40">
             <CardContent className="p-8 text-center">
-              <p className="text-sm text-muted-foreground font-heading">Nenhuma parceria encontrada</p>
+              <p className="text-sm text-muted-foreground">Nenhuma parceria encontrada</p>
             </CardContent>
           </Card>
         ) : (
           filtered.map((p) => {
             const meta = partnerTypeMeta[p.type];
-            const Icon = meta.icon;
             return (
-              <Card key={p.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 hover:shadow-xl transition-all">
+              <Card key={p.id} className="bg-card/60 backdrop-blur border-border/40 hover:bg-card/80 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${meta.color.split(" ").slice(0, 2).join(" ")}`}>
-                      <Icon className="h-5 w-5" />
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-heading font-bold text-xs bg-muted text-muted-foreground">
+                      {getInitials(p.name)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <h3 className="font-heading font-bold text-sm text-foreground truncate">{p.name}</h3>
-                        <Badge variant="outline" className={`text-[10px] font-heading border ${meta.color}`}>{meta.label}</Badge>
-                        {!p.active && <Badge variant="secondary" className="text-[10px]">Inativo</Badge>}
+                        <span className="font-heading font-bold text-sm text-foreground truncate">{p.name}</span>
+                        <Badge variant="outline" className="text-[10px] font-heading border-border text-muted-foreground">{meta.label}</Badge>
+                        {!p.active && <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">Inativo</Badge>}
                       </div>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                         {p.specialty && <span>{p.specialty}</span>}
@@ -196,13 +190,13 @@ export const ParceriasTab = () => {
                         <p className="text-xs text-muted-foreground mt-1 truncate max-w-md">{p.observations}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(p)}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(p.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                    <div className="flex items-center gap-2 shrink-0 text-xs">
+                      <button className="text-muted-foreground hover:text-foreground underline transition-colors" onClick={() => openEdit(p)}>
+                        editar
+                      </button>
+                      <button className="text-muted-foreground hover:text-destructive underline transition-colors" onClick={() => handleDelete(p.id)}>
+                        excluir
+                      </button>
                     </div>
                   </div>
                 </CardContent>
@@ -216,10 +210,7 @@ export const ParceriasTab = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-secondary/10">
-                <Building2 className="h-4 w-4 text-secondary" />
-              </div>
+            <DialogTitle className="font-heading">
               {editingId ? "Editar Parceria" : "Nova Parceria"}
             </DialogTitle>
           </DialogHeader>
@@ -276,7 +267,7 @@ export const ParceriasTab = () => {
                 <Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} className="rounded-xl min-h-[60px]" placeholder="Detalhes da parceria..." />
               </div>
             </div>
-            <Button onClick={handleSave} className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading shadow-md shadow-secondary/20">
+            <Button onClick={handleSave} className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading">
               {editingId ? "Salvar Alterações" : "Cadastrar Parceria"}
             </Button>
           </div>
