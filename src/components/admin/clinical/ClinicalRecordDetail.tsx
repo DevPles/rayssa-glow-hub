@@ -64,21 +64,21 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
     const doneExamTypes = record.gestationalExams.map(e => e.type);
 
     if (igWeeks >= 11 && igWeeks <= 14 && !doneExamTypes.includes("Ultrassom 1º Trimestre")) {
-      actions.push({ label: "Solicitar NT", icon: "📸", tab: "exames" });
+      actions.push({ label: "Solicitar NT", icon: "", tab: "exames" });
     }
     if (igWeeks >= 20 && igWeeks <= 24 && !doneExamTypes.includes("Ultrassom Morfológico")) {
-      actions.push({ label: "Solicitar Morfo", icon: "📸", tab: "exames" });
+      actions.push({ label: "Solicitar Morfo", icon: "", tab: "exames" });
     }
     if (igWeeks >= 24 && igWeeks <= 28 && !doneExamTypes.includes("TOTG 75g")) {
-      actions.push({ label: "Solicitar TOTG", icon: "🧪", tab: "exames" });
+      actions.push({ label: "Solicitar TOTG", icon: "", tab: "exames" });
     }
     if (igWeeks >= 35 && igWeeks <= 37 && !doneExamTypes.includes("Estreptococo Grupo B (GBS)")) {
-      actions.push({ label: "Solicitar GBS", icon: "🦠", tab: "exames" });
+      actions.push({ label: "Solicitar GBS", icon: "", tab: "exames" });
     }
 
     const overdueConsults = record.prenatalConsultations.filter(c => c.status === "agendada" && new Date(c.date) < new Date());
     if (overdueConsults.length > 0) {
-      actions.push({ label: "Reagendar", icon: "📅", tab: "consultas" });
+      actions.push({ label: "Reagendar", icon: "", tab: "consultas" });
     }
 
     return actions.slice(0, 4);
@@ -95,7 +95,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
         <div className="flex gap-2">
           {quickActions.map(qa => (
             <Button key={qa.label} variant="outline" size="sm" className="text-[10px] font-heading h-7" onClick={() => setActiveTab(qa.tab)}>
-              {qa.icon} {qa.label}
+              {qa.label}
             </Button>
           ))}
           <Button variant="outline" onClick={onEdit}>Editar</Button>
@@ -120,7 +120,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
                   <h2 className="font-heading font-bold text-xl text-foreground">{record.fullName}</h2>
                   {alertCounts.total > 0 && (
                     <Badge variant={alertCounts.critical > 0 ? "destructive" : "secondary"} className={`text-[10px] font-heading ${alertCounts.critical > 0 ? "clinical-alert-critical" : ""}`}>
-                      {alertCounts.critical > 0 ? `🔴 ${alertCounts.critical}` : ""} {alertCounts.warning > 0 ? `🟡 ${alertCounts.warning}` : ""}
+                      {alertCounts.critical > 0 ? `${alertCounts.critical} crítico(s)` : ""} {alertCounts.warning > 0 ? `${alertCounts.warning} atenção` : ""}
                     </Badge>
                   )}
                 </div>
