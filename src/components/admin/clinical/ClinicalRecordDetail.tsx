@@ -146,7 +146,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
               {lastConsult && (
                 <>
                   {lastConsult.bloodPressure && (
-                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-red-100 dark:bg-red-950/30" : "bg-muted/30"}`}>
+                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-destructive/10" : "bg-muted/30"}`}>
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">PA</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.bloodPressure}</p>
                     </div>
@@ -175,7 +175,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-6 bg-white/40 backdrop-blur-xl rounded-xl">
+        <TabsList className="w-full grid grid-cols-6 bg-muted/30 rounded-xl">
           <TabsTrigger value="cartao" className="rounded-lg font-heading text-xs">Cartão</TabsTrigger>
           <TabsTrigger value="timeline" className="rounded-lg font-heading text-xs">Timeline</TabsTrigger>
           <TabsTrigger value="consultas" className="rounded-lg font-heading text-xs">Consultas ({record.prenatalConsultations.length})</TabsTrigger>
@@ -218,7 +218,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
                   { label: "Emergência", value: record.emergencyContact || "—" },
                   { label: "Consentimento", value: record.consentSigned ? "Assinado" : "Pendente" },
                 ].map(item => (
-                  <div key={item.label} className="bg-white/30 backdrop-blur-lg rounded-xl p-3">
+                  <div key={item.label} className="bg-muted/20 rounded-xl p-3">
                     <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                     <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
                   </div>

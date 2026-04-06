@@ -88,7 +88,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
     return indicators;
   }, [lastConsult, gc.riskClassification, igWeeks]);
 
-  const riskColor = { ok: "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300", warn: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300", danger: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300" };
+  const riskColor = { ok: "bg-primary/10 text-primary", warn: "bg-secondary/20 text-secondary-foreground", danger: "bg-destructive/10 text-destructive" };
 
   return (
     <div className="space-y-4">
@@ -145,7 +145,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
                 { label: "Edema", value: lastConsult.edema || "—" },
                 { label: "Apresentação", value: lastConsult.fetalPresentation || "—" },
               ].map(item => (
-                <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-2.5 text-center">
+                <div key={item.label} className="bg-muted/20 rounded-xl p-2.5 text-center">
                   <p className="text-[9px] text-muted-foreground font-heading">{item.label}</p>
                   <p className="text-sm font-heading font-bold text-foreground">{item.value}</p>
                   {item.sub && <p className="text-[9px] text-muted-foreground">{item.sub}</p>}
@@ -168,7 +168,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
               { label: "Classificação", value: gc.riskClassification === "habitual" ? "Risco Habitual" : "Alto Risco" },
               { label: "Altura", value: gc.height ? `${gc.height}m` : "—" },
             ].map(item => (
-              <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3 text-center">
+              <div key={item.label} className="bg-muted/20 rounded-xl p-3 text-center">
                 <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                 <p className="text-sm font-heading font-bold text-foreground">{item.value}</p>
               </div>
@@ -195,25 +195,25 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
             {examChecklist.map(({ tri, total, done }) => {
               const isCurrentTri = tri === String(getTrimesterFromIG(igWeeks));
               return (
-                <div key={tri} className={`bg-white/30 dark:bg-white/5 rounded-xl p-3 text-center ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
+                <div key={tri} className={`bg-muted/20 rounded-xl p-3 text-center ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
                   <p className="text-[10px] text-muted-foreground font-heading uppercase">
                     {isCurrentTri ? "" : ""}Exames {tri}º Tri
                   </p>
-                  <p className={`text-sm font-heading font-bold ${done === total ? "text-green-600" : "text-amber-600"}`}>{done}/{total}</p>
+                  <p className={`text-sm font-heading font-bold ${done === total ? "text-primary" : "text-muted-foreground"}`}>{done}/{total}</p>
                   <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1">
-                    <div className={`h-full rounded-full transition-all ${done === total ? "bg-green-500" : "bg-amber-400"}`} style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }} />
+                    <div className={`h-full rounded-full transition-all ${done === total ? "bg-primary" : "bg-secondary"}`} style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }} />
                   </div>
-                  {done === total && <span className="text-[9px] text-green-600">Completo</span>}
+                  {done === total && <span className="text-[9px] text-primary">Completo</span>}
                 </div>
               );
             })}
-            <div className="bg-white/30 dark:bg-white/5 rounded-xl p-3 text-center">
+            <div className="bg-muted/20 rounded-xl p-3 text-center">
               <p className="text-[10px] text-muted-foreground font-heading uppercase">Vacinas Recom.</p>
-              <p className={`text-sm font-heading font-bold ${vaccineChecklist.done === vaccineChecklist.total ? "text-green-600" : "text-amber-600"}`}>{vaccineChecklist.done}/{vaccineChecklist.total}</p>
+              <p className={`text-sm font-heading font-bold ${vaccineChecklist.done === vaccineChecklist.total ? "text-primary" : "text-muted-foreground"}`}>{vaccineChecklist.done}/{vaccineChecklist.total}</p>
               <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1">
-                <div className={`h-full rounded-full transition-all ${vaccineChecklist.done === vaccineChecklist.total ? "bg-green-500" : "bg-amber-400"}`} style={{ width: `${vaccineChecklist.total > 0 ? (vaccineChecklist.done / vaccineChecklist.total) * 100 : 0}%` }} />
+                <div className={`h-full rounded-full transition-all ${vaccineChecklist.done === vaccineChecklist.total ? "bg-primary" : "bg-secondary"}`} style={{ width: `${vaccineChecklist.total > 0 ? (vaccineChecklist.done / vaccineChecklist.total) * 100 : 0}%` }} />
               </div>
-              {vaccineChecklist.done === vaccineChecklist.total && <span className="text-[9px] text-green-600">Completo</span>}
+              {vaccineChecklist.done === vaccineChecklist.total && <span className="text-[9px] text-primary">Completo</span>}
             </div>
           </div>
         </CardContent>
@@ -231,7 +231,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
               { label: "Cirurgias anteriores", value: gc.previousSurgeries },
               { label: "Histórico familiar", value: gc.familyHistory },
             ].filter(v => v.value).map(item => (
-              <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3">
+              <div key={item.label} className="bg-muted/20 rounded-xl p-3">
                 <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                 <p className="text-sm text-foreground">{item.value}</p>
               </div>
@@ -247,14 +247,14 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
               { label: "Pediatra", value: gc.pediatrician },
               { label: "Hospital", value: gc.hospital },
             ].filter(v => v.value).map(item => (
-              <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3">
+              <div key={item.label} className="bg-muted/20 rounded-xl p-3">
                 <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                 <p className="text-sm text-foreground">{item.value}</p>
               </div>
             ))}
           </div>
           {gc.birthPlan && (
-            <div className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3">
+            <div className="bg-muted/20 rounded-xl p-3">
               <p className="text-[10px] text-muted-foreground font-heading uppercase">Plano de Parto</p>
               <p className="text-sm text-foreground">{gc.birthPlan}</p>
             </div>

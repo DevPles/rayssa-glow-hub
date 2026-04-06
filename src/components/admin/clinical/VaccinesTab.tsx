@@ -49,17 +49,17 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex gap-3">
-          <div className="bg-green-50 rounded-xl px-3 py-2 text-center border border-green-200">
-            <p className="text-lg font-heading font-bold text-green-600">{appliedCount}</p>
-            <p className="text-[10px] text-green-600/80">Aplicadas</p>
+          <div className="bg-primary/10 rounded-xl px-3 py-2 text-center border border-primary/20">
+            <p className="text-lg font-heading font-bold text-primary">{appliedCount}</p>
+            <p className="text-[10px] text-primary/80">Aplicadas</p>
           </div>
-          <div className="bg-amber-50 rounded-xl px-3 py-2 text-center border border-amber-200">
-            <p className="text-lg font-heading font-bold text-amber-600">{pendingCount}</p>
-            <p className="text-[10px] text-amber-600/80">Pendentes</p>
+          <div className="bg-secondary/10 rounded-xl px-3 py-2 text-center border border-secondary/20">
+            <p className="text-lg font-heading font-bold text-secondary-foreground">{pendingCount}</p>
+            <p className="text-[10px] text-secondary-foreground/80">Pendentes</p>
           </div>
-          <div className="bg-blue-50 rounded-xl px-3 py-2 text-center border border-blue-200">
-            <p className="text-lg font-heading font-bold text-blue-600">{vaccines.length}</p>
-            <p className="text-[10px] text-blue-600/80">Total Reg.</p>
+          <div className="bg-muted/30 rounded-xl px-3 py-2 text-center border border-border">
+            <p className="text-lg font-heading font-bold text-foreground">{vaccines.length}</p>
+            <p className="text-[10px] text-muted-foreground">Total Reg.</p>
           </div>
         </div>
         <Button variant="secondary" size="sm" onClick={() => setDialogOpen(true)}>Registrar Vacina</Button>
@@ -69,7 +69,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
       {VACCINE_CATEGORIES.map(({ key: cat, label: catLabel, color: catColor }) => {
         const catVaccines = VACCINES_BRAZIL.filter(v => v.category === cat);
         return (
-          <Card key={cat} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+          <Card key={cat} className="border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className={`text-sm font-heading ${catColor}`}>{catLabel}</CardTitle>
               {cat === "contraindicada" && <p className="text-[10px] text-destructive/80">Vacinas de vírus vivo atenuado — NÃO aplicar na gestação</p>}
@@ -90,24 +90,24 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
                     {catVaccines.map(vac => {
                       const applied = vaccines.filter(v => v.name === vac.name);
                       const allDone = vac.doses.length > 0 && vac.doses.every(d => applied.some(a => a.dose === d));
-                      const statusLabel = cat === "contraindicada" ? "⛔" : allDone ? "Completa" : applied.length > 0 ? `${applied.length}/${vac.doses.length}` : "Pendente";
-                      const statusColor = cat === "contraindicada" ? "text-destructive" : allDone ? "text-green-600" : applied.length > 0 ? "text-amber-600" : "text-muted-foreground";
+                      const statusLabel = cat === "contraindicada" ? "N/A" : allDone ? "Completa" : applied.length > 0 ? `${applied.length}/${vac.doses.length}` : "Pendente";
+                      const statusColor = cat === "contraindicada" ? "text-destructive" : allDone ? "text-primary" : applied.length > 0 ? "text-secondary-foreground" : "text-muted-foreground";
 
                       return (
                         <Fragment key={vac.name}>
-                          <tr className="border-b border-border/10 hover:bg-white/20">
+                          <tr className="border-b border-border/10 hover:bg-muted/30">
                             <td className="py-2 px-2">
                               <span className="font-heading font-semibold text-foreground">{vac.name}</span>
                             </td>
                             <td className="py-2 px-2">
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-heading ${cat === "contraindicada" ? "bg-red-100 text-red-600" : "bg-muted/50 text-foreground"}`}>{vac.trimester}</span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-heading ${cat === "contraindicada" ? "bg-destructive/10 text-destructive" : "bg-muted/50 text-foreground"}`}>{vac.trimester}</span>
                             </td>
                             <td className="py-2 px-2 text-center">
                               <div className="flex justify-center gap-0.5">
                                 {vac.doses.map((dose, di) => {
                                   const doseApplied = applied.some(a => a.dose === dose);
                                   return (
-                                    <span key={di} className={`w-4 h-4 rounded-full text-[8px] flex items-center justify-center font-bold ${doseApplied ? "bg-green-500 text-white" : "bg-muted/60 text-muted-foreground"}`}>{di + 1}</span>
+                                    <span key={di} className={`w-4 h-4 rounded-full text-[8px] flex items-center justify-center font-bold ${doseApplied ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground"}`}>{di + 1}</span>
                                   );
                                 })}
                               </div>
@@ -148,7 +148,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
 
       {/* Custom vaccines */}
       {vaccines.filter(v => v.name === "Outra" && v.customName).length > 0 && (
-        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+        <Card className="border-border/50">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Vacinas Adicionais</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">

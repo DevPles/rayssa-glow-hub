@@ -149,10 +149,10 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
   if (alerts.length === 0) return null;
 
   const styleMap: Record<AlertSeverity, string> = {
-    critical: "bg-red-50 border-red-300 text-red-900 dark:bg-red-950/30 dark:border-red-800 dark:text-red-200",
-    warning: "bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200",
-    info: "bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-200",
-    positive: "bg-green-50 border-green-200 text-green-900 dark:bg-green-950/30 dark:border-green-800 dark:text-green-200",
+    critical: "bg-destructive/10 border-destructive/30 text-destructive dark:bg-destructive/10 dark:border-destructive/30",
+    warning: "bg-secondary/10 border-secondary/30 text-secondary-foreground dark:bg-secondary/10 dark:border-secondary/30",
+    info: "bg-accent/30 border-accent/50 text-accent-foreground dark:bg-accent/20 dark:border-accent/30",
+    positive: "bg-primary/10 border-primary/30 text-primary dark:bg-primary/10 dark:border-primary/30",
   };
 
   const badgeMap: Record<AlertSeverity, { label: string; variant: "destructive" | "secondary" | "outline" | "default" }> = {

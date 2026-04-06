@@ -59,7 +59,7 @@ const ClinicalRecordList = ({ records, onOpenRecord, onEditRecord, onDeleteRecor
           { value: filteredRecords.reduce((sum, r) => sum + r.prenatalConsultations.length, 0), label: "Consultas" },
           { value: filteredRecords.reduce((sum, r) => sum + r.gestationalExams.length, 0), label: "Exames" },
         ].map(s => (
-          <Card key={s.label} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+          <Card key={s.label} className="border-border/50">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-heading font-bold text-foreground">{s.value}</p>
               <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -70,11 +70,11 @@ const ClinicalRecordList = ({ records, onOpenRecord, onEditRecord, onDeleteRecor
 
       <div className="space-y-3">
         {filteredRecords.length === 0 ? (
-          <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+          <Card className="border-border/50">
             <CardContent className="p-8 text-center"><p className="text-sm text-muted-foreground font-heading">Nenhum registro encontrado</p></CardContent>
           </Card>
         ) : filteredRecords.map(record => (
-          <Card key={record.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => onOpenRecord(record)}>
+          <Card key={record.id} className="border-border/50 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => onOpenRecord(record)}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 flex-1 min-w-0">

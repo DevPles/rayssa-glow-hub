@@ -116,7 +116,7 @@ const ClinicalRecordForm = ({ initialData, nextNumber, onSave, onCancel }: Clini
       </div>
 
       {/* CPF */}
-      <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+      <Card className="border-border/50">
         <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Identificação por CPF</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-end gap-3">
@@ -131,7 +131,7 @@ const ClinicalRecordForm = ({ initialData, nextNumber, onSave, onCancel }: Clini
       </Card>
 
       {/* Professionals */}
-      <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+      <Card className="border-border/50">
         <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Profissionais Responsáveis *</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-3 mb-2">
@@ -160,7 +160,7 @@ const ClinicalRecordForm = ({ initialData, nextNumber, onSave, onCancel }: Clini
       </Card>
 
       {/* Patient Data */}
-      <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+      <Card className="border-border/50">
         <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Dados da Gestante</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-4">
@@ -189,7 +189,7 @@ const ClinicalRecordForm = ({ initialData, nextNumber, onSave, onCancel }: Clini
       </Card>
 
       {/* Gestational Card */}
-      <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+      <Card className="border-border/50">
         <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Cartão da Gestante</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">

@@ -150,7 +150,7 @@ export const VACCINES_BRAZIL: VaccineInfo[] = [
 
 // Category groupings for display
 export const VACCINE_CATEGORIES: { key: VaccineCategory; label: string; color: string }[] = [
-  { key: "recomendada", label: "✅ Recomendadas na Gestação", color: "text-green-600" },
-  { key: "situacao", label: "⚠️ Situações Especiais", color: "text-amber-600" },
-  { key: "contraindicada", label: "⛔ Contraindicadas", color: "text-destructive" },
+  { key: "recomendada", label: "Recomendadas na Gestação", color: "text-primary" },
+  { key: "situacao", label: "Situações Especiais", color: "text-secondary-foreground" },
+  { key: "contraindicada", label: "Contraindicadas", color: "text-destructive" },
 ];

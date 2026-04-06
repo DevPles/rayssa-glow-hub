@@ -83,8 +83,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
     return result;
   }, [events, filter, trimFilter, dum]);
 
-  const iconMap = { consulta: "", exame: "", vacina: "" };
-  const colorMap = { consulta: "border-l-blue-400", exame: "border-l-amber-400", vacina: "border-l-green-400" };
+  const colorMap = { consulta: "border-l-secondary", exame: "border-l-primary", vacina: "border-l-muted-foreground" };
 
   return (
     <div className="space-y-4">
@@ -103,7 +102,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
       </div>
 
       {filtered.length === 0 ? (
-        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+        <Card className="border-border/50">
           <CardContent className="p-8 text-center"><p className="text-sm text-muted-foreground font-heading">Nenhum evento encontrado</p></CardContent>
         </Card>
       ) : (
@@ -111,7 +110,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
           {filtered.map((ev) => (
             <div
               key={ev.id}
-              className={`bg-white/40 backdrop-blur-xl border border-white/50 shadow-sm rounded-xl p-3 border-l-4 ${colorMap[ev.type]} cursor-pointer hover:shadow-md transition-shadow`}
+              className={`bg-card border border-border/50 rounded-xl p-3 border-l-4 ${colorMap[ev.type]} cursor-pointer hover:bg-accent/30 transition-colors`}
               onClick={() => {
                 if (ev.type === "consulta" && onConsultClick) {
                   const c = record.prenatalConsultations.find(c => c.id === ev.id);
@@ -124,7 +123,6 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2 flex-1 min-w-0">
-                  <span className="text-sm shrink-0">{iconMap[ev.type]}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-heading font-bold text-foreground">{ev.title}</p>
                     <p className="text-[11px] text-muted-foreground truncate">{ev.subtitle}</p>
