@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { ClinicalRecord } from "@/contexts/ClinicalRecordContext";
 import { format } from "date-fns";
-import { calcGestationalAge, calcGestationalWeeks, calcDPP, calcIMC, EXAMS_BY_TRIMESTER, VACCINES_BRAZIL } from "./constants";
+import { calcGestationalAge, calcGestationalWeeks, calcDPP, calcIMC, getTrimesterFromIG, EXAMS_BY_TRIMESTER, VACCINES_BRAZIL } from "./constants";
 import FilterableChart from "./FilterableChart";
 
 interface GestationalCardProps {
