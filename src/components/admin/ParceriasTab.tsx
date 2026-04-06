@@ -133,15 +133,15 @@ export const ParceriasTab = () => {
       </div>
 
       {/* Search + Filter + Add */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Input
           placeholder="Buscar parceiro..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] max-w-sm rounded-xl"
+          className="w-full sm:min-w-[200px] sm:max-w-sm sm:flex-1 rounded-xl"
         />
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="rounded-xl w-[180px]">
+          <SelectTrigger className="w-full rounded-xl sm:w-[180px]">
             <SelectValue placeholder="Filtrar tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -152,7 +152,7 @@ export const ParceriasTab = () => {
             <SelectItem value="enfermeiro">Enfermeiros</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="secondary" onClick={openNew} className="ml-auto font-heading">
+        <Button variant="secondary" onClick={openNew} className="w-full sm:ml-auto sm:w-auto">
           Nova Parceria
         </Button>
       </div>
@@ -171,32 +171,34 @@ export const ParceriasTab = () => {
             return (
               <Card key={p.id} className="bg-card/60 backdrop-blur border-border/40 hover:bg-card/80 transition-colors">
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-heading font-bold text-xs bg-muted text-muted-foreground">
-                      {getInitials(p.name)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <span className="font-heading font-bold text-sm text-foreground truncate">{p.name}</span>
-                        <Badge variant="outline" className="text-[10px] font-heading border-border text-muted-foreground">{meta.label}</Badge>
-                        {!p.active && <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">Inativo</Badge>}
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-heading font-bold text-xs bg-muted text-muted-foreground">
+                        {getInitials(p.name)}
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-                        {p.specialty && <span>{p.specialty}</span>}
-                        {p.crm_coren && <span className="font-mono">{p.crm_coren}</span>}
-                        {p.phone && <span className="hidden sm:inline">{p.phone}</span>}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                          <span className="font-heading font-bold text-sm text-foreground truncate">{p.name}</span>
+                          <Badge variant="outline" className="text-[10px] font-heading border-border text-muted-foreground">{meta.label}</Badge>
+                          {!p.active && <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">Inativo</Badge>}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                          {p.specialty && <span>{p.specialty}</span>}
+                          {p.crm_coren && <span className="font-mono">{p.crm_coren}</span>}
+                          {p.phone && <span className="hidden sm:inline">{p.phone}</span>}
+                        </div>
+                        {p.observations && (
+                          <p className="text-xs text-muted-foreground mt-1 truncate max-w-md">{p.observations}</p>
+                        )}
                       </div>
-                      {p.observations && (
-                        <p className="text-xs text-muted-foreground mt-1 truncate max-w-md">{p.observations}</p>
-                      )}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 text-xs">
-                      <button className="text-muted-foreground hover:text-foreground underline transition-colors" onClick={() => openEdit(p)}>
-                        editar
-                      </button>
-                      <button className="text-muted-foreground hover:text-destructive underline transition-colors" onClick={() => handleDelete(p.id)}>
-                        excluir
-                      </button>
+                    <div className="flex w-full justify-end gap-2 md:w-auto">
+                      <Button type="button" variant="outline" size="sm" onClick={() => openEdit(p)}>
+                        Editar
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => handleDelete(p.id)}>
+                        Excluir
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

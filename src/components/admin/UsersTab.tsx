@@ -117,15 +117,15 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
       </div>
 
       {/* Search + Filter + Add */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Input
           placeholder="Buscar por nome, e-mail ou telefone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] max-w-sm rounded-xl"
+          className="w-full sm:min-w-[200px] sm:max-w-sm sm:flex-1 rounded-xl"
         />
         <Select value={filterRole} onValueChange={setFilterRole}>
-          <SelectTrigger className="rounded-xl w-[180px]">
+          <SelectTrigger className="w-full rounded-xl sm:w-[180px]">
             <SelectValue placeholder="Filtrar tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -143,7 +143,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
             setNewUserRole("cliente");
             setCreateDialogOpen(true);
           }}
-          className="ml-auto font-heading"
+          className="w-full sm:ml-auto sm:w-auto"
         >
           Novo Usuário
         </Button>
@@ -165,43 +165,55 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
             return (
               <Card key={u.id} className="bg-card/60 backdrop-blur border-border/40 hover:bg-card/80 transition-colors">
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-heading font-bold text-xs bg-muted text-muted-foreground">
-                      {getInitials(u.name)}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <span className="font-heading font-bold text-sm text-foreground truncate">{u.name}</span>
-                        <Badge variant="outline" className="text-[10px] font-heading border-border text-muted-foreground">
-                          {meta.label}
-                        </Badge>
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-heading font-bold text-xs bg-muted text-muted-foreground">
+                        {getInitials(u.name)}
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="truncate">{u.email}</span>
-                        {u.phone && <span className="hidden sm:inline">{u.phone}</span>}
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                          <span className="font-heading font-bold text-sm text-foreground truncate">{u.name}</span>
+                          <Badge variant="outline" className="text-[10px] font-heading border-border text-muted-foreground">
+                            {meta.label}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                          <span className="truncate">{u.email}</span>
+                          {u.phone && <span className="hidden sm:inline">{u.phone}</span>}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground min-w-[100px]">
-                      <span className="font-mono">{pwVisible ? u.password : "••••••"}</span>
-                      <button onClick={() => setShowPassword((p) => ({ ...p, [u.id]: !p[u.id] }))} className="hover:text-foreground transition-colors text-[10px] underline">
-                        {pwVisible ? "ocultar" : "ver"}
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0 text-xs">
-                      <button className="text-muted-foreground hover:text-foreground underline transition-colors" onClick={() => openEdit(u)}>
-                        editar
-                      </button>
-                      {u.id !== currentUserId && (
-                        <button
-                          className="text-muted-foreground hover:text-destructive underline transition-colors"
-                          onClick={() => { deleteUser(u.id); toast({ title: "Usuário removido" }); }}
+                    <div className="flex w-full items-center justify-between gap-3 md:w-auto md:justify-end">
+                      <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground min-w-[120px] justify-end">
+                        <span className="font-mono">{pwVisible ? u.password : "••••••"}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 text-[11px]"
+                          onClick={() => setShowPassword((p) => ({ ...p, [u.id]: !p[u.id] }))}
                         >
-                          excluir
-                        </button>
-                      )}
+                          {pwVisible ? "Ocultar" : "Ver"}
+                        </Button>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={() => openEdit(u)}>
+                          Editar
+                        </Button>
+                        {u.id !== currentUserId && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { deleteUser(u.id); toast({ title: "Usuário removido" }); }}
+                          >
+                            Excluir
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
