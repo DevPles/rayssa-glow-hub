@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { Eye, EyeOff, Trash2, Pencil, Plus, Search, Users, UserCheck, UserPlus, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,22 +11,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import type { MockUser, UserRole } from "@/contexts/AuthContext";
 
-const roleMeta: Record<UserRole, { label: string; color: string; icon: typeof Users }> = {
-  super_admin: { label: "Super Admin", color: "bg-amber-100 text-amber-800 border-amber-300", icon: Shield },
-  admin: { label: "Administrador", color: "bg-purple-100 text-purple-800 border-purple-300", icon: UserCheck },
-  afiliada: { label: "Parceiro(a)", color: "bg-blue-100 text-blue-800 border-blue-300", icon: UserPlus },
-  cliente: { label: "Gestante", color: "bg-pink-100 text-pink-800 border-pink-300", icon: Users },
+const roleMeta: Record<UserRole, { label: string }> = {
+  super_admin: { label: "Super Admin" },
+  admin: { label: "Administrador" },
+  afiliada: { label: "Parceiro(a)" },
+  cliente: { label: "Gestante" },
 };
 
 const loyaltyTiers = [
-  { name: "Bronze", color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-300", dot: "bg-amber-400" },
-  { name: "Prata", color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-300", dot: "bg-slate-400" },
-  { name: "Ouro", color: "text-yellow-700", bg: "bg-yellow-50", border: "border-yellow-400", dot: "bg-yellow-500" },
-  { name: "Diamante", color: "text-violet-700", bg: "bg-violet-50", border: "border-violet-400", dot: "bg-violet-500" },
+  { name: "Bronze" },
+  { name: "Prata" },
+  { name: "Ouro" },
+  { name: "Diamante" },
 ];
 
 type TierName = "Bronze" | "Prata" | "Ouro" | "Diamante";
-const getTier = (name: TierName) => loyaltyTiers.find((t) => t.name === name) || loyaltyTiers[0];
 
 const initialLoyaltyData: Record<string, { points: number; purchases: number; procedures: number }> = {
   "2": { points: 1358, purchases: 5, procedures: 8 },
@@ -132,16 +130,6 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
     return parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "?";
   };
 
-  const initialsColor = (role: UserRole) => {
-    switch (role) {
-      case "super_admin": return "bg-amber-200 text-amber-800";
-      case "admin": return "bg-purple-200 text-purple-800";
-      case "afiliada": return "bg-blue-200 text-blue-800";
-      default: return "bg-pink-200 text-pink-800";
-    }
-  };
-
-  // Ranking for fidelity tab
   const ranked = users
     .filter((u) => u.role === "cliente")
     .map((u) => ({ id: u.id, name: u.name, points: (initialLoyaltyData[u.id] || defaultLoyalty).points, tier: getUserTier(u.id) }))
@@ -152,20 +140,15 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { icon: Users, label: "Total", value: stats.total, accent: "text-foreground" },
-          { icon: Users, label: "Gestantes", value: stats.gestantes, accent: "text-pink-600" },
-          { icon: UserCheck, label: "Profissionais", value: stats.profissionais, accent: "text-purple-600" },
-          { icon: Shield, label: "Admins", value: stats.admins, accent: "text-amber-600" },
+          { label: "Total", value: stats.total },
+          { label: "Gestantes", value: stats.gestantes },
+          { label: "Profissionais", value: stats.profissionais },
+          { label: "Admins", value: stats.admins },
         ].map((s) => (
-          <Card key={s.label} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-muted/60">
-                <s.icon className={`h-4 w-4 ${s.accent}`} />
-              </div>
-              <div>
-                <p className={`text-xl font-heading font-bold ${s.accent}`}>{s.value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
-              </div>
+          <Card key={s.label} className="bg-card/60 backdrop-blur border-border/40">
+            <CardContent className="p-4">
+              <p className="text-2xl font-heading font-bold text-foreground">{s.value}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -173,15 +156,12 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
 
       {/* Search + Filter + Add */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome, e-mail ou telefone..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 rounded-xl"
-          />
-        </div>
+        <Input
+          placeholder="Buscar por nome, e-mail ou telefone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 min-w-[200px] max-w-sm rounded-xl"
+        />
         <Select value={filterRole} onValueChange={setFilterRole}>
           <SelectTrigger className="rounded-xl w-[180px]">
             <SelectValue placeholder="Filtrar tipo" />
@@ -201,45 +181,44 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
             setNewUserTier("Bronze");
             setCreateDialogOpen(true);
           }}
-          className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading gap-1.5 shadow-md shadow-secondary/20 ml-auto"
+          className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading ml-auto"
         >
-          <Plus className="h-4 w-4" /> Novo Usuário
+          + Novo Usuário
         </Button>
       </div>
 
-      {/* User Cards */}
+      {/* User List */}
       <div className="space-y-2">
         {filteredUsers.length === 0 ? (
-          <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+          <Card className="bg-card/60 backdrop-blur border-border/40">
             <CardContent className="p-8 text-center">
-              <p className="text-sm text-muted-foreground font-heading">Nenhum usuário encontrado</p>
+              <p className="text-sm text-muted-foreground">Nenhum usuário encontrado</p>
             </CardContent>
           </Card>
         ) : (
           filteredUsers.map((u) => {
             const meta = roleMeta[u.role];
             const tierName = getUserTier(u.id);
-            const tier = getTier(tierName);
             const pwVisible = showPassword[u.id] || false;
 
             return (
-              <Card key={u.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 hover:shadow-xl transition-all group">
+              <Card key={u.id} className="bg-card/60 backdrop-blur border-border/40 hover:bg-card/80 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
                     {/* Avatar */}
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 font-heading font-bold text-sm ${initialsColor(u.role)}`}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-heading font-bold text-xs bg-muted text-muted-foreground">
                       {getInitials(u.name)}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <h3 className="font-heading font-bold text-sm text-foreground truncate">{u.name}</h3>
-                        <Badge variant="outline" className={`text-[10px] font-heading border ${meta.color}`}>
+                        <span className="font-heading font-bold text-sm text-foreground truncate">{u.name}</span>
+                        <Badge variant="outline" className="text-[10px] font-heading border-border text-muted-foreground">
                           {meta.label}
                         </Badge>
                         {u.role === "cliente" && (
-                          <Badge className={`${tier.bg} ${tier.color} border ${tier.border} text-[10px] font-heading font-bold py-0 px-1.5`}>
+                          <Badge variant="outline" className="text-[10px] font-heading border-border text-muted-foreground">
                             {tierName}
                           </Badge>
                         )}
@@ -251,27 +230,25 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                     </div>
 
                     {/* Password */}
-                    <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground min-w-[100px]">
+                    <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground min-w-[100px]">
                       <span className="font-mono">{pwVisible ? u.password : "••••••"}</span>
-                      <button onClick={() => setShowPassword((p) => ({ ...p, [u.id]: !p[u.id] }))} className="hover:text-foreground transition-colors p-0.5">
-                        {pwVisible ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                      <button onClick={() => setShowPassword((p) => ({ ...p, [u.id]: !p[u.id] }))} className="hover:text-foreground transition-colors text-[10px] underline">
+                        {pwVisible ? "ocultar" : "ver"}
                       </button>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
+                    <div className="flex items-center gap-2 shrink-0 text-xs">
+                      <button className="text-muted-foreground hover:text-foreground underline transition-colors" onClick={() => openEdit(u)}>
+                        editar
+                      </button>
                       {u.id !== currentUserId && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        <button
+                          className="text-muted-foreground hover:text-destructive underline transition-colors"
                           onClick={() => { deleteUser(u.id); toast({ title: "Usuário removido" }); }}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                          excluir
+                        </button>
                       )}
                     </div>
                   </div>
@@ -286,13 +263,8 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading flex items-center gap-3">
-              {editingUser && (
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-heading font-bold text-xs ${initialsColor(editingUser.role)}`}>
-                  {getInitials(editingUser.name)}
-                </div>
-              )}
-              {editingUser ? editingUser.name : "Editar Usuário"}
+            <DialogTitle className="font-heading">
+              {editingUser ? `Editar — ${editingUser.name}` : "Editar Usuário"}
             </DialogTitle>
           </DialogHeader>
 
@@ -346,37 +318,28 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                       <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {loyaltyTiers.map((t) => (
-                          <SelectItem key={t.name} value={t.name}>
-                            <span className="flex items-center gap-2">
-                              <span className={`w-2 h-2 rounded-full ${t.dot}`} />
-                              {t.name}
-                            </span>
-                          </SelectItem>
+                          <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
-                {/* Ranking */}
                 {ranked.length > 0 && (
                   <>
                     <Separator />
                     <p className="font-heading font-semibold text-xs text-foreground">Ranking de Gestantes</p>
                     <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
                       {ranked.map((r, i) => {
-                        const rTier = getTier(r.tier);
                         const isCurrentUser = r.id === editingUser.id;
                         return (
                           <div
                             key={r.id}
                             className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs ${isCurrentUser ? "bg-secondary/10 border border-secondary/30" : "bg-muted/30"}`}
                           >
-                            <span className={`font-heading font-bold w-5 text-center ${i === 0 ? "text-yellow-600" : i === 1 ? "text-slate-500" : i === 2 ? "text-amber-700" : "text-muted-foreground"}`}>
-                              {i + 1}
-                            </span>
+                            <span className="font-heading font-bold w-5 text-center text-muted-foreground">{i + 1}</span>
                             <span className={`flex-1 ${isCurrentUser ? "font-bold text-foreground" : "text-muted-foreground"}`}>{r.name}</span>
-                            <Badge className={`${rTier.bg} ${rTier.color} border ${rTier.border} text-[9px] py-0 px-1.5`}>{r.tier}</Badge>
+                            <span className="text-muted-foreground">{r.tier}</span>
                             <span className="font-heading font-semibold w-12 text-right">{r.points.toLocaleString("pt-BR")}</span>
                           </div>
                         );
@@ -390,11 +353,10 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                 <TabsContent value="fidelidade" className="space-y-4 mt-4">
                   {(() => {
                     const loyalty = initialLoyaltyData[editingUser.id] || defaultLoyalty;
-                    const currentTier = getTier(formTier);
                     return (
                       <>
                         <div className="flex items-center gap-3 mb-2">
-                          <Badge className={`${currentTier.bg} ${currentTier.color} border ${currentTier.border} text-sm font-heading font-bold px-3 py-1`}>
+                          <Badge variant="outline" className="text-sm font-heading font-bold px-3 py-1 border-border text-foreground">
                             {formTier}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
@@ -420,7 +382,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
               )}
 
               <Separator className="mt-4" />
-              <Button onClick={handleSave} className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading mt-2 shadow-md shadow-secondary/20">
+              <Button onClick={handleSave} className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading mt-2">
                 Salvar Alterações
               </Button>
             </Tabs>
@@ -432,12 +394,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-secondary/10">
-                <UserPlus className="h-4 w-4 text-secondary" />
-              </div>
-              Novo Usuário
-            </DialogTitle>
+            <DialogTitle className="font-heading">Novo Usuário</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div className="grid grid-cols-2 gap-3">
@@ -477,12 +434,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {loyaltyTiers.map((t) => (
-                      <SelectItem key={t.name} value={t.name}>
-                        <span className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${t.dot}`} />
-                          {t.name}
-                        </span>
-                      </SelectItem>
+                      <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -490,7 +442,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
             </div>
             <Button
               onClick={handleCreate}
-              className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading shadow-md shadow-secondary/20"
+              className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading"
             >
               Criar Usuário
             </Button>
