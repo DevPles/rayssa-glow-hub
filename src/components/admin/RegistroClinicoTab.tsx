@@ -1501,6 +1501,22 @@ const RegistroClinicoTab = () => {
                     {selectedConsultation.observations && <div className="text-xs"><span className="text-muted-foreground">Observações:</span> {selectedConsultation.observations}</div>}
                     {selectedConsultation.conduct && <div className="text-xs"><span className="text-muted-foreground">Conduta:</span> {selectedConsultation.conduct}</div>}
                     {selectedConsultation.professional && <div className="text-xs text-muted-foreground">Profissional: {selectedConsultation.professional}</div>}
+                    {(selectedConsultation.requestedExams || []).length > 0 && (
+                      <div className="mt-2">
+                        <Separator className="mb-2" />
+                        <p className="text-[10px] font-heading font-semibold text-foreground mb-1">Exames Solicitados ({selectedConsultation.requestedExams!.length}):</p>
+                        <div className="space-y-1">
+                          {selectedConsultation.requestedExams!.map((ex) => (
+                            <div key={ex.id} className="flex items-center justify-between bg-white/30 rounded-lg px-2 py-1">
+                              <span className="text-[11px] font-heading text-foreground">{ex.examName}</span>
+                              <Badge variant={ex.status === "realizado" ? "default" : "secondary"} className="text-[9px] font-heading">
+                                {ex.status === "realizado" ? "Realizado" : "Solicitado"}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
