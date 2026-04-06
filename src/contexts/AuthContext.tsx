@@ -27,12 +27,12 @@ export interface MockUser {
 
 // Mock users database
 const mockUsersDB: MockUser[] = [
-  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", specialty: "", tenantId: null },
-  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", specialty: "medico_obstetra", tenantId: null },
-  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", specialty: "", tenantId: null },
-  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "admin", specialty: "enfermeiro_obstetra", tenantId: null },
-  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", specialty: "", tenantId: null },
-  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "admin", specialty: "medico_obstetra", tenantId: null },
+  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", specialty: "", tenantId: null, createdAt: "2024-01-01" },
+  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", specialty: "medico_obstetra", tenantId: null, createdAt: "2024-02-15" },
+  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", specialty: "", tenantId: null, cpf: "529.982.247-25", birthDate: "1992-05-14", gender: "feminino", createdAt: "2024-03-10" },
+  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "admin", specialty: "enfermeiro_obstetra", tenantId: null, createdAt: "2024-03-15" },
+  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", specialty: "", tenantId: null, gender: "feminino", createdAt: "2024-04-01" },
+  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "admin", specialty: "medico_obstetra", tenantId: null, createdAt: "2024-04-20" },
 ];
 
 interface AuthContextType {
