@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,27 +12,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useClinicalRecords, createEmptyRecord, emptyGestationalCard, type ClinicalRecord, type PrenatalConsultation, type GestationalExam, type AssignedProfessional } from "@/contexts/ClinicalRecordContext";
+import {
+  useClinicalRecords, createEmptyRecord, emptyGestationalCard,
+  type ClinicalRecord, type PrenatalConsultation, type GestationalExam,
+  type AssignedProfessional, type Vaccine,
+} from "@/contexts/ClinicalRecordContext";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 type View = "list" | "form" | "detail";
 
-const handleFileUpload = (accept: string, onFiles: (urls: string[]) => void) => {
-  const input = document.createElement("input");
-  input.type = "file"; input.accept = accept; input.multiple = true;
-  input.onchange = (e) => {
-    const files = (e.target as HTMLInputElement).files;
-    if (!files) return;
-    const urls: string[] = [];
-    Array.from(files).forEach((file) => {
-      if (file.size > 10 * 1024 * 1024) { toast({ title: "Arquivo muito grande", description: `${file.name} excede 10MB`, variant: "destructive" }); return; }
-      urls.push(URL.createObjectURL(file));
-    });
-    onFiles(urls);
-  };
-  input.click();
-};
+// ===== UTILS =====
 
 const calcGestationalAge = (dum: string): string => {
   if (!dum) return "—";
@@ -45,17 +35,112 @@ const calcGestationalAge = (dum: string): string => {
   return `${weeks}s ${days}d`;
 };
 
-const calcDPP = (dum: string): string => {
-  if (!dum) return "";
-  const dumDate = new Date(dum);
-  dumDate.setDate(dumDate.getDate() + 280);
-  return dumDate.toISOString().split("T")[0];
+const calcGestationalWeeks = (dum: string): number => {
+  if (!dum) return 0;
+  const diffMs = new Date().getTime() - new Date(dum).getTime();
+  return Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
 };
 
+const calcDPP = (dum: string): string => {
+  if (!dum) return "";
+  const d = new Date(dum);
+  d.setDate(d.getDate() + 280);
+  return d.toISOString().split("T")[0];
+};
+
+const calcIMC = (weight: string, height: string): string => {
+  const w = parseFloat(weight);
+  const h = parseFloat(height);
+  if (!w || !h || h === 0) return "";
+  return (w / (h * h)).toFixed(1);
+};
+
+const formatCPF = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+};
+
+const mockCPFLookup = (cpf: string): { name: string; birthDate: string; address: string } | null => {
+  const clean = cpf.replace(/\D/g, "");
+  if (clean.length !== 11) return null;
+  const mocks: Record<string, { name: string; birthDate: string; address: string }> = {
+    "12345678900": { name: "Maria Silva", birthDate: "1990-05-12", address: "Rua das Flores, 123 - São Paulo" },
+    "98765432100": { name: "Ana Carolina Santos", birthDate: "1988-11-03", address: "Av. Paulista, 1000 - São Paulo" },
+    "11122233344": { name: "Juliana Oliveira", birthDate: "1995-02-20", address: "Rua XV de Novembro, 50 - Curitiba" },
+  };
+  return mocks[clean] || { name: `Paciente CPF ${clean.slice(0,3)}`, birthDate: "1992-01-01", address: "Endereço não encontrado" };
+};
+
+// Exames padrão por trimestre (protocolo MS)
+const EXAMS_BY_TRIMESTER: Record<string, string[]> = {
+  "1": ["Hemograma Completo", "Tipagem Sanguínea", "Glicemia de Jejum", "Urina Tipo I", "Urocultura", "Toxoplasmose IgG/IgM", "Rubéola IgG/IgM", "HIV", "VDRL", "Hepatite B (HBsAg)", "TSH", "Ultrassom 1º Trimestre", "Coombs Indireto"],
+  "2": ["Ultrassom Morfológico", "TOTG 75g", "Hemograma", "Coombs Indireto", "Urina Tipo I"],
+  "3": ["Hemograma", "Glicemia", "VDRL", "HIV", "Hepatite B", "Urocultura", "Estreptococo Grupo B (GBS)", "Ultrassom 3º Trimestre"],
+};
+
+// Vacinas obrigatórias na gestação
+const REQUIRED_VACCINES = [
+  { name: "Influenza (Gripe)", doses: ["Dose Única"] },
+  { name: "dTpa (Tríplice Bacteriana)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"] },
+  { name: "Hepatite B", doses: ["1ª Dose", "2ª Dose", "3ª Dose"] },
+  { name: "COVID-19", doses: ["1ª Dose", "2ª Dose", "Reforço"] },
+];
+
+const handleFileUpload = (accept: string, onFiles: (urls: string[]) => void) => {
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = accept; input.multiple = true;
+  input.onchange = (e) => {
+    const files = (e.target as HTMLInputElement).files;
+    if (!files) return;
+    const urls = Array.from(files).map((f) => URL.createObjectURL(f));
+    onFiles(urls);
+  };
+  input.click();
+};
+
+// ===== SIMPLE SVG CHART =====
+const SimpleLineChart = ({ data, label, color = "hsl(var(--secondary))" }: { data: { week: number; value: number }[]; label: string; color?: string }) => {
+  if (data.length < 2) return <p className="text-xs text-muted-foreground text-center py-4">Dados insuficientes para gráfico</p>;
+  const minW = Math.min(...data.map(d => d.week));
+  const maxW = Math.max(...data.map(d => d.week));
+  const minV = Math.min(...data.map(d => d.value)) * 0.9;
+  const maxV = Math.max(...data.map(d => d.value)) * 1.1;
+  const w = 320, h = 160, px = 40, py = 20;
+  const scaleX = (wk: number) => px + ((wk - minW) / (maxW - minW || 1)) * (w - 2 * px);
+  const scaleY = (v: number) => h - py - ((v - minV) / (maxV - minV || 1)) * (h - 2 * py);
+  const points = data.map(d => `${scaleX(d.week)},${scaleY(d.value)}`).join(" ");
+
+  return (
+    <div>
+      <p className="text-xs font-heading font-semibold text-foreground mb-1">{label}</p>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full max-w-sm">
+        {/* Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((f) => {
+          const y = h - py - f * (h - 2 * py);
+          const val = (minV + f * (maxV - minV)).toFixed(1);
+          return <g key={f}><line x1={px} y1={y} x2={w - px} y2={y} stroke="hsl(var(--border))" strokeWidth="0.5" /><text x={px - 4} y={y + 3} textAnchor="end" fill="hsl(var(--muted-foreground))" fontSize="8">{val}</text></g>;
+        })}
+        {/* X axis labels */}
+        {data.map((d) => (
+          <text key={d.week} x={scaleX(d.week)} y={h - 4} textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="8">{d.week}s</text>
+        ))}
+        <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
+        {data.map((d, i) => (
+          <circle key={i} cx={scaleX(d.week)} cy={scaleY(d.value)} r="3" fill={color} />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+// ===== MAIN COMPONENT =====
 const RegistroClinicoTab = () => {
   const { user, users } = useAuth();
-  const { records, addRecord, updateRecord, deleteRecord, addPrenatalConsultation, addGestationalExam } = useClinicalRecords();
-  const professionals = users.filter((u) => u.role === "admin");
+  const { records, addRecord, updateRecord, deleteRecord, addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam, addVaccine } = useClinicalRecords();
+  const professionals = users.filter((u) => u.role === "admin" || u.role === "super_admin");
 
   const [view, setView] = useState<View>("list");
   const [search, setSearch] = useState("");
@@ -65,36 +150,62 @@ const RegistroClinicoTab = () => {
   const [selectedRecord, setSelectedRecord] = useState<ClinicalRecord | null>(null);
   const [formData, setFormData] = useState<Omit<ClinicalRecord, "id"> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [cpfLocked, setCpfLocked] = useState(false);
 
+  // Professional filter in form
+  const [formSpecialtyFilter, setFormSpecialtyFilter] = useState<string>("all");
+
+  // Consultation dialog
   const [consultDialogOpen, setConsultDialogOpen] = useState(false);
+  const [consultDetailOpen, setConsultDetailOpen] = useState(false);
+  const [selectedConsultation, setSelectedConsultation] = useState<PrenatalConsultation | null>(null);
   const [consultForm, setConsultForm] = useState<Omit<PrenatalConsultation, "id">>({
     date: new Date().toISOString().split("T")[0], gestationalAge: "", weight: "", bloodPressure: "",
     uterineHeight: "", fetalHeartRate: "", edema: "Ausente", fetalPresentation: "",
-    observations: "", conduct: "", professional: "", nextAppointment: "",
+    observations: "", conduct: "", professional: user?.name || "", nextAppointment: "", status: "agendada",
   });
 
+  // Exam dialog
   const [examDialogOpen, setExamDialogOpen] = useState(false);
+  const [examDetailOpen, setExamDetailOpen] = useState(false);
+  const [selectedExam, setSelectedExam] = useState<GestationalExam | null>(null);
   const [examForm, setExamForm] = useState<Omit<GestationalExam, "id">>({
     date: new Date().toISOString().split("T")[0], type: "", result: "", observations: "", fileUrl: "",
+    trimester: "1", interpretation: "", referenceValues: "", requestedBy: user?.name || "", laboratory: "",
+  });
+
+  // Vaccine dialog
+  const [vaccineDialogOpen, setVaccineDialogOpen] = useState(false);
+  const [vaccineForm, setVaccineForm] = useState<Omit<Vaccine, "id">>({
+    name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "",
   });
 
   const filteredRecords = useMemo(() => {
     let result = records;
-    // Filter by professional
     if (filterProfessionalId !== "all") {
-      result = result.filter((r) =>
-        r.assignedProfessionals?.some((p) => p.id === filterProfessionalId)
-      );
+      result = result.filter((r) => r.assignedProfessionals?.some((p) => p.id === filterProfessionalId));
     }
-    // Filter by search
     if (search) {
       const s = search.toLowerCase();
-      result = result.filter((r) =>
-        r.patientName.toLowerCase().includes(s) || r.prontuarioNumber.toLowerCase().includes(s)
-      );
+      result = result.filter((r) => r.patientName.toLowerCase().includes(s) || r.prontuarioNumber.toLowerCase().includes(s) || r.cpf?.includes(s));
     }
     return result;
   }, [records, filterProfessionalId, search]);
+
+  const filteredProfessionals = useMemo(() => {
+    if (formSpecialtyFilter === "all") return professionals;
+    return professionals.filter((p) => p.specialty === formSpecialtyFilter);
+  }, [professionals, formSpecialtyFilter]);
+
+  // Auto-select if only one professional after filter
+  useEffect(() => {
+    if (formData && filteredProfessionals.length === 1) {
+      const p = filteredProfessionals[0];
+      if (!formData.assignedProfessionals?.some((ap) => ap.id === p.id)) {
+        setFormData((prev) => prev ? { ...prev, assignedProfessionals: [{ id: p.id, name: p.name }] } : prev);
+      }
+    }
+  }, [filteredProfessionals, formData]);
 
   const getNextRecordNumber = () => {
     const nums = records.map((r) => {
@@ -105,11 +216,13 @@ const RegistroClinicoTab = () => {
   };
 
   const openNewRecord = () => {
-    const defaultProfessionals: AssignedProfessional[] = user && (user.role === "admin")
+    const defaultProfessionals: AssignedProfessional[] = user && user.role === "admin"
       ? [{ id: user.id, name: user.name }]
       : [];
     setFormData({ ...createEmptyRecord("", "", getNextRecordNumber(), defaultProfessionals) });
     setEditingId(null);
+    setCpfLocked(false);
+    setFormSpecialtyFilter("all");
     setView("form");
   };
 
@@ -117,17 +230,33 @@ const RegistroClinicoTab = () => {
     const { id, ...rest } = record;
     setFormData(rest);
     setEditingId(id);
+    setCpfLocked(!!rest.cpf);
     setView("form");
+  };
+
+  const handleCPFChange = (value: string) => {
+    const formatted = formatCPF(value);
+    updateForm("cpf", formatted);
+    const clean = formatted.replace(/\D/g, "");
+    if (clean.length === 11 && !cpfLocked) {
+      const data = mockCPFLookup(formatted);
+      if (data) {
+        setFormData((prev) => prev ? {
+          ...prev, cpf: formatted, fullName: data.name, patientName: data.name,
+          birthDate: data.birthDate, address: data.address,
+        } : prev);
+        setCpfLocked(true);
+        toast({ title: "Dados preenchidos automaticamente via CPF" });
+      }
+    }
   };
 
   const handleSave = () => {
     if (!formData || !formData.fullName) {
-      toast({ title: "Preencha o nome completo da gestante", variant: "destructive" });
-      return;
+      toast({ title: "Preencha o nome completo da gestante", variant: "destructive" }); return;
     }
     if (!formData.assignedProfessionals || formData.assignedProfessionals.length === 0) {
-      toast({ title: "Selecione ao menos um profissional responsável", variant: "destructive" });
-      return;
+      toast({ title: "Selecione ao menos um profissional responsável", variant: "destructive" }); return;
     }
     if (!formData.patientId) {
       formData.patientId = `new-${Date.now()}`;
@@ -136,6 +265,10 @@ const RegistroClinicoTab = () => {
     if (formData.gestationalCard.dum && !formData.gestationalCard.dpp) {
       formData.gestationalCard.dpp = calcDPP(formData.gestationalCard.dum);
     }
+    // Auto-calc IMC
+    const imc = calcIMC(formData.gestationalCard.preGestationalWeight, formData.gestationalCard.height);
+    if (imc) formData.gestationalCard.preGestationalBmi = imc;
+
     if (editingId) {
       updateRecord(editingId, formData);
       toast({ title: "Registro atualizado!" });
@@ -152,9 +285,7 @@ const RegistroClinicoTab = () => {
     if (!formData) return;
     const current = formData.assignedProfessionals || [];
     const exists = current.some((p) => p.id === profId);
-    const updated = exists
-      ? current.filter((p) => p.id !== profId)
-      : [...current, { id: profId, name: profName }];
+    const updated = exists ? current.filter((p) => p.id !== profId) : [...current, { id: profId, name: profName }];
     setFormData({ ...formData, assignedProfessionals: updated });
   };
 
@@ -163,8 +294,28 @@ const RegistroClinicoTab = () => {
     addPrenatalConsultation(selectedRecord.id, consultForm);
     setSelectedRecord((prev) => prev ? { ...prev, prenatalConsultations: [...prev.prenatalConsultations, { ...consultForm, id: `pc${Date.now()}` }] } : prev);
     setConsultDialogOpen(false);
-    setConsultForm({ date: new Date().toISOString().split("T")[0], gestationalAge: "", weight: "", bloodPressure: "", uterineHeight: "", fetalHeartRate: "", edema: "Ausente", fetalPresentation: "", observations: "", conduct: "", professional: "", nextAppointment: "" });
-    toast({ title: "Consulta pré-natal registrada!" });
+    setConsultForm({ date: new Date().toISOString().split("T")[0], gestationalAge: "", weight: "", bloodPressure: "", uterineHeight: "", fetalHeartRate: "", edema: "Ausente", fetalPresentation: "", observations: "", conduct: "", professional: user?.name || "", nextAppointment: "", status: "agendada" });
+    toast({ title: "Consulta registrada!" });
+  };
+
+  const handleRealizarConsulta = () => {
+    if (!selectedRecord || !selectedConsultation) return;
+    updatePrenatalConsultation(selectedRecord.id, selectedConsultation.id, { ...selectedConsultation, status: "realizada" });
+    setSelectedRecord((prev) => prev ? {
+      ...prev, prenatalConsultations: prev.prenatalConsultations.map((c) => c.id === selectedConsultation.id ? { ...selectedConsultation, status: "realizada" } : c),
+    } : prev);
+    setConsultDetailOpen(false);
+    toast({ title: "Consulta realizada!" });
+  };
+
+  const handleCancelarConsulta = () => {
+    if (!selectedRecord || !selectedConsultation) return;
+    updatePrenatalConsultation(selectedRecord.id, selectedConsultation.id, { status: "cancelada" });
+    setSelectedRecord((prev) => prev ? {
+      ...prev, prenatalConsultations: prev.prenatalConsultations.map((c) => c.id === selectedConsultation.id ? { ...c, status: "cancelada" } : c),
+    } : prev);
+    setConsultDetailOpen(false);
+    toast({ title: "Consulta cancelada" });
   };
 
   const handleAddExam = () => {
@@ -172,8 +323,17 @@ const RegistroClinicoTab = () => {
     addGestationalExam(selectedRecord.id, examForm);
     setSelectedRecord((prev) => prev ? { ...prev, gestationalExams: [...prev.gestationalExams, { ...examForm, id: `ge${Date.now()}` }] } : prev);
     setExamDialogOpen(false);
-    setExamForm({ date: new Date().toISOString().split("T")[0], type: "", result: "", observations: "", fileUrl: "" });
+    setExamForm({ date: new Date().toISOString().split("T")[0], type: "", result: "", observations: "", fileUrl: "", trimester: "1", interpretation: "", referenceValues: "", requestedBy: user?.name || "", laboratory: "" });
     toast({ title: "Exame registrado!" });
+  };
+
+  const handleAddVaccine = () => {
+    if (!selectedRecord || !vaccineForm.name) return;
+    addVaccine(selectedRecord.id, vaccineForm);
+    setSelectedRecord((prev) => prev ? { ...prev, vaccines: [...(prev.vaccines || []), { ...vaccineForm, id: `v${Date.now()}` }] } : prev);
+    setVaccineDialogOpen(false);
+    setVaccineForm({ name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "" });
+    toast({ title: "Vacina registrada!" });
   };
 
   const updateForm = (field: string, value: any) => {
@@ -181,7 +341,28 @@ const RegistroClinicoTab = () => {
   };
 
   const updateGestCard = (field: string, value: any) => {
-    setFormData((prev) => prev ? { ...prev, gestationalCard: { ...prev.gestationalCard, [field]: value } } : prev);
+    setFormData((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, gestationalCard: { ...prev.gestationalCard, [field]: value } };
+      // Auto-calc IMC
+      if (field === "preGestationalWeight" || field === "height") {
+        const w = field === "preGestationalWeight" ? value : updated.gestationalCard.preGestationalWeight;
+        const h = field === "height" ? value : updated.gestationalCard.height;
+        const imc = calcIMC(w, h);
+        if (imc) updated.gestationalCard.preGestationalBmi = imc;
+      }
+      // Auto-calc DPP
+      if (field === "dum" && value) {
+        updated.gestationalCard.dpp = calcDPP(value);
+      }
+      return updated;
+    });
+  };
+
+  const specialtyLabel = (s: string) => {
+    if (s === "medico_obstetra") return "Médico(a) Obstetra";
+    if (s === "enfermeiro_obstetra") return "Enfermeiro(a) Obstetra";
+    return "Profissional";
   };
 
   // ===== LIST VIEW =====
@@ -190,11 +371,9 @@ const RegistroClinicoTab = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
-            <Input placeholder="Buscar gestante ou registro..." value={search} onChange={(e) => setSearch(e.target.value)} className="rounded-xl max-w-sm" />
+            <Input placeholder="Buscar por nome, registro ou CPF..." value={search} onChange={(e) => setSearch(e.target.value)} className="rounded-xl max-w-sm" />
             <Select value={filterProfessionalId} onValueChange={setFilterProfessionalId}>
-              <SelectTrigger className="rounded-xl w-[220px]">
-                <SelectValue placeholder="Filtrar por profissional" />
-              </SelectTrigger>
+              <SelectTrigger className="rounded-xl w-[220px]"><SelectValue placeholder="Filtrar por profissional" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os profissionais</SelectItem>
                 {professionals.map((p) => (
@@ -203,16 +382,14 @@ const RegistroClinicoTab = () => {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={openNewRecord} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading shadow-md shadow-secondary/20">
-            Nova Ficha Gestacional
-          </Button>
+          <Button variant="secondary" onClick={openNewRecord}>Nova Ficha Gestacional</Button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { value: filteredRecords.length, label: "Total de Fichas" },
             { value: filteredRecords.filter((r) => r.status === "ativo").length, label: "Ativas" },
-            { value: filteredRecords.reduce((sum, r) => sum + r.prenatalConsultations.length, 0), label: "Consultas Registradas" },
+            { value: filteredRecords.reduce((sum, r) => sum + r.prenatalConsultations.length, 0), label: "Consultas" },
             { value: filteredRecords.reduce((sum, r) => sum + r.gestationalExams.length, 0), label: "Exames" },
           ].map((s) => (
             <Card key={s.label} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
@@ -232,21 +409,16 @@ const RegistroClinicoTab = () => {
               </CardContent>
             </Card>
           ) : filteredRecords.map((record) => (
-            <Card key={record.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 hover:shadow-xl transition-shadow">
+            <Card key={record.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => { setSelectedRecord(record); setView("detail"); }}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {record.patientPhoto ? (
-                      <img src={record.patientPhoto} alt="" className="w-10 h-10 rounded-full object-cover border border-border shrink-0" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border shrink-0">
-                        <span className="text-xs text-muted-foreground font-heading">{record.patientName.charAt(0)}</span>
-                      </div>
-                    )}
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border shrink-0">
+                      <span className="text-xs text-muted-foreground font-heading">{record.patientName.charAt(0)}</span>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h3 className="font-heading font-bold text-foreground text-sm">{record.patientName}</h3>
-                        <Badge variant="outline" className="text-[10px] font-heading">Gestacional</Badge>
                         <Badge variant={record.status === "ativo" ? "default" : "secondary"} className="text-[10px] font-heading">
                           {record.status === "ativo" ? "Ativo" : "Arquivado"}
                         </Badge>
@@ -254,29 +426,22 @@ const RegistroClinicoTab = () => {
                           <Badge variant="destructive" className="text-[10px] font-heading">Alto Risco</Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{record.prontuarioNumber}</p>
+                      <p className="text-xs text-muted-foreground">{record.prontuarioNumber} {record.cpf ? `• CPF: ${record.cpf}` : ""}</p>
                       <div className="flex gap-3 text-xs text-muted-foreground flex-wrap">
-                        {record.gestationalCard.dum && (
-                          <span>IG: {calcGestationalAge(record.gestationalCard.dum)}</span>
-                        )}
-                        {record.gestationalCard.dpp && (
-                          <span>DPP: {format(new Date(record.gestationalCard.dpp), "dd/MM/yyyy")}</span>
-                        )}
+                        {record.gestationalCard.dum && <span>IG: {calcGestationalAge(record.gestationalCard.dum)}</span>}
+                        {record.gestationalCard.dpp && <span>DPP: {format(new Date(record.gestationalCard.dpp), "dd/MM/yyyy")}</span>}
                         <span>{record.prenatalConsultations.length} consulta(s)</span>
                       </div>
-                      {record.assignedProfessionals && record.assignedProfessionals.length > 0 && (
+                      {record.assignedProfessionals?.length > 0 && (
                         <div className="flex gap-1 mt-1 flex-wrap">
                           {record.assignedProfessionals.map((p) => (
-                            <Badge key={p.id} variant="outline" className="text-[10px] font-heading bg-primary/5">
-                              {p.name}
-                            </Badge>
+                            <Badge key={p.id} variant="outline" className="text-[10px] font-heading">{p.name}</Badge>
                           ))}
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button size="sm" variant="ghost" className="text-xs font-heading" onClick={() => { setSelectedRecord(record); setView("detail"); }}>Ver</Button>
+                  <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                     <Button size="sm" variant="ghost" className="text-xs font-heading" onClick={() => openEditRecord(record)}>Editar</Button>
                     <Button size="sm" variant="ghost" className="text-xs font-heading hover:text-destructive" onClick={() => handleDelete(record.id)}>Excluir</Button>
                   </div>
@@ -294,70 +459,84 @@ const RegistroClinicoTab = () => {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Button onClick={() => setView("list")} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">← Voltar</Button>
-          <h2 className="font-heading font-bold text-foreground">{editingId ? "Editar Ficha Gestacional" : "Nova Ficha Gestacional"}</h2>
-          <Button onClick={handleSave} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading shadow-md shadow-secondary/20">Salvar</Button>
+          <Button variant="secondary" onClick={() => setView("list")}>← Voltar</Button>
+          <h2 className="font-heading font-bold text-foreground">{editingId ? "Editar Ficha" : "Nova Ficha Gestacional"}</h2>
+          <Button variant="secondary" onClick={handleSave}>Salvar</Button>
         </div>
+
+        {/* CPF First */}
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Identificação por CPF</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-end gap-3">
+              <div className="space-y-1 flex-1 max-w-xs">
+                <Label className="text-xs font-heading">CPF *</Label>
+                <Input
+                  value={formData.cpf || ""}
+                  onChange={(e) => handleCPFChange(e.target.value)}
+                  className="rounded-xl"
+                  placeholder="000.000.000-00"
+                  disabled={cpfLocked && !!editingId}
+                />
+              </div>
+              {cpfLocked && (
+                <Button variant="outline" size="sm" onClick={() => setCpfLocked(false)}>Editar dados</Button>
+              )}
+            </div>
+            {cpfLocked && <p className="text-xs text-muted-foreground">Dados preenchidos automaticamente. Clique em "Editar dados" para alterar.</p>}
+          </CardContent>
+        </Card>
 
         {/* Professionals */}
         <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Profissionais Responsáveis *</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground mb-3">Selecione os médicos/enfermeiros responsáveis por esta gestante:</p>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-3 mb-2">
+              <Label className="text-xs font-heading">Filtrar por categoria:</Label>
+              <Select value={formSpecialtyFilter} onValueChange={setFormSpecialtyFilter}>
+                <SelectTrigger className="rounded-xl w-[220px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="medico_obstetra">Médico(a) Obstetra</SelectItem>
+                  <SelectItem value="enfermeiro_obstetra">Enfermeiro(a) Obstetra</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {professionals.map((p) => {
+              {filteredProfessionals.map((p) => {
                 const isSelected = formData.assignedProfessionals?.some((ap) => ap.id === p.id);
                 return (
-                  <Button
-                    key={p.id}
-                    type="button"
-                    size="sm"
-                    variant={isSelected ? "default" : "outline"}
-                    className={`rounded-full font-heading text-xs ${isSelected ? "bg-secondary text-secondary-foreground" : ""}`}
-                    onClick={() => toggleProfessional(p.id, p.name)}
-                  >
-                    {p.name} ({p.role === "admin" ? "Admin" : "Afiliada"})
+                  <Button key={p.id} type="button" size="sm" variant={isSelected ? "default" : "outline"} onClick={() => toggleProfessional(p.id, p.name)}>
+                    {p.name} {p.specialty ? `(${specialtyLabel(p.specialty)})` : ""}
                   </Button>
                 );
               })}
+              {filteredProfessionals.length === 0 && <p className="text-xs text-muted-foreground">Nenhum profissional nesta categoria</p>}
             </div>
-            {formData.assignedProfessionals && formData.assignedProfessionals.length > 0 && (
-              <div className="flex gap-1 mt-3 flex-wrap">
-                {formData.assignedProfessionals.map((p) => (
-                  <Badge key={p.id} className="font-heading text-xs">{p.name}</Badge>
-                ))}
-              </div>
-            )}
           </CardContent>
         </Card>
 
         {/* Identification */}
         <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Identificação da Gestante</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Dados da Gestante</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-4">
-              <div className="relative">
-                {formData.patientPhoto ? (
-                  <img src={formData.patientPhoto} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/20" />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
-                    <span className="text-xs text-muted-foreground font-heading">Foto</span>
-                  </div>
-                )}
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                {formData.patientPhoto ? <img src={formData.patientPhoto} alt="" className="w-16 h-16 rounded-full object-cover" /> : <span className="text-xs text-muted-foreground font-heading">Foto</span>}
               </div>
-              <Button type="button" size="sm" variant="outline" className="rounded-xl text-xs font-heading" onClick={() => handleFileUpload("image/*", (urls) => { if (urls[0]) updateForm("patientPhoto", urls[0]); })}>
+              <Button type="button" size="sm" variant="outline" onClick={() => handleFileUpload("image/*", (urls) => { if (urls[0]) updateForm("patientPhoto", urls[0]); })}>
                 {formData.patientPhoto ? "Trocar" : "Foto"}
               </Button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-              <div className="space-y-1 col-span-2"><Label className="text-xs font-heading">Nome Completo *</Label><Input value={formData.fullName} onChange={(e) => { updateForm("fullName", e.target.value); updateForm("patientName", e.target.value); }} className="rounded-xl" /></div>
+              <div className="space-y-1 col-span-2"><Label className="text-xs font-heading">Nome Completo *</Label><Input value={formData.fullName} onChange={(e) => { updateForm("fullName", e.target.value); updateForm("patientName", e.target.value); }} className="rounded-xl" disabled={cpfLocked} /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Nº Registro</Label><Input value={formData.prontuarioNumber} readOnly className="rounded-xl bg-muted" /></div>
-              <div className="space-y-1"><Label className="text-xs font-heading">Nascimento</Label><Input type="date" value={formData.birthDate} onChange={(e) => updateForm("birthDate", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">Nascimento</Label><Input type="date" value={formData.birthDate} onChange={(e) => updateForm("birthDate", e.target.value)} className="rounded-xl" disabled={cpfLocked} /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Telefone</Label><Input value={formData.phone} onChange={(e) => updateForm("phone", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Estado Civil</Label><Input value={formData.maritalStatus} onChange={(e) => updateForm("maritalStatus", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Profissão</Label><Input value={formData.profession} onChange={(e) => updateForm("profession", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Contato Emergência</Label><Input value={formData.emergencyContact} onChange={(e) => updateForm("emergencyContact", e.target.value)} className="rounded-xl" /></div>
-              <div className="space-y-1 col-span-2 md:col-span-4"><Label className="text-xs font-heading">Endereço</Label><Input value={formData.address} onChange={(e) => updateForm("address", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1 col-span-2 md:col-span-4"><Label className="text-xs font-heading">Endereço</Label><Input value={formData.address} onChange={(e) => updateForm("address", e.target.value)} className="rounded-xl" disabled={cpfLocked} /></div>
               <div className="col-span-2 md:col-span-4 flex items-center gap-3">
                 <Checkbox checked={formData.consentSigned} onCheckedChange={(v) => updateForm("consentSigned", !!v)} />
                 <Label className="text-xs font-heading font-semibold">Termo de consentimento assinado</Label>
@@ -375,35 +554,33 @@ const RegistroClinicoTab = () => {
                 <Label className="text-xs font-heading">Tipo Sanguíneo</Label>
                 <Select value={formData.gestationalCard.bloodType} onValueChange={(v) => updateGestCard("bloodType", v)}>
                   <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {["A", "B", "AB", "O"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{["A", "B", "AB", "O"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs font-heading">Rh</Label>
                 <Select value={formData.gestationalCard.rh} onValueChange={(v) => updateGestCard("rh", v)}>
                   <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="+">Positivo (+)</SelectItem>
-                    <SelectItem value="-">Negativo (-)</SelectItem>
-                  </SelectContent>
+                  <SelectContent><SelectItem value="+">Positivo (+)</SelectItem><SelectItem value="-">Negativo (-)</SelectItem></SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1"><Label className="text-xs font-heading">DUM</Label><Input type="date" value={formData.gestationalCard.dum} onChange={(e) => { updateGestCard("dum", e.target.value); updateGestCard("dpp", calcDPP(e.target.value)); }} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">DUM</Label><Input type="date" value={formData.gestationalCard.dum} onChange={(e) => updateGestCard("dum", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">DPP (auto)</Label><Input value={formData.gestationalCard.dpp} readOnly className="rounded-xl bg-muted" /></div>
             </div>
+            {formData.gestationalCard.dum && (
+              <div className="text-xs text-muted-foreground">IG atual: <span className="font-semibold text-foreground">{calcGestationalAge(formData.gestationalCard.dum)}</span></div>
+            )}
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
-              <div className="space-y-1"><Label className="text-xs font-heading">Gestações (G)</Label><Input value={formData.gestationalCard.gravida} onChange={(e) => updateGestCard("gravida", e.target.value)} className="rounded-xl" /></div>
-              <div className="space-y-1"><Label className="text-xs font-heading">Partos (P)</Label><Input value={formData.gestationalCard.para} onChange={(e) => updateGestCard("para", e.target.value)} className="rounded-xl" /></div>
-              <div className="space-y-1"><Label className="text-xs font-heading">Abortos (A)</Label><Input value={formData.gestationalCard.abortions} onChange={(e) => updateGestCard("abortions", e.target.value)} className="rounded-xl" /></div>
-              <div className="space-y-1"><Label className="text-xs font-heading">Peso Pré-gest.</Label><Input value={formData.gestationalCard.preGestationalWeight} onChange={(e) => updateGestCard("preGestationalWeight", e.target.value)} className="rounded-xl" placeholder="kg" /></div>
-              <div className="space-y-1"><Label className="text-xs font-heading">Altura</Label><Input value={formData.gestationalCard.height} onChange={(e) => updateGestCard("height", e.target.value)} className="rounded-xl" placeholder="m" /></div>
-              <div className="space-y-1"><Label className="text-xs font-heading">IMC Pré-gest.</Label><Input value={formData.gestationalCard.preGestationalBmi} onChange={(e) => updateGestCard("preGestationalBmi", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">G</Label><Input value={formData.gestationalCard.gravida} onChange={(e) => updateGestCard("gravida", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">P</Label><Input value={formData.gestationalCard.para} onChange={(e) => updateGestCard("para", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">A</Label><Input value={formData.gestationalCard.abortions} onChange={(e) => updateGestCard("abortions", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">Peso Pré-gest. (kg)</Label><Input value={formData.gestationalCard.preGestationalWeight} onChange={(e) => updateGestCard("preGestationalWeight", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">Altura (m)</Label><Input value={formData.gestationalCard.height} onChange={(e) => updateGestCard("height", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">IMC (auto)</Label><Input value={formData.gestationalCard.preGestationalBmi} readOnly className="rounded-xl bg-muted" /></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               <div className="space-y-1"><Label className="text-xs font-heading">Alergias</Label><Input value={formData.gestationalCard.allergies} onChange={(e) => updateGestCard("allergies", e.target.value)} className="rounded-xl" /></div>
-              <div className="space-y-1"><Label className="text-xs font-heading">Medicamentos em uso</Label><Input value={formData.gestationalCard.medications} onChange={(e) => updateGestCard("medications", e.target.value)} className="rounded-xl" /></div>
+              <div className="space-y-1"><Label className="text-xs font-heading">Medicamentos</Label><Input value={formData.gestationalCard.medications} onChange={(e) => updateGestCard("medications", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Condições pré-existentes</Label><Input value={formData.gestationalCard.preExistingConditions} onChange={(e) => updateGestCard("preExistingConditions", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Cirurgias anteriores</Label><Input value={formData.gestationalCard.previousSurgeries} onChange={(e) => updateGestCard("previousSurgeries", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Histórico familiar</Label><Input value={formData.gestationalCard.familyHistory} onChange={(e) => updateGestCard("familyHistory", e.target.value)} className="rounded-xl" /></div>
@@ -411,10 +588,7 @@ const RegistroClinicoTab = () => {
                 <Label className="text-xs font-heading">Classificação de Risco</Label>
                 <Select value={formData.gestationalCard.riskClassification} onValueChange={(v: any) => updateGestCard("riskClassification", v)}>
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="habitual">Risco Habitual</SelectItem>
-                    <SelectItem value="alto_risco">Alto Risco</SelectItem>
-                  </SelectContent>
+                  <SelectContent><SelectItem value="habitual">Risco Habitual</SelectItem><SelectItem value="alto_risco">Alto Risco</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
@@ -425,16 +599,14 @@ const RegistroClinicoTab = () => {
               <div className="space-y-1"><Label className="text-xs font-heading">Tel. Acompanhante</Label><Input value={formData.gestationalCard.companionPhone} onChange={(e) => updateGestCard("companionPhone", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Pediatra</Label><Input value={formData.gestationalCard.pediatrician} onChange={(e) => updateGestCard("pediatrician", e.target.value)} className="rounded-xl" /></div>
               <div className="space-y-1"><Label className="text-xs font-heading">Hospital/Maternidade</Label><Input value={formData.gestationalCard.hospital} onChange={(e) => updateGestCard("hospital", e.target.value)} className="rounded-xl" /></div>
-              <div className="space-y-1 col-span-1 md:col-span-2"><Label className="text-xs font-heading">Plano de Parto</Label><Textarea value={formData.gestationalCard.birthPlan} onChange={(e) => updateGestCard("birthPlan", e.target.value)} className="rounded-xl min-h-[60px]" placeholder="Descreva as preferências para o parto..." /></div>
+              <div className="space-y-1 col-span-1 md:col-span-2"><Label className="text-xs font-heading">Plano de Parto</Label><Textarea value={formData.gestationalCard.birthPlan} onChange={(e) => updateGestCard("birthPlan", e.target.value)} className="rounded-xl min-h-[60px]" /></div>
             </div>
           </CardContent>
         </Card>
 
         <div className="flex gap-3 pb-6">
-          <Button variant="outline" onClick={() => setView("list")} className="flex-1 rounded-full font-heading">Cancelar</Button>
-          <Button onClick={handleSave} className="flex-1 bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading shadow-md shadow-secondary/20">
-            {editingId ? "Salvar Alterações" : "Criar Registro"}
-          </Button>
+          <Button variant="outline" onClick={() => setView("list")} className="flex-1">Cancelar</Button>
+          <Button variant="secondary" onClick={handleSave} className="flex-1">{editingId ? "Salvar Alterações" : "Criar Registro"}</Button>
         </div>
       </div>
     );
@@ -445,78 +617,97 @@ const RegistroClinicoTab = () => {
     const r = selectedRecord;
     const gc = r.gestationalCard;
     const igAtual = calcGestationalAge(gc.dum);
+    const igWeeks = calcGestationalWeeks(gc.dum);
+
+    // Chart data from consultations
+    const weightData = r.prenatalConsultations
+      .filter((c) => c.weight && c.gestationalAge)
+      .map((c) => {
+        const weekMatch = c.gestationalAge.match(/(\d+)/);
+        return { week: weekMatch ? parseInt(weekMatch[1]) : 0, value: parseFloat(c.weight) };
+      })
+      .filter((d) => d.week > 0 && !isNaN(d.value))
+      .sort((a, b) => a.week - b.week);
+
+    const uterineHeightData = r.prenatalConsultations
+      .filter((c) => c.uterineHeight && c.gestationalAge)
+      .map((c) => {
+        const weekMatch = c.gestationalAge.match(/(\d+)/);
+        return { week: weekMatch ? parseInt(weekMatch[1]) : 0, value: parseFloat(c.uterineHeight) };
+      })
+      .filter((d) => d.week > 0 && !isNaN(d.value))
+      .sort((a, b) => a.week - b.week);
+
+    // Exams by trimester
+    const examsByTrimester = (tri: string) => r.gestationalExams.filter((e) => e.trimester === tri);
+    const getExamsDone = (tri: string) => examsByTrimester(tri).map((e) => e.type);
 
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Button onClick={() => setView("list")} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">← Voltar</Button>
-          <Button variant="outline" onClick={() => openEditRecord(r)} className="rounded-full font-heading text-sm">Editar</Button>
+          <Button variant="secondary" onClick={() => setView("list")}>← Voltar</Button>
+          <Button variant="outline" onClick={() => openEditRecord(r)}>Editar</Button>
         </div>
 
-        {/* Header Card */}
-        <Card className="bg-gradient-to-r from-secondary/10 to-primary/10 backdrop-blur-xl border-white/50 shadow-lg">
+        {/* Header */}
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
-                {r.patientPhoto ? (
-                  <img src={r.patientPhoto} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/20 shrink-0" />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border shrink-0">
-                    <span className="text-lg text-muted-foreground font-heading font-bold">{r.fullName.charAt(0)}</span>
-                  </div>
-                )}
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border shrink-0">
+                  <span className="text-lg text-muted-foreground font-heading font-bold">{r.fullName.charAt(0)}</span>
+                </div>
                 <div>
                   <h2 className="font-heading font-bold text-xl text-foreground">{r.fullName}</h2>
-                  <p className="text-sm text-muted-foreground">{r.prontuarioNumber}</p>
+                  <p className="text-sm text-muted-foreground">{r.prontuarioNumber} {r.cpf ? `• CPF: ${r.cpf}` : ""}</p>
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    <Badge variant="outline" className="font-heading text-xs">Gestacional</Badge>
                     <Badge variant={r.status === "ativo" ? "default" : "secondary"} className="font-heading text-xs">{r.status}</Badge>
                     {gc.riskClassification === "alto_risco" && <Badge variant="destructive" className="font-heading text-xs">Alto Risco</Badge>}
                     {gc.bloodType && <Badge variant="outline" className="font-heading text-xs">{gc.bloodType}{gc.rh}</Badge>}
                   </div>
-                  {r.assignedProfessionals && r.assignedProfessionals.length > 0 && (
+                  {r.assignedProfessionals?.length > 0 && (
                     <div className="flex gap-1 mt-2 flex-wrap">
-                      <span className="text-[10px] text-muted-foreground mr-1">Profissionais:</span>
                       {r.assignedProfessionals.map((p) => (
-                        <Badge key={p.id} variant="outline" className="text-[10px] font-heading bg-primary/5">{p.name}</Badge>
+                        <Badge key={p.id} variant="outline" className="text-[10px] font-heading">{p.name}</Badge>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-              <div className="text-right space-y-1">
-                {gc.dum && (
-                  <div className="bg-secondary/20 rounded-xl px-4 py-2 text-center">
+              {gc.dum && (
+                <div className="text-right">
+                  <div className="bg-secondary/10 rounded-xl px-4 py-2 text-center">
                     <p className="text-[10px] text-muted-foreground font-heading uppercase">Idade Gestacional</p>
                     <p className="text-lg font-heading font-bold text-secondary">{igAtual}</p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
         <Tabs defaultValue="cartao" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 bg-white/40 backdrop-blur-xl rounded-xl">
+          <TabsList className="w-full grid grid-cols-5 bg-white/40 backdrop-blur-xl rounded-xl">
             <TabsTrigger value="cartao" className="rounded-lg font-heading text-xs">Cartão</TabsTrigger>
             <TabsTrigger value="consultas" className="rounded-lg font-heading text-xs">Consultas ({r.prenatalConsultations.length})</TabsTrigger>
             <TabsTrigger value="exames" className="rounded-lg font-heading text-xs">Exames ({r.gestationalExams.length})</TabsTrigger>
-            <TabsTrigger value="dados" className="rounded-lg font-heading text-xs">Dados Pessoais</TabsTrigger>
+            <TabsTrigger value="vacinas" className="rounded-lg font-heading text-xs">Vacinas ({(r.vaccines || []).length})</TabsTrigger>
+            <TabsTrigger value="dados" className="rounded-lg font-heading text-xs">Dados</TabsTrigger>
           </TabsList>
 
           {/* CARTÃO DA GESTANTE */}
           <TabsContent value="cartao" className="space-y-4 mt-4">
             <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Cartão Digital da Gestante</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     { label: "Tipo Sanguíneo", value: gc.bloodType ? `${gc.bloodType} ${gc.rh}` : "—" },
                     { label: "G / P / A", value: gc.gravida ? `G${gc.gravida}P${gc.para}A${gc.abortions}` : "—" },
                     { label: "DUM", value: gc.dum ? format(new Date(gc.dum), "dd/MM/yyyy") : "—" },
                     { label: "DPP", value: gc.dpp ? format(new Date(gc.dpp), "dd/MM/yyyy") : "—" },
-                    { label: "Peso Pré-gestacional", value: gc.preGestationalWeight || "—" },
-                    { label: "IMC Pré-gestacional", value: gc.preGestationalBmi || "—" },
+                    { label: "Peso Pré-gest.", value: gc.preGestationalWeight ? `${gc.preGestationalWeight} kg` : "—" },
+                    { label: "IMC Pré-gest.", value: gc.preGestationalBmi || "—" },
                     { label: "Classificação", value: gc.riskClassification === "habitual" ? "Risco Habitual" : "Alto Risco" },
                     { label: "IG Atual", value: igAtual },
                   ].map((item) => (
@@ -525,6 +716,14 @@ const RegistroClinicoTab = () => {
                       <p className="text-sm font-heading font-bold text-foreground">{item.value}</p>
                     </div>
                   ))}
+                </div>
+
+                <Separator />
+
+                {/* Gráficos */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <SimpleLineChart data={weightData} label="Curva de Ganho de Peso (kg × semana)" />
+                  <SimpleLineChart data={uterineHeightData} label="Curva de Altura Uterina (cm × semana)" color="hsl(var(--primary))" />
                 </div>
 
                 <Separator />
@@ -569,54 +768,49 @@ const RegistroClinicoTab = () => {
             </Card>
           </TabsContent>
 
-          {/* CONSULTAS PRÉ-NATAIS */}
+          {/* CONSULTAS */}
           <TabsContent value="consultas" className="space-y-4 mt-4">
             <div className="flex justify-end">
-              <Button size="sm" onClick={() => setConsultDialogOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">
-                Nova Consulta
-              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setConsultDialogOpen(true)}>Nova Consulta</Button>
             </div>
             {r.prenatalConsultations.length === 0 ? (
               <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
-                <CardContent className="p-8 text-center">
-                  <p className="text-sm text-muted-foreground font-heading">Nenhuma consulta pré-natal registrada</p>
-                </CardContent>
+                <CardContent className="p-8 text-center"><p className="text-sm text-muted-foreground font-heading">Nenhuma consulta registrada</p></CardContent>
               </Card>
             ) : (
               <div className="space-y-3">
                 {r.prenatalConsultations.map((c, idx) => (
-                  <Card key={c.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+                  <Card key={c.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+                    onClick={() => { setSelectedConsultation({ ...c }); setConsultDetailOpen(true); }}>
                     <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-3">
+                      <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h4 className="font-heading font-bold text-sm text-foreground">Consulta #{idx + 1}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-heading font-bold text-sm text-foreground">Consulta #{idx + 1}</h4>
+                            <Badge variant={c.status === "realizada" ? "default" : c.status === "cancelada" ? "destructive" : "secondary"} className="text-[10px] font-heading">
+                              {c.status === "realizada" ? "Realizada" : c.status === "cancelada" ? "Cancelada" : "Agendada"}
+                            </Badge>
+                          </div>
                           <p className="text-xs text-muted-foreground">{format(new Date(c.date), "dd/MM/yyyy", { locale: ptBR })} • {c.gestationalAge}</p>
                         </div>
-                        {c.professional && <span className="text-xs text-muted-foreground font-heading">{c.professional}</span>}
+                        {c.professional && <span className="text-xs text-muted-foreground">{c.professional}</span>}
                       </div>
-                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                        {[
-                          { label: "Peso", value: c.weight },
-                          { label: "PA", value: c.bloodPressure },
-                          { label: "AU", value: c.uterineHeight },
-                          { label: "BCF", value: c.fetalHeartRate },
-                          { label: "Edema", value: c.edema },
-                          { label: "Apresentação", value: c.fetalPresentation },
-                        ].filter(v => v.value).map((item) => (
-                          <div key={item.label} className="bg-white/30 backdrop-blur-lg rounded-lg p-2 text-center">
-                            <p className="text-[10px] text-muted-foreground font-heading">{item.label}</p>
-                            <p className="text-xs font-heading font-semibold text-foreground">{item.value}</p>
-                          </div>
-                        ))}
-                      </div>
-                      {c.observations && (
-                        <div className="mt-2 text-xs text-foreground"><span className="text-muted-foreground">Observações:</span> {c.observations}</div>
-                      )}
-                      {c.conduct && (
-                        <div className="mt-1 text-xs text-primary"><span className="text-muted-foreground">Conduta:</span> {c.conduct}</div>
-                      )}
-                      {c.nextAppointment && (
-                        <div className="mt-1 text-xs text-muted-foreground">Próxima consulta: {format(new Date(c.nextAppointment), "dd/MM/yyyy")}</div>
+                      {c.status === "realizada" && (
+                        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                          {[
+                            { label: "Peso", value: c.weight ? `${c.weight}kg` : "" },
+                            { label: "PA", value: c.bloodPressure },
+                            { label: "AU", value: c.uterineHeight ? `${c.uterineHeight}cm` : "" },
+                            { label: "BCF", value: c.fetalHeartRate ? `${c.fetalHeartRate}bpm` : "" },
+                            { label: "Edema", value: c.edema },
+                            { label: "Apresentação", value: c.fetalPresentation },
+                          ].filter(v => v.value).map((item) => (
+                            <div key={item.label} className="bg-white/30 rounded-lg p-2 text-center">
+                              <p className="text-[10px] text-muted-foreground font-heading">{item.label}</p>
+                              <p className="text-xs font-heading font-semibold text-foreground">{item.value}</p>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </CardContent>
                   </Card>
@@ -625,37 +819,95 @@ const RegistroClinicoTab = () => {
             )}
           </TabsContent>
 
-          {/* EXAMES */}
+          {/* EXAMES POR TRIMESTRE */}
           <TabsContent value="exames" className="space-y-4 mt-4">
             <div className="flex justify-end">
-              <Button size="sm" onClick={() => setExamDialogOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">
-                Novo Exame
-              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setExamDialogOpen(true)}>Novo Exame</Button>
             </div>
-            {r.gestationalExams.length === 0 ? (
-              <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
-                <CardContent className="p-8 text-center">
-                  <p className="text-sm text-muted-foreground font-heading">Nenhum exame registrado</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                {r.gestationalExams.map((exam) => (
-                  <Card key={exam.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-heading font-bold text-sm text-foreground">{exam.type}</h4>
-                        <span className="text-xs text-muted-foreground">{format(new Date(exam.date), "dd/MM/yyyy")}</span>
+            {(["1", "2", "3"] as const).map((tri) => {
+              const done = getExamsDone(tri);
+              const expected = EXAMS_BY_TRIMESTER[tri];
+              const exams = examsByTrimester(tri);
+              return (
+                <Card key={tri} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-heading flex items-center justify-between">
+                      <span>{tri}º Trimestre</span>
+                      <span className="text-xs text-muted-foreground font-normal">{done.length}/{expected.length} exames realizados</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {/* Checklist */}
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {expected.map((examName) => {
+                        const isDone = done.includes(examName);
+                        return (
+                          <Badge key={examName} variant={isDone ? "default" : "outline"} className="text-[10px] font-heading">
+                            {isDone ? "✓ " : ""}{examName}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                    {/* Exam cards */}
+                    {exams.map((exam) => (
+                      <div key={exam.id} className="bg-white/30 rounded-xl p-3 cursor-pointer hover:bg-white/50 transition-colors"
+                        onClick={() => { setSelectedExam(exam); setExamDetailOpen(true); }}>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-sm font-heading font-semibold text-foreground">{exam.type}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(exam.date), "dd/MM/yyyy")} • {exam.laboratory || "—"}</p>
+                          </div>
+                          {exam.interpretation && (
+                            <Badge variant={exam.interpretation === "normal" ? "default" : exam.interpretation === "alterado" ? "destructive" : "secondary"} className="text-[10px] font-heading">
+                              {exam.interpretation === "normal" ? "Normal" : exam.interpretation === "alterado" ? "Alterado" : "Inconclusivo"}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-foreground mt-1">{exam.result}</p>
                       </div>
-                      <p className="text-xs text-foreground"><span className="text-muted-foreground">Resultado:</span> {exam.result}</p>
-                      {exam.observations && (
-                        <p className="text-xs text-muted-foreground mt-1">{exam.observations}</p>
+                    ))}
+                    {exams.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">Nenhum exame registrado neste trimestre</p>}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          {/* VACINAS */}
+          <TabsContent value="vacinas" className="space-y-4 mt-4">
+            <div className="flex justify-end">
+              <Button variant="secondary" size="sm" onClick={() => setVaccineDialogOpen(true)}>Registrar Vacina</Button>
+            </div>
+            <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Calendário Vacinal da Gestante</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                {REQUIRED_VACCINES.map((vac) => {
+                  const applied = (r.vaccines || []).filter((v) => v.name === vac.name);
+                  return (
+                    <div key={vac.name} className="bg-white/30 rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-heading font-semibold text-foreground">{vac.name}</p>
+                        <Badge variant={applied.length > 0 ? "default" : "outline"} className="text-[10px] font-heading">
+                          {applied.length > 0 ? `${applied.length} dose(s) aplicada(s)` : "Pendente"}
+                        </Badge>
+                      </div>
+                      {applied.length > 0 && (
+                        <div className="space-y-1">
+                          {applied.map((v) => (
+                            <div key={v.id} className="text-xs text-muted-foreground flex gap-3">
+                              <span>{v.dose}</span>
+                              <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
+                              <span>Lote: {v.lot || "—"}</span>
+                              <span>{v.professional}</span>
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* DADOS PESSOAIS */}
@@ -664,6 +916,7 @@ const RegistroClinicoTab = () => {
               <CardContent className="p-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
+                    { label: "CPF", value: r.cpf || "—" },
                     { label: "Nascimento", value: r.birthDate ? format(new Date(r.birthDate), "dd/MM/yyyy") : "—" },
                     { label: "Telefone", value: r.phone || "—" },
                     { label: "Estado Civil", value: r.maritalStatus || "—" },
@@ -683,74 +936,259 @@ const RegistroClinicoTab = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Add Consultation Dialog */}
+        {/* ===== DIALOGS ===== */}
+
+        {/* New Consultation Dialog */}
         <Dialog open={consultDialogOpen} onOpenChange={setConsultDialogOpen}>
           <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle className="font-heading">Registrar Consulta Pré-natal</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-heading">Agendar / Registrar Consulta Pré-natal</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-2">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Data *</Label><Input type="date" value={consultForm.date} onChange={(e) => setConsultForm({ ...consultForm, date: e.target.value })} className="rounded-xl" /></div>
-                <div className="space-y-1.5"><Label className="text-xs font-heading">Idade Gestacional</Label><Input value={consultForm.gestationalAge} onChange={(e) => setConsultForm({ ...consultForm, gestationalAge: e.target.value })} className="rounded-xl" placeholder="Ex: 20 semanas" /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">IG</Label><Input value={consultForm.gestationalAge} onChange={(e) => setConsultForm({ ...consultForm, gestationalAge: e.target.value })} className="rounded-xl" placeholder="Ex: 20 semanas" /></div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-1.5"><Label className="text-xs font-heading">Peso</Label><Input value={consultForm.weight} onChange={(e) => setConsultForm({ ...consultForm, weight: e.target.value })} className="rounded-xl" placeholder="kg" /></div>
-                <div className="space-y-1.5"><Label className="text-xs font-heading">Pressão Arterial</Label><Input value={consultForm.bloodPressure} onChange={(e) => setConsultForm({ ...consultForm, bloodPressure: e.target.value })} className="rounded-xl" placeholder="mmHg" /></div>
-                <div className="space-y-1.5"><Label className="text-xs font-heading">Altura Uterina</Label><Input value={consultForm.uterineHeight} onChange={(e) => setConsultForm({ ...consultForm, uterineHeight: e.target.value })} className="rounded-xl" placeholder="cm" /></div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-heading">Status</Label>
+                <Select value={consultForm.status} onValueChange={(v: any) => setConsultForm({ ...consultForm, status: v })}>
+                  <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="agendada">Agendada</SelectItem>
+                    <SelectItem value="realizada">Realizada</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-1.5"><Label className="text-xs font-heading">BCF (batimentos)</Label><Input value={consultForm.fetalHeartRate} onChange={(e) => setConsultForm({ ...consultForm, fetalHeartRate: e.target.value })} className="rounded-xl" placeholder="bpm" /></div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-heading">Edema</Label>
-                  <Select value={consultForm.edema} onValueChange={(v) => setConsultForm({ ...consultForm, edema: v })}>
-                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Ausente">Ausente</SelectItem>
-                      <SelectItem value="+">+</SelectItem>
-                      <SelectItem value="++">++</SelectItem>
-                      <SelectItem value="+++">+++</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5"><Label className="text-xs font-heading">Apresentação Fetal</Label><Input value={consultForm.fetalPresentation} onChange={(e) => setConsultForm({ ...consultForm, fetalPresentation: e.target.value })} className="rounded-xl" placeholder="Cefálica, Pélvica..." /></div>
-              </div>
-              <div className="space-y-1.5"><Label className="text-xs font-heading">Observações</Label><Textarea value={consultForm.observations} onChange={(e) => setConsultForm({ ...consultForm, observations: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
-              <div className="space-y-1.5"><Label className="text-xs font-heading">Conduta</Label><Textarea value={consultForm.conduct} onChange={(e) => setConsultForm({ ...consultForm, conduct: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
+              {consultForm.status === "realizada" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">Peso (kg)</Label><Input value={consultForm.weight} onChange={(e) => setConsultForm({ ...consultForm, weight: e.target.value })} className="rounded-xl" /></div>
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">PA</Label><Input value={consultForm.bloodPressure} onChange={(e) => setConsultForm({ ...consultForm, bloodPressure: e.target.value })} className="rounded-xl" /></div>
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">AU (cm)</Label><Input value={consultForm.uterineHeight} onChange={(e) => setConsultForm({ ...consultForm, uterineHeight: e.target.value })} className="rounded-xl" /></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">BCF (bpm)</Label><Input value={consultForm.fetalHeartRate} onChange={(e) => setConsultForm({ ...consultForm, fetalHeartRate: e.target.value })} className="rounded-xl" /></div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-heading">Edema</Label>
+                      <Select value={consultForm.edema} onValueChange={(v) => setConsultForm({ ...consultForm, edema: v })}>
+                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="Ausente">Ausente</SelectItem><SelectItem value="+">+</SelectItem><SelectItem value="++">++</SelectItem><SelectItem value="+++">+++</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">Apresentação</Label><Input value={consultForm.fetalPresentation} onChange={(e) => setConsultForm({ ...consultForm, fetalPresentation: e.target.value })} className="rounded-xl" /></div>
+                  </div>
+                  <div className="space-y-1.5"><Label className="text-xs font-heading">Observações</Label><Textarea value={consultForm.observations} onChange={(e) => setConsultForm({ ...consultForm, observations: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
+                  <div className="space-y-1.5"><Label className="text-xs font-heading">Conduta</Label><Textarea value={consultForm.conduct} onChange={(e) => setConsultForm({ ...consultForm, conduct: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
+                </>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={consultForm.professional} onChange={(e) => setConsultForm({ ...consultForm, professional: e.target.value })} className="rounded-xl" /></div>
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Próxima Consulta</Label><Input type="date" value={consultForm.nextAppointment} onChange={(e) => setConsultForm({ ...consultForm, nextAppointment: e.target.value })} className="rounded-xl" /></div>
               </div>
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" onClick={() => setConsultDialogOpen(false)} className="flex-1 rounded-full font-heading">Cancelar</Button>
-                <Button onClick={handleAddConsultation} className="flex-1 bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading">Registrar</Button>
+                <Button variant="outline" onClick={() => setConsultDialogOpen(false)} className="flex-1">Cancelar</Button>
+                <Button variant="secondary" onClick={handleAddConsultation} className="flex-1">Registrar</Button>
               </div>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Add Exam Dialog */}
+        {/* Consultation Detail/Realizar Dialog */}
+        <Dialog open={consultDetailOpen} onOpenChange={setConsultDetailOpen}>
+          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader><DialogTitle className="font-heading">Detalhes da Consulta</DialogTitle></DialogHeader>
+            {selectedConsultation && (
+              <div className="space-y-3 mt-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-heading">{format(new Date(selectedConsultation.date), "dd/MM/yyyy")} • {selectedConsultation.gestationalAge}</p>
+                  <Badge variant={selectedConsultation.status === "realizada" ? "default" : selectedConsultation.status === "cancelada" ? "destructive" : "secondary"} className="text-xs font-heading">
+                    {selectedConsultation.status === "realizada" ? "Realizada" : selectedConsultation.status === "cancelada" ? "Cancelada" : "Agendada"}
+                  </Badge>
+                </div>
+
+                {selectedConsultation.status === "agendada" && (
+                  <>
+                    <Separator />
+                    <p className="text-xs font-heading font-semibold">Preencha os dados para realizar a consulta:</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1.5"><Label className="text-xs font-heading">Peso (kg)</Label><Input value={selectedConsultation.weight} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, weight: e.target.value })} className="rounded-xl" /></div>
+                      <div className="space-y-1.5"><Label className="text-xs font-heading">PA</Label><Input value={selectedConsultation.bloodPressure} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, bloodPressure: e.target.value })} className="rounded-xl" /></div>
+                      <div className="space-y-1.5"><Label className="text-xs font-heading">AU (cm)</Label><Input value={selectedConsultation.uterineHeight} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, uterineHeight: e.target.value })} className="rounded-xl" /></div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1.5"><Label className="text-xs font-heading">BCF (bpm)</Label><Input value={selectedConsultation.fetalHeartRate} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, fetalHeartRate: e.target.value })} className="rounded-xl" /></div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-heading">Edema</Label>
+                        <Select value={selectedConsultation.edema} onValueChange={(v) => setSelectedConsultation({ ...selectedConsultation, edema: v })}>
+                          <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="Ausente">Ausente</SelectItem><SelectItem value="+">+</SelectItem><SelectItem value="++">++</SelectItem><SelectItem value="+++">+++</SelectItem></SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5"><Label className="text-xs font-heading">Apresentação</Label><Input value={selectedConsultation.fetalPresentation} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, fetalPresentation: e.target.value })} className="rounded-xl" /></div>
+                    </div>
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">Observações</Label><Textarea value={selectedConsultation.observations} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, observations: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">Conduta</Label><Textarea value={selectedConsultation.conduct} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, conduct: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
+                    <div className="flex gap-3 pt-2">
+                      <Button variant="outline" onClick={handleCancelarConsulta} className="flex-1">Cancelar Consulta</Button>
+                      <Button variant="secondary" onClick={handleRealizarConsulta} className="flex-1">Realizar Consulta</Button>
+                    </div>
+                  </>
+                )}
+
+                {selectedConsultation.status === "realizada" && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                      {[
+                        { label: "Peso", value: selectedConsultation.weight ? `${selectedConsultation.weight}kg` : "—" },
+                        { label: "PA", value: selectedConsultation.bloodPressure || "—" },
+                        { label: "AU", value: selectedConsultation.uterineHeight ? `${selectedConsultation.uterineHeight}cm` : "—" },
+                        { label: "BCF", value: selectedConsultation.fetalHeartRate ? `${selectedConsultation.fetalHeartRate}bpm` : "—" },
+                        { label: "Edema", value: selectedConsultation.edema || "—" },
+                        { label: "Apresentação", value: selectedConsultation.fetalPresentation || "—" },
+                      ].map((item) => (
+                        <div key={item.label} className="bg-white/30 rounded-lg p-2 text-center">
+                          <p className="text-[10px] text-muted-foreground font-heading">{item.label}</p>
+                          <p className="text-xs font-heading font-semibold text-foreground">{item.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedConsultation.observations && <div className="text-xs"><span className="text-muted-foreground">Observações:</span> {selectedConsultation.observations}</div>}
+                    {selectedConsultation.conduct && <div className="text-xs"><span className="text-muted-foreground">Conduta:</span> {selectedConsultation.conduct}</div>}
+                    {selectedConsultation.professional && <div className="text-xs text-muted-foreground">Profissional: {selectedConsultation.professional}</div>}
+                  </div>
+                )}
+
+                {selectedConsultation.status === "cancelada" && (
+                  <p className="text-sm text-muted-foreground text-center py-4">Esta consulta foi cancelada.</p>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Exam Dialog */}
         <Dialog open={examDialogOpen} onOpenChange={setExamDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle className="font-heading">Registrar Exame</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-2">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Data</Label><Input type="date" value={examForm.date} onChange={(e) => setExamForm({ ...examForm, date: e.target.value })} className="rounded-xl" /></div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-heading">Tipo de Exame *</Label>
-                  <Select value={examForm.type} onValueChange={(v) => setExamForm({ ...examForm, type: v })}>
-                    <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>
-                      {["Ultrassom 1º Trimestre", "Ultrassom Morfológico", "Ultrassom 3º Trimestre", "Hemograma Completo", "Tipagem Sanguínea", "Glicemia", "TOTG", "Urina Tipo I", "Urocultura", "Toxoplasmose", "Rubéola", "HIV", "VDRL", "Hepatite B", "Hepatite C", "TSH", "Coombs Indireto", "Estreptococo B", "Outro"].map(t => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
-                      ))}
-                    </SelectContent>
+                  <Label className="text-xs font-heading">Trimestre *</Label>
+                  <Select value={examForm.trimester} onValueChange={(v: any) => setExamForm({ ...examForm, trimester: v })}>
+                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent><SelectItem value="1">1º Trimestre</SelectItem><SelectItem value="2">2º Trimestre</SelectItem><SelectItem value="3">3º Trimestre</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-heading">Tipo de Exame *</Label>
+                <Select value={examForm.type} onValueChange={(v) => setExamForm({ ...examForm, type: v })}>
+                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {EXAMS_BY_TRIMESTER[examForm.trimester].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    <SelectItem value="Outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-1.5"><Label className="text-xs font-heading">Resultado</Label><Textarea value={examForm.result} onChange={(e) => setExamForm({ ...examForm, result: e.target.value })} className="rounded-xl min-h-[60px]" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-heading">Interpretação</Label>
+                  <Select value={examForm.interpretation || "none"} onValueChange={(v) => setExamForm({ ...examForm, interpretation: v === "none" ? "" : v as any })}>
+                    <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent><SelectItem value="none">—</SelectItem><SelectItem value="normal">Normal</SelectItem><SelectItem value="alterado">Alterado</SelectItem><SelectItem value="inconclusivo">Inconclusivo</SelectItem></SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Laboratório</Label><Input value={examForm.laboratory} onChange={(e) => setExamForm({ ...examForm, laboratory: e.target.value })} className="rounded-xl" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Valores de Referência</Label><Input value={examForm.referenceValues} onChange={(e) => setExamForm({ ...examForm, referenceValues: e.target.value })} className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Solicitado por</Label><Input value={examForm.requestedBy} onChange={(e) => setExamForm({ ...examForm, requestedBy: e.target.value })} className="rounded-xl" /></div>
+              </div>
               <div className="space-y-1.5"><Label className="text-xs font-heading">Observações</Label><Input value={examForm.observations} onChange={(e) => setExamForm({ ...examForm, observations: e.target.value })} className="rounded-xl" /></div>
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" onClick={() => setExamDialogOpen(false)} className="flex-1 rounded-full font-heading">Cancelar</Button>
-                <Button onClick={handleAddExam} className="flex-1 bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading">Registrar</Button>
+                <Button variant="outline" onClick={() => setExamDialogOpen(false)} className="flex-1">Cancelar</Button>
+                <Button variant="secondary" onClick={handleAddExam} className="flex-1">Registrar</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Exam Detail Dialog */}
+        <Dialog open={examDetailOpen} onOpenChange={setExamDetailOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader><DialogTitle className="font-heading">Detalhes do Exame</DialogTitle></DialogHeader>
+            {selectedExam && (
+              <div className="space-y-3 mt-2">
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "Exame", value: selectedExam.type },
+                    { label: "Data", value: format(new Date(selectedExam.date), "dd/MM/yyyy") },
+                    { label: "Trimestre", value: `${selectedExam.trimester}º` },
+                    { label: "Laboratório", value: selectedExam.laboratory || "—" },
+                    { label: "Solicitado por", value: selectedExam.requestedBy || "—" },
+                    { label: "Interpretação", value: selectedExam.interpretation === "normal" ? "Normal" : selectedExam.interpretation === "alterado" ? "Alterado" : selectedExam.interpretation === "inconclusivo" ? "Inconclusivo" : "—" },
+                  ].map((item) => (
+                    <div key={item.label} className="bg-white/30 rounded-xl p-3">
+                      <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
+                      <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+                {selectedExam.referenceValues && (
+                  <div className="bg-white/30 rounded-xl p-3">
+                    <p className="text-[10px] text-muted-foreground font-heading uppercase">Valores de Referência</p>
+                    <p className="text-sm text-foreground">{selectedExam.referenceValues}</p>
+                  </div>
+                )}
+                <div className="bg-white/30 rounded-xl p-3">
+                  <p className="text-[10px] text-muted-foreground font-heading uppercase">Resultado</p>
+                  <p className="text-sm text-foreground">{selectedExam.result || "—"}</p>
+                </div>
+                {selectedExam.observations && (
+                  <div className="bg-white/30 rounded-xl p-3">
+                    <p className="text-[10px] text-muted-foreground font-heading uppercase">Observações</p>
+                    <p className="text-sm text-foreground">{selectedExam.observations}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Vaccine Dialog */}
+        <Dialog open={vaccineDialogOpen} onOpenChange={setVaccineDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader><DialogTitle className="font-heading">Registrar Vacina</DialogTitle></DialogHeader>
+            <div className="space-y-3 mt-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-heading">Vacina *</Label>
+                <Select value={vaccineForm.name} onValueChange={(v) => setVaccineForm({ ...vaccineForm, name: v })}>
+                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {REQUIRED_VACCINES.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                    <SelectItem value="Outra">Outra</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-heading">Dose</Label>
+                <Select value={vaccineForm.dose} onValueChange={(v) => setVaccineForm({ ...vaccineForm, dose: v })}>
+                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {(REQUIRED_VACCINES.find((v) => v.name === vaccineForm.name)?.doses || ["Dose Única", "1ª Dose", "2ª Dose", "3ª Dose", "Reforço"]).map((d) => (
+                      <SelectItem key={d} value={d}>{d}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Data</Label><Input type="date" value={vaccineForm.date} onChange={(e) => setVaccineForm({ ...vaccineForm, date: e.target.value })} className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Lote</Label><Input value={vaccineForm.lot} onChange={(e) => setVaccineForm({ ...vaccineForm, lot: e.target.value })} className="rounded-xl" /></div>
+              </div>
+              <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={vaccineForm.professional} onChange={(e) => setVaccineForm({ ...vaccineForm, professional: e.target.value })} className="rounded-xl" /></div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" onClick={() => setVaccineDialogOpen(false)} className="flex-1">Cancelar</Button>
+                <Button variant="secondary" onClick={handleAddVaccine} className="flex-1">Registrar</Button>
               </div>
             </div>
           </DialogContent>
