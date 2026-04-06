@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import HeroBookingDialog from "@/components/HeroBookingDialog";
 import heroBg from "@/assets/hero-bg.jpg";
+import logo from "@/assets/logo.png";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
 
 const words = ["Privado", "Personalizado"];
@@ -61,6 +62,7 @@ const HeroSection = () => {
         <div className="grid gap-12 items-center">
           {/* Left content */}
           <div>
+            <img src={logo} alt="LeMater" className="w-64 md:w-80 lg:w-96 object-contain mb-4 drop-shadow-2xl" />
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
               <span className="animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema de </span>
               <span className="animate-fade-in text-primary" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>Experiência Exclusiva</span>
