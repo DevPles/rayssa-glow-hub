@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Check } from "lucide-react";
+import GestationalTimeline from "@/components/GestationalTimeline";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +30,7 @@ const NucleoMaterno = () => {
   const filtered = activeFilter === "Todos" ? pageServices : pageServices.filter((s) => s.category === activeFilter);
 
   const handleAdd = (service: any) => {
-    addToCart({ ...service, origin: "Núcleo Materno" });
+    addToCart({ ...service, origin: "Cuidados Gestacionais" });
   };
 
   return (
@@ -51,9 +52,9 @@ const NucleoMaterno = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-center">
             <div>
-              <span className="inline-block text-xs font-heading font-semibold text-accent tracking-widest uppercase bg-accent/20 backdrop-blur-sm px-3 py-1 rounded-full border border-accent/30 mb-2">Cuidado Materno</span>
-              <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Núcleo Materno Especializado"}</h1>
-              <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Protocolos estéticos seguros e especializados para gestantes e puérperas."}</p>
+               <span className="inline-block text-xs font-heading font-semibold text-accent tracking-widest uppercase bg-accent/20 backdrop-blur-sm px-3 py-1 rounded-full border border-accent/30 mb-2">Cuidados Gestacionais</span>
+               <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Linha do Tempo & Cuidados Gestacionais"}</h1>
+               <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Acompanhe cada fase da gestação com serviços e orientações especializadas."}</p>
               <Link to="/#servicos">
                 <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm"><ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar</Button>
               </Link>
@@ -73,6 +74,8 @@ const NucleoMaterno = () => {
           </div>
         </div>
       </div>
+
+      <GestationalTimeline />
 
       <div className="relative z-10 container mx-auto px-4 py-16 md:py-20">
         <div className="flex items-center gap-2 flex-wrap mb-10">
@@ -113,8 +116,8 @@ const NucleoMaterno = () => {
 
         <div className="mt-20 text-center">
           <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-10 md:p-14 border border-white/50">
-            <h3 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-4">Cuide de você e do seu bebê</h3>
-            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">Monte seu combo materno personalizado com desconto progressivo.</p>
+             <h3 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-4">Cuide de você e do seu bebê</h3>
+             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">Monte seu plano gestacional personalizado com acompanhamento completo.</p>
             {totalItems > 0 ? (
               <Button onClick={() => setCartOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading rounded-full px-8 py-3 shadow-md shadow-secondary/20 text-base">Ver Carrinho ({totalItems} {totalItems === 1 ? "item" : "itens"})</Button>
             ) : (

@@ -17,7 +17,7 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-sm text-card/50 leading-relaxed">
-              Esteticista e Enfermeira Obstetra especializada em cuidado estético integrado para todas as fases da vida da mulher, em Ribeirão Preto, SP.
+              Sistema completo de acompanhamento gestacional com consultas pré-natal, linha do tempo, registro clínico e serviços especializados para gestantes.
             </p>
           </div>
 
@@ -25,7 +25,7 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-semibold mb-5 text-sm tracking-wider uppercase text-card/70">Links Rápidos</h4>
             <ul className="space-y-3">
-              {["Serviços", "Produtos", "Cursos", "Blog", "Agendamento"].map((link) => (
+              {["Consultas", "Produtos", "Blog", "Agendamento", "Minha Gestação"].map((link) => (
                 <li key={link}>
                   <a href="#" className="text-sm text-card/50 hover:text-accent transition-colors">{link}</a>
                 </li>

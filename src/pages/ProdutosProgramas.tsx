@@ -29,7 +29,7 @@ const ProdutosProgramas = () => {
   const filtered = activeFilter === "Todos" ? pageServices : pageServices.filter((s) => s.category === activeFilter);
 
   const handleAdd = (product: any) => {
-    addToCart({ ...product, origin: "Produtos & Programas" });
+    addToCart({ ...product, origin: "Produtos para Gestantes" });
   };
 
   return (
@@ -52,9 +52,9 @@ const ProdutosProgramas = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex items-center justify-between gap-6">
             <div>
-              <span className="inline-block text-xs font-heading font-semibold text-primary tracking-widest uppercase bg-primary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-primary/30 mb-2">Loja & Programas</span>
-              <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Produtos & Programas Online"}</h1>
-              <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Cosméticos premium, semijoias exclusivas, kits maternidade e programas online."}</p>
+               <span className="inline-block text-xs font-heading font-semibold text-primary tracking-widest uppercase bg-primary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-primary/30 mb-2">Loja para Gestantes</span>
+               <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Produtos para Gestantes"}</h1>
+               <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Produtos selecionados para gestantes e mamães: kits, cosméticos e itens de bem-estar."}</p>
               <Link to="/#servicos">
                 <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm"><ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar</Button>
               </Link>

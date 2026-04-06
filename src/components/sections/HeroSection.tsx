@@ -6,7 +6,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 import rayssaPortrait from "@/assets/rayssa-portrait.jpg";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
 
-const words = ["Mulher", "Gestante"];
+const words = ["Gestante", "Mamãe"];
 
 const HeroSection = () => {
   const { settings } = useSystemSettings();
@@ -68,14 +68,14 @@ const HeroSection = () => {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-card mb-6 leading-[1.1]">
-              <span className="inline-block animate-fade-in" style={{ animationDelay: '0ms' }}>Estética Especializada em{" "}</span>
-              <span className="inline-block animate-fade-in text-primary" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>Cada Fase</span>{" "}
-              <span className="inline-block animate-fade-in" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>da Vida da</span>{" "}
+              <span className="inline-block animate-fade-in" style={{ animationDelay: '0ms' }}>Acompanhamento Completo{" "}</span>
+              <span className="inline-block animate-fade-in text-primary" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>para Cada Fase</span>{" "}
+              <span className="inline-block animate-fade-in" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>da Sua Gestação,</span>{" "}
               <span className="inline-block animate-fade-in text-accent" style={{ animationDelay: '900ms', animationFillMode: 'both' }}>{displayText}<span className="animate-pulse">|</span></span>
             </h1>
 
             <p className="text-lg text-card/70 mb-8 leading-relaxed max-w-lg">
-              {settings.heroDescription || "Estética avançada e cuidado materno integrados por meio de protocolos seguros e personalizados, sustentados por ampla experiência clínica — por Rayssa Leslie, Esteticista Avançada e Enfermeira Obstetra."}
+              {settings.heroDescription || "Acompanhamento gestacional completo com consultas pré-natal, linha do tempo da gestação, registro clínico digital e serviços especializados para gestantes e puérperas."}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -84,7 +84,7 @@ const HeroSection = () => {
                 onClick={handleAgendar}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading text-base px-8 h-14 shadow-lg shadow-secondary/30 rounded-full"
               >
-                Agendar Consulta Gratuita
+                Agendar Consulta
                 <ArrowRight className="h-5 w-5 ml-1" />
               </Button>
               <Button

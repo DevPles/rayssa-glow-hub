@@ -16,10 +16,10 @@ const TestimonialsSection = () => {
             Depoimentos
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-5">
-            O que Nossas Clientes <span className="text-accent">Dizem</span>
+            O que Nossas Gestantes <span className="text-accent">Dizem</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-            Histórias reais de transformação e cuidado.
+            Histórias reais de acompanhamento e cuidado.
           </p>
         </div>
 
