@@ -36,10 +36,22 @@ const calcGestationalAge = (dum: string): string => {
   return `${weeks}s ${days}d`;
 };
 
-const calcGestationalWeeks = (dum: string): number => {
+const calcGestationalWeeks = (dum: string, refDate?: string): number => {
   if (!dum) return 0;
-  const diffMs = new Date().getTime() - new Date(dum).getTime();
+  const ref = refDate ? new Date(refDate) : new Date();
+  const diffMs = ref.getTime() - new Date(dum).getTime();
   return Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
+};
+
+const calcGestationalAgeAtDate = (dum: string, date: string): string => {
+  if (!dum || !date) return "";
+  const dumDate = new Date(dum);
+  const refDate = new Date(date);
+  const diffMs = refDate.getTime() - dumDate.getTime();
+  const weeks = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
+  const days = Math.floor((diffMs % (7 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+  if (weeks < 0) return "";
+  return `${weeks}s ${days}d`;
 };
 
 const calcDPP = (dum: string): string => {
@@ -844,7 +856,13 @@ const RegistroClinicoTab = () => {
           {/* CONSULTAS */}
           <TabsContent value="consultas" className="space-y-4 mt-4">
             <div className="flex justify-end">
-              <Button variant="secondary" size="sm" onClick={() => setConsultDialogOpen(true)}>Nova Consulta</Button>
+              <Button variant="secondary" size="sm" onClick={() => {
+                const dum = selectedRecord?.gestationalCard?.dum || "";
+                const today = new Date().toISOString().split("T")[0];
+                const autoIG = calcGestationalAgeAtDate(dum, today);
+                setConsultForm((prev) => ({ ...prev, date: today, gestationalAge: autoIG || prev.gestationalAge }));
+                setConsultDialogOpen(true);
+              }}>Nova Consulta</Button>
             </div>
             {r.prenatalConsultations.length === 0 ? (
               <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
@@ -1042,8 +1060,16 @@ const RegistroClinicoTab = () => {
             <DialogHeader><DialogTitle className="font-heading">Agendar / Registrar Consulta Pré-natal</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-2">
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5"><Label className="text-xs font-heading">Data *</Label><Input type="date" value={consultForm.date} onChange={(e) => setConsultForm({ ...consultForm, date: e.target.value })} className="rounded-xl" /></div>
-                <div className="space-y-1.5"><Label className="text-xs font-heading">IG</Label><Input value={consultForm.gestationalAge} onChange={(e) => setConsultForm({ ...consultForm, gestationalAge: e.target.value })} className="rounded-xl" placeholder="Ex: 20 semanas" /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Data *</Label><Input type="date" value={consultForm.date} onChange={(e) => {
+                  const newDate = e.target.value;
+                  const dum = selectedRecord?.gestationalCard?.dum || "";
+                  const autoIG = calcGestationalAgeAtDate(dum, newDate);
+                  setConsultForm({ ...consultForm, date: newDate, gestationalAge: autoIG || consultForm.gestationalAge });
+                }} className="rounded-xl" /></div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-heading">IG {selectedRecord?.gestationalCard?.dum ? "(automático)" : ""}</Label>
+                  <Input value={consultForm.gestationalAge} onChange={(e) => setConsultForm({ ...consultForm, gestationalAge: e.target.value })} className="rounded-xl bg-muted/30" readOnly={!!selectedRecord?.gestationalCard?.dum} />
+                </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-heading">Status</Label>
