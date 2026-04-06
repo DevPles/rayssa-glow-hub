@@ -22,16 +22,8 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/40 backdrop-blur-md border-b border-white/20 shadow-sm">
       <div className="container mx-auto flex items-center justify-between h-18 px-4 py-3">
-        <a href="#" className="flex items-center gap-2.5">
-          <img src={logoSrc} alt="Logo" className="w-10 h-10 object-contain" />
-          <div>
-            <span className="font-heading text-base font-bold text-foreground leading-none block">
-              {settings.companyShortName}
-            </span>
-            <span className="text-[10px] text-muted-foreground font-heading tracking-wide uppercase">
-              {settings.companySubtitle}
-            </span>
-          </div>
+        <a href="#" className="flex items-center">
+          <img src={logoSrc} alt="LeMater" className="h-10 object-contain" />
         </a>
 
         {/* Desktop nav */}
