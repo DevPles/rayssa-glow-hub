@@ -1054,8 +1054,16 @@ const RegistroClinicoTab = () => {
             <DialogHeader><DialogTitle className="font-heading">Agendar / Registrar Consulta Pré-natal</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-2">
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5"><Label className="text-xs font-heading">Data *</Label><Input type="date" value={consultForm.date} onChange={(e) => setConsultForm({ ...consultForm, date: e.target.value })} className="rounded-xl" /></div>
-                <div className="space-y-1.5"><Label className="text-xs font-heading">IG</Label><Input value={consultForm.gestationalAge} onChange={(e) => setConsultForm({ ...consultForm, gestationalAge: e.target.value })} className="rounded-xl" placeholder="Ex: 20 semanas" /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Data *</Label><Input type="date" value={consultForm.date} onChange={(e) => {
+                  const newDate = e.target.value;
+                  const dum = selectedRecord?.gestationalCard?.dum || "";
+                  const autoIG = calcGestationalAgeAtDate(dum, newDate);
+                  setConsultForm({ ...consultForm, date: newDate, gestationalAge: autoIG || consultForm.gestationalAge });
+                }} className="rounded-xl" /></div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-heading">IG {selectedRecord?.gestationalCard?.dum ? "(automático)" : ""}</Label>
+                  <Input value={consultForm.gestationalAge} onChange={(e) => setConsultForm({ ...consultForm, gestationalAge: e.target.value })} className="rounded-xl bg-muted/30" readOnly={!!selectedRecord?.gestationalCard?.dum} />
+                </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-heading">Status</Label>
