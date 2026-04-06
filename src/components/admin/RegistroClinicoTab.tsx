@@ -495,10 +495,14 @@ const RegistroClinicoTab = () => {
                 <Input
                   value={formData.cpf || ""}
                   onChange={(e) => handleCPFChange(e.target.value)}
+                <Input
+                  value={formData.cpf || ""}
+                  onChange={(e) => handleCPFChange(e.target.value)}
                   className="rounded-xl"
                   placeholder="000.000.000-00"
-                  disabled={cpfLocked && !!editingId}
+                  disabled={(cpfLocked && !!editingId) || cpfLoading}
                 />
+                {cpfLoading && <span className="text-xs text-muted-foreground animate-pulse">Consultando...</span>}
               </div>
               {cpfLocked && (
                 <Button variant="outline" size="sm" onClick={() => setCpfLocked(false)}>Editar dados</Button>
