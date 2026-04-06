@@ -105,22 +105,38 @@ const EXAMS_BY_TRIMESTER: Record<string, string[]> = {
   "3": ["Hemograma", "Glicemia", "VDRL", "HIV", "Hepatite B", "Urocultura", "Estreptococo Grupo B (GBS)", "Ultrassom 3º Trimestre"],
 };
 
-// Vacinas disponíveis no Brasil para gestantes
-const VACCINES_BRAZIL = [
-  { name: "Influenza (Gripe)", doses: ["Dose Única"], gestationalAlert: "Recomendada em qualquer trimestre da gestação. Protege contra complicações respiratórias graves." },
-  { name: "dTpa (Tríplice Bacteriana)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], gestationalAlert: "Aplicar entre 20ª e 36ª semana. Protege o recém-nascido contra coqueluche nos primeiros meses." },
-  { name: "Hepatite B", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], gestationalAlert: "Indicada para gestantes não vacinadas. Pode ser aplicada em qualquer trimestre." },
-  { name: "COVID-19", doses: ["1ª Dose", "2ª Dose", "Reforço"], gestationalAlert: "Gestantes são grupo prioritário. Pfizer e CoronaVac são recomendadas." },
-  { name: "dT (Dupla Adulto)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], gestationalAlert: "Alternativa à dTpa quando esta não estiver disponível. Não protege contra coqueluche." },
-  { name: "Febre Amarela", doses: ["Dose Única", "Reforço"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação, exceto em surtos com alto risco epidemiológico. Avaliar risco-benefício." },
-  { name: "Tríplice Viral (SCR)", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério imediato se suscetível." },
-  { name: "Varicela", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério se suscetível." },
-  { name: "HPV", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Completar esquema após o parto." },
-  { name: "Pneumocócica 23-valente", doses: ["Dose Única", "Reforço"], gestationalAlert: "Indicada para gestantes com comorbidades (diabetes, cardiopatias, pneumopatias)." },
-  { name: "Meningocócica ACWY", doses: ["Dose Única"], gestationalAlert: "Pode ser considerada em situações epidemiológicas especiais." },
-  { name: "Raiva", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "4ª Dose", "5ª Dose"], gestationalAlert: "Indicada em pós-exposição (mordida animal). Pode ser aplicada na gestação quando necessário." },
-  { name: "Hepatite A", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "Pode ser aplicada quando houver indicação epidemiológica." },
-  { name: "BCG", doses: ["Dose Única"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacina para o recém-nascido." },
+// Vacinas disponíveis no Brasil para gestantes - com período recomendado e categorização
+type VaccineCategory = "recomendada" | "situacao" | "contraindicada";
+interface VaccineInfo {
+  name: string;
+  doses: string[];
+  category: VaccineCategory;
+  trimester: string;
+  gestationalAlert: string;
+  manufacturers: string[];
+  commonReactions: string[];
+}
+
+const VACCINES_BRAZIL: VaccineInfo[] = [
+  // RECOMENDADAS
+  { name: "Influenza (Gripe)", doses: ["Dose Única"], category: "recomendada", trimester: "Qualquer", gestationalAlert: "Recomendada em qualquer trimestre. Protege contra complicações respiratórias graves.", manufacturers: ["Sanofi Pasteur", "Butantan", "Seqirus", "Abbott"], commonReactions: ["Dor local", "Febre baixa", "Mialgia"] },
+  { name: "dTpa (Tríplice Bacteriana)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], category: "recomendada", trimester: "2º/3º (20ª-36ª sem)", gestationalAlert: "Aplicar entre 20ª e 36ª semana. Protege o recém-nascido contra coqueluche.", manufacturers: ["GSK (Boostrix)", "Sanofi (Adacel)"], commonReactions: ["Dor local", "Cefaleia", "Fadiga"] },
+  { name: "Hepatite B", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], category: "recomendada", trimester: "Qualquer", gestationalAlert: "Indicada para gestantes não vacinadas. Esquema 0-1-6 meses.", manufacturers: ["Butantan", "Fiocruz", "GSK (Engerix-B)", "Merck (Recombivax)"], commonReactions: ["Dor local", "Febre baixa"] },
+  { name: "COVID-19", doses: ["1ª Dose", "2ª Dose", "Reforço"], category: "recomendada", trimester: "Qualquer", gestationalAlert: "Gestantes são grupo prioritário. Pfizer (Comirnaty) e CoronaVac recomendadas.", manufacturers: ["Pfizer (Comirnaty)", "Sinovac (CoronaVac)", "AstraZeneca", "Janssen"], commonReactions: ["Dor local", "Fadiga", "Cefaleia", "Mialgia", "Febre"] },
+  { name: "dT (Dupla Adulto)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], category: "recomendada", trimester: "Qualquer", gestationalAlert: "Alternativa à dTpa quando esta não estiver disponível.", manufacturers: ["Butantan", "Serum Institute"], commonReactions: ["Dor local", "Vermelhidão"] },
+
+  // SITUAÇÕES ESPECIAIS
+  { name: "Pneumocócica 23-valente", doses: ["Dose Única", "Reforço"], category: "situacao", trimester: "Qualquer (se indicada)", gestationalAlert: "Indicada para gestantes com comorbidades (diabetes, cardiopatias, pneumopatias).", manufacturers: ["Merck (Pneumovax 23)", "Sanofi"], commonReactions: ["Dor local", "Febre", "Mialgia"] },
+  { name: "Meningocócica ACWY", doses: ["Dose Única"], category: "situacao", trimester: "Qualquer (se indicada)", gestationalAlert: "Considerar em situações epidemiológicas especiais.", manufacturers: ["GSK (Menveo)", "Sanofi (Menactra)", "Pfizer (Nimenrix)"], commonReactions: ["Dor local", "Cefaleia"] },
+  { name: "Raiva", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "4ª Dose", "5ª Dose"], category: "situacao", trimester: "Pós-exposição", gestationalAlert: "Indicada em pós-exposição (mordida animal). Pode ser aplicada na gestação.", manufacturers: ["Sanofi (Verorab)", "Butantan", "Serum Institute"], commonReactions: ["Dor local", "Cefaleia", "Náusea"] },
+  { name: "Hepatite A", doses: ["1ª Dose", "2ª Dose"], category: "situacao", trimester: "Qualquer (se indicada)", gestationalAlert: "Pode ser aplicada quando houver indicação epidemiológica.", manufacturers: ["GSK (Havrix)", "Merck (Vaqta)"], commonReactions: ["Dor local", "Fadiga"] },
+
+  // CONTRAINDICADAS
+  { name: "Febre Amarela", doses: ["Dose Única", "Reforço"], category: "contraindicada", trimester: "CONTRAINDICADA", gestationalAlert: "⚠️ CONTRAINDICADA na gestação, exceto em surtos com alto risco epidemiológico.", manufacturers: ["Fiocruz/Bio-Manguinhos", "Sanofi (Stamaril)"], commonReactions: ["Febre", "Cefaleia", "Mialgia"] },
+  { name: "Tríplice Viral (SCR)", doses: ["1ª Dose", "2ª Dose"], category: "contraindicada", trimester: "CONTRAINDICADA", gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério imediato se suscetível.", manufacturers: ["Fiocruz/Bio-Manguinhos", "Merck (M-M-R II)", "GSK (Priorix)"], commonReactions: ["Febre", "Exantema", "Artralgia"] },
+  { name: "Varicela", doses: ["1ª Dose", "2ª Dose"], category: "contraindicada", trimester: "CONTRAINDICADA", gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério se suscetível.", manufacturers: ["Merck (Varivax)", "GSK (Varilrix)"], commonReactions: ["Dor local", "Febre baixa", "Exantema leve"] },
+  { name: "HPV", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], category: "contraindicada", trimester: "CONTRAINDICADA", gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Completar esquema após o parto.", manufacturers: ["Merck (Gardasil 9)", "GSK (Cervarix)"], commonReactions: ["Dor local", "Cefaleia", "Febre"] },
+  { name: "BCG", doses: ["Dose Única"], category: "contraindicada", trimester: "CONTRAINDICADA", gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacina para o recém-nascido.", manufacturers: ["Fundação Ataulpho de Paiva"], commonReactions: ["Úlcera local", "Linfadenopatia"] },
 ];
 
 const handleFileUpload = (accept: string, onFiles: (urls: string[]) => void) => {
