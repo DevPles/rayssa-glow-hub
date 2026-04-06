@@ -13,6 +13,16 @@ export interface MockUser {
   role: UserRole;
   specialty: ProfessionalSpecialty;
   tenantId?: string | null;
+  photoUrl?: string;
+  cpf?: string;
+  birthDate?: string;
+  gender?: "feminino" | "masculino" | "outro" | "";
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  notes?: string;
+  createdAt?: string;
 }
 
 // Mock users database
