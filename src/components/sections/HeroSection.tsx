@@ -62,10 +62,6 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left content */}
           <div>
-            <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm text-primary px-4 py-2 rounded-full text-sm font-heading font-medium mb-6 border border-primary/30">
-              <MapPin className="h-4 w-4" />
-              Ribeirão Preto, SP
-            </div>
 
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
               <span className="animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema de </span>
