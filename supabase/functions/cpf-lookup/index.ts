@@ -99,62 +99,63 @@ Deno.serve(async (req) => {
     }
 
     // Fallback: use Lovable AI to generate realistic data
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY")!;
-
-    try {
-      const aiResp = await fetch(`${SUPABASE_URL}/functions/v1/ai`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "system",
-              content: `Você é um sistema que gera dados fictícios realistas de uma pessoa brasileira para simulação de cadastro médico. 
-Responda APENAS com JSON válido, sem markdown, sem explicações. O JSON deve ter exatamente estas chaves:
-{"name": "Nome Completo", "birthDate": "YYYY-MM-DD", "address": "Endereço completo com cidade e estado"}
-A pessoa deve ser do sexo feminino (gestante), com idade entre 18 e 42 anos, da região: ${region}.
-Use nomes brasileiros comuns e endereços realistas da região informada.`,
-            },
-            {
-              role: "user",
-              content: `Gere dados para uma gestante da região: ${region}. CPF terminado em ${clean.slice(-4)}.`,
-            },
-          ],
-          model: "google/gemini-2.5-flash-lite",
-        }),
-      });
-
-      if (aiResp.ok) {
-        const aiData = await aiResp.json();
-        const content = aiData.choices?.[0]?.message?.content || "";
-        
-        // Parse the JSON from AI response
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          console.log("AI-generated person data for CPF region:", region);
-          return new Response(
-            JSON.stringify({
-              success: true,
-              source: "generated",
-              data: {
-                name: parsed.name || "",
-                birthDate: parsed.birthDate || "",
-                address: parsed.address || "",
-                situation: "Regular",
-                region,
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    
+    if (LOVABLE_API_KEY) {
+      try {
+        const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-lite",
+            messages: [
+              {
+                role: "system",
+                content: `Você gera dados fictícios realistas de uma pessoa brasileira para simulação de cadastro médico. Responda APENAS com JSON válido, sem markdown. Formato exato: {"name":"Nome Completo","birthDate":"YYYY-MM-DD","address":"Endereço completo"}. Pessoa feminina, 18-42 anos, da região: ${region}.`,
               },
-            }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+              {
+                role: "user",
+                content: `Gere dados para gestante da região ${region}, CPF final ${clean.slice(-4)}.`,
+              },
+            ],
+            response_format: { type: "json_object" },
+          }),
+        });
+
+        if (aiResp.ok) {
+          const aiData = await aiResp.json();
+          const content = aiData.choices?.[0]?.message?.content || "";
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            console.log("AI-generated person data for CPF region:", region);
+            return new Response(
+              JSON.stringify({
+                success: true,
+                source: "ai",
+                data: {
+                  name: parsed.name || "",
+                  birthDate: parsed.birthDate || "",
+                  address: parsed.address || "",
+                  situation: "Regular",
+                  region,
+                },
+              }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        } else {
+          const errText = await aiResp.text();
+          console.log("AI gateway error:", aiResp.status, errText);
         }
+      } catch (e) {
+        console.log("AI fallback failed:", e);
       }
-    } catch (e) {
-      console.log("AI fallback failed:", e);
+    } else {
+      console.log("LOVABLE_API_KEY not available, skipping AI fallback");
     }
 
     // Last resort: return validated CPF with region only
