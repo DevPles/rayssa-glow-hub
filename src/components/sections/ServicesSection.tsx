@@ -30,6 +30,7 @@ const serviceCards = [
     gradient: "from-primary/20 to-secondary/10",
     link: "/produtos-programas",
   },
+];
 
 const servicesWords = ["especializadas", "personalizadas"];
 
