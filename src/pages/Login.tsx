@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
-import loginSide from "@/assets/login-side.jpg";
+import loginSide from "@/assets/estetica-hero.png";
 import FloatingBubbles from "@/components/FloatingBubbles";
 import ForgotPasswordDialog from "@/components/ForgotPasswordDialog";
 
@@ -74,14 +74,14 @@ const Login = () => {
         <div className="absolute top-10 left-10">
           <img src={logo} alt="RL Logo" className="w-14 h-14 object-contain drop-shadow-2xl" />
         </div>
-        <div className="absolute bottom-10 left-10 right-10">
+         <div className="absolute bottom-10 left-10 right-10">
           <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
-            <h2 className="font-heading font-bold text-white text-2xl mb-2 tracking-tight">Rayssa Leslie</h2>
-            <p className="text-white/70 text-sm leading-relaxed">Estética & Saúde da Mulher — Especializada em cada fase da sua vida</p>
+            <h2 className="font-heading font-bold text-white text-2xl mb-2 tracking-tight">LeMater</h2>
+            <p className="text-white/70 text-sm leading-relaxed">Sistema de Experiência Exclusiva de Parto — Acompanhamento gestacional completo e personalizado</p>
             <div className="flex gap-2 mt-4">
-              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Estética Avançada</span>
-              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Núcleo Materno</span>
-              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Beleza</span>
+              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Pré-Natal</span>
+              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Gestação</span>
+              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Parto</span>
             </div>
           </div>
         </div>
