@@ -259,8 +259,8 @@ const mockRecords: ClinicalRecord[] = [
       { id: "ge4", date: "2026-03-05", type: "Ultrassom Morfológico", result: "Anatomia fetal preservada, peso estimado 380g", observations: "Sexo: feminino. Placenta anterior grau 0", fileUrl: "", trimester: "2", interpretation: "normal", referenceValues: "", requestedBy: "Dra. Rayssa", laboratory: "Clínica Imagem" },
     ],
     vaccines: [
-      { id: "v1", name: "Influenza", dose: "Dose Única", date: "2026-02-10", lot: "FL2026A", professional: "Dra. Rayssa" },
-      { id: "v2", name: "dTpa", dose: "1ª Dose", date: "2026-03-15", lot: "DT2026B", professional: "Dra. Rayssa" },
+      { id: "v1", name: "Influenza (Gripe)", dose: "Dose Única", date: "2026-02-10", lot: "FL2026A", professional: "Dra. Rayssa", manufacturer: "Butantan", reaction: "" },
+      { id: "v2", name: "dTpa (Tríplice Bacteriana)", dose: "1ª Dose", date: "2026-03-15", lot: "DT2026B", professional: "Dra. Rayssa", manufacturer: "GSK", reaction: "" },
     ],
   },
 ];
