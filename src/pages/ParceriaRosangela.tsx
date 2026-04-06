@@ -29,7 +29,7 @@ const ParceriaRosangela = () => {
   const filtered = activeFilter === "Todos" ? pageServices : pageServices.filter((s) => s.category === activeFilter);
 
   const handleAdd = (service: any) => {
-    addToCart({ ...service, origin: "Parceria Rosângela" });
+    addToCart({ ...service, origin: "Serviços Especializados" });
   };
 
   return (
@@ -51,9 +51,9 @@ const ParceriaRosangela = () => {
         <HeroLights />
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1">
-            <span className="inline-block text-xs font-heading font-semibold text-secondary tracking-widest uppercase bg-secondary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-secondary/30 mb-2">Parceria Exclusiva</span>
-            <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Parceria Rosângela"}<br />Salão de Beleza</h1>
-            <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Atendimento integrado unindo estética clínica e beleza em um só lugar."}</p>
+             <span className="inline-block text-xs font-heading font-semibold text-secondary tracking-widest uppercase bg-secondary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-secondary/30 mb-2">Serviços Gestacionais</span>
+             <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Serviços Especializados"}</h1>
+             <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Serviços de bem-estar e cuidados especializados para gestantes e puérperas."}</p>
             <Link to="/#servicos">
               <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm"><ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar</Button>
             </Link>
@@ -114,8 +114,8 @@ const ParceriaRosangela = () => {
 
         <div className="mt-20 text-center">
           <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-10 md:p-14 border border-white/50">
-            <h3 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-4">Beleza completa em um só lugar</h3>
-            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">Monte seu combo de serviços com desconto progressivo.</p>
+             <h3 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-4">Bem-estar completo na gestação</h3>
+             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">Combine serviços para um cuidado integral durante sua gestação.</p>
             {totalItems > 0 ? (
               <Button onClick={() => setCartOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading rounded-full px-8 py-3 shadow-md shadow-secondary/20 text-base">Ver Carrinho ({totalItems} {totalItems === 1 ? "item" : "itens"})</Button>
             ) : (
