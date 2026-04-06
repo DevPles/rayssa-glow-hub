@@ -32,12 +32,11 @@ import AdminAgendamentos from "./pages/admin/AdminAgendamentos";
 import AdminAgenda from "./pages/admin/AdminAgenda";
 import AdminBlog from "./pages/admin/AdminBlog";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
-import AdminAfiliados from "./pages/admin/AdminAfiliados";
+import AdminParcerias from "./pages/admin/AdminParcerias";
 import AdminSuporte from "./pages/admin/AdminSuporte";
 import AdminSistema from "./pages/admin/AdminSistema";
 import DashboardCliente from "./pages/DashboardCliente";
-import DashboardAfiliada from "./pages/DashboardAfiliada";
-import AffiliateCheckout from "./pages/AffiliateCheckout";
+import NotFound from "./pages/NotFound";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -79,12 +78,10 @@ const App = () => (
                 <Route path="/admin/agenda" element={<AdminAgenda />} />
                 <Route path="/admin/blog" element={<AdminBlog />} />
                 <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-                <Route path="/admin/afiliados" element={<AdminAfiliados />} />
+                <Route path="/admin/parcerias" element={<AdminParcerias />} />
                 <Route path="/admin/suporte" element={<AdminSuporte />} />
                 <Route path="/admin/sistema" element={<AdminSistema />} />
                 <Route path="/dashboard" element={<DashboardCliente />} />
-                <Route path="/dashboard-afiliada" element={<DashboardAfiliada />} />
-                <Route path="/ref/:code" element={<AffiliateCheckout />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
