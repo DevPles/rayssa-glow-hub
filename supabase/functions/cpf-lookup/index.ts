@@ -4,11 +4,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Validate CPF checksum
 function isValidCPF(cpf: string): boolean {
   const clean = cpf.replace(/\D/g, "");
   if (clean.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(clean)) return false; // all same digits
+  if (/^(\d)\1{10}$/.test(clean)) return false;
 
   let sum = 0;
   for (let i = 0; i < 9; i++) sum += parseInt(clean[i]) * (10 - i);
@@ -25,7 +24,6 @@ function isValidCPF(cpf: string): boolean {
   return true;
 }
 
-// CPF region mapping (8th digit)
 function getRegion(cpf: string): string {
   const clean = cpf.replace(/\D/g, "");
   const regionDigit = parseInt(clean[8]);
@@ -70,15 +68,51 @@ Deno.serve(async (req) => {
 
     const region = getRegion(clean);
 
-    // Try BrasilAPI first (free, no key needed)
+    // 1) Try Consultar.io API (requires CPF_API_TOKEN secret)
+    const cpfApiToken = Deno.env.get("CPF_API_TOKEN");
+    if (cpfApiToken) {
+      try {
+        const resp = await fetch(
+          `https://consultar.io/api/v1/cpf/consultar?cpf=${clean}`,
+          {
+            headers: { Authorization: `Token ${cpfApiToken}` },
+            signal: AbortSignal.timeout(8000),
+          }
+        );
+
+        if (resp.ok) {
+          const data = await resp.json();
+          console.log("Consultar.io CPF lookup success:", data.nome);
+          return new Response(
+            JSON.stringify({
+              success: true,
+              source: "receita",
+              data: {
+                name: data.nome || "",
+                birthDate: data.data_nascimento || "",
+                situation: data.situacao || "Regular",
+                region,
+              },
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        } else {
+          console.log("Consultar.io error:", resp.status, await resp.text());
+        }
+      } catch (e) {
+        console.log("Consultar.io failed:", e);
+      }
+    }
+
+    // 2) Try BrasilAPI (free, no key)
     try {
-      const brasilApiResp = await fetch(
+      const brasilResp = await fetch(
         `https://brasilapi.com.br/api/cpf/v1/${clean}`,
         { signal: AbortSignal.timeout(5000) }
       );
 
-      if (brasilApiResp.ok) {
-        const data = await brasilApiResp.json();
+      if (brasilResp.ok) {
+        const data = await brasilResp.json();
         console.log("BrasilAPI CPF lookup success");
         return new Response(
           JSON.stringify({
@@ -95,12 +129,28 @@ Deno.serve(async (req) => {
         );
       }
     } catch (e) {
-      console.log("BrasilAPI unavailable, using AI fallback:", e);
+      console.log("BrasilAPI unavailable:", e);
     }
 
-    // Fallback: use Lovable AI to generate realistic data
+    // 3) Validate CPF exists via SUS/Saúde backend (free, returns true/false)
+    let cpfExists = false;
+    try {
+      const susResp = await fetch(
+        `https://scpa-backend.saude.gov.br/public/scpa-usuario/validacao-cpf/${clean}`,
+        { signal: AbortSignal.timeout(5000) }
+      );
+      if (susResp.ok) {
+        const susText = await susResp.text();
+        cpfExists = susText.trim() === "true";
+        console.log("SUS CPF validation:", cpfExists);
+      }
+    } catch (e) {
+      console.log("SUS validation unavailable:", e);
+    }
+
+    // 4) AI fallback for generating realistic data
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+
     if (LOVABLE_API_KEY) {
       try {
         const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -131,16 +181,16 @@ Deno.serve(async (req) => {
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            console.log("AI-generated person data for CPF region:", region);
+            console.log("AI-generated data for region:", region);
             return new Response(
               JSON.stringify({
                 success: true,
-                source: "ai",
+                source: cpfExists ? "sus_validated" : "simulated",
                 data: {
                   name: parsed.name || "",
                   birthDate: parsed.birthDate || "",
                   address: parsed.address || "",
-                  situation: "Regular",
+                  situation: cpfExists ? "Regular (validado)" : "Dados simulados",
                   region,
                 },
               }),
@@ -148,17 +198,14 @@ Deno.serve(async (req) => {
             );
           }
         } else {
-          const errText = await aiResp.text();
-          console.log("AI gateway error:", aiResp.status, errText);
+          console.log("AI gateway error:", aiResp.status);
         }
       } catch (e) {
         console.log("AI fallback failed:", e);
       }
-    } else {
-      console.log("LOVABLE_API_KEY not available, skipping AI fallback");
     }
 
-    // Last resort: return validated CPF with region only
+    // 5) Last resort
     return new Response(
       JSON.stringify({
         success: true,
@@ -167,7 +214,7 @@ Deno.serve(async (req) => {
           name: "",
           birthDate: "",
           address: "",
-          situation: "Regular",
+          situation: cpfExists ? "CPF válido na Receita" : "CPF válido (formato)",
           region,
         },
       }),
