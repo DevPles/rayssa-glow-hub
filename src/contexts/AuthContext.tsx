@@ -13,16 +13,26 @@ export interface MockUser {
   role: UserRole;
   specialty: ProfessionalSpecialty;
   tenantId?: string | null;
+  photoUrl?: string;
+  cpf?: string;
+  birthDate?: string;
+  gender?: "feminino" | "masculino" | "outro" | "";
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  notes?: string;
+  createdAt?: string;
 }
 
 // Mock users database
 const mockUsersDB: MockUser[] = [
-  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", specialty: "", tenantId: null },
-  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", specialty: "medico_obstetra", tenantId: null },
-  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", specialty: "", tenantId: null },
-  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "admin", specialty: "enfermeiro_obstetra", tenantId: null },
-  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", specialty: "", tenantId: null },
-  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "admin", specialty: "medico_obstetra", tenantId: null },
+  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", specialty: "", tenantId: null, createdAt: "2024-01-01" },
+  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", specialty: "medico_obstetra", tenantId: null, createdAt: "2024-02-15" },
+  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", specialty: "", tenantId: null, cpf: "529.982.247-25", birthDate: "1992-05-14", gender: "feminino", createdAt: "2024-03-10" },
+  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "admin", specialty: "enfermeiro_obstetra", tenantId: null, createdAt: "2024-03-15" },
+  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", specialty: "", tenantId: null, gender: "feminino", createdAt: "2024-04-01" },
+  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "admin", specialty: "medico_obstetra", tenantId: null, createdAt: "2024-04-20" },
 ];
 
 interface AuthContextType {
@@ -30,10 +40,10 @@ interface AuthContextType {
   users: MockUser[];
   login: (email: string, password: string) => MockUser | null;
   signup: (name: string, email: string) => MockUser;
-  addUser: (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null }) => MockUser;
+  addUser: (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null; photoUrl?: string; cpf?: string; birthDate?: string; gender?: string; address?: string; city?: string; state?: string; zipCode?: string; notes?: string; specialty?: ProfessionalSpecialty }) => MockUser;
   logout: () => void;
   updateUserRole: (userId: string, role: UserRole) => void;
-  updateUser: (userId: string, data: Partial<Pick<MockUser, "name" | "email" | "phone" | "password" | "tenantId">>) => void;
+  updateUser: (userId: string, data: Partial<Omit<MockUser, "id" | "role">>) => void;
   deleteUser: (userId: string) => void;
 }
 
@@ -103,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return newUser;
   };
 
-  const addUser = (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null }): MockUser => {
+  const addUser = (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null; photoUrl?: string; cpf?: string; birthDate?: string; gender?: string; address?: string; city?: string; state?: string; zipCode?: string; notes?: string; specialty?: ProfessionalSpecialty }): MockUser => {
     const newUser: MockUser = {
       id: `u${Date.now()}`,
       name: data.name,
@@ -111,8 +121,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: data.phone || "",
       password: data.password || "123456",
       role: data.role || "cliente",
-      specialty: "",
+      specialty: data.specialty || "",
       tenantId: data.tenantId || null,
+      photoUrl: data.photoUrl || "",
+      cpf: data.cpf || "",
+      birthDate: data.birthDate || "",
+      gender: (data.gender as MockUser["gender"]) || "",
+      address: data.address || "",
+      city: data.city || "",
+      state: data.state || "",
+      zipCode: data.zipCode || "",
+      notes: data.notes || "",
+      createdAt: new Date().toISOString().split("T")[0],
     };
     setUsers((prev) => [...prev, newUser]);
     return newUser;
