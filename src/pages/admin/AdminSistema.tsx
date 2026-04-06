@@ -531,7 +531,7 @@ const AdminSistema = () => {
                           { key: "estetica-avancada", label: "Estética Avançada" },
                           { key: "nucleo-materno", label: "Núcleo Materno" },
                           { key: "produtos-programas", label: "Produtos & Programas" },
-                          { key: "parceria-rosangela", label: "Parceria Rosângela" },
+                          
                         ].map(({ key, label }) => {
                           const cfg = settings.pageConfigs?.[key] || { photoUrl: null, expertName: "", expertSubtitle: "", pageTitle: label, pageDescription: "" };
                           return (

@@ -17,14 +17,14 @@ const pages = [
   { value: "estetica-avancada", label: "Pré-Natal & Consultas" },
   { value: "nucleo-materno", label: "Linha do Tempo & Cuidados Gestacionais" },
   { value: "produtos-programas", label: "Produtos para Gestantes" },
-  { value: "parceria-rosangela", label: "Serviços Especializados" },
+  
 ];
 
 const defaultCategoriesByPage: Record<string, string[]> = {
   "estetica-avancada": ["Consultas", "Exames", "Avaliações"],
   "nucleo-materno": ["1º Trimestre", "2º Trimestre", "3º Trimestre", "Pós-Parto"],
   "produtos-programas": ["Kits Maternidade", "Cosméticos Gestacionais", "Enxoval", "Bem-estar"],
-  "parceria-rosangela": ["Drenagem & Massagem", "Preparação para o Parto", "Cuidados Pós-Parto"],
+  
 };
 
 const initialServices: ServiceCard[] = [
@@ -55,13 +55,6 @@ const initialServices: ServiceCard[] = [
   { id: "cos3", title: "Protetor Solar Gestacional FPS 60", description: "Proteção solar segura para gestantes com toque seco.", price: 79, duration: "—", page: "produtos-programas", category: "Cosméticos Gestacionais", images: [] },
   { id: "env1", title: "Kit Enxoval Básico", description: "Itens essenciais para os primeiros dias do bebê: body, manta e touca.", price: 199, duration: "—", page: "produtos-programas", category: "Enxoval", images: [] },
   { id: "bem1", title: "Almofada de Amamentação", description: "Almofada ergonômica para conforto durante a amamentação.", price: 149, duration: "—", page: "produtos-programas", category: "Bem-estar", images: [] },
-  // Serviços Especializados
-  { id: "rs1", title: "Drenagem Gestacional Completa", description: "Sessão completa de drenagem linfática adaptada para gestantes.", price: 180, duration: "60 min", page: "parceria-rosangela", category: "Drenagem & Massagem", images: [] },
-  { id: "rs2", title: "Massagem Relaxante Gestacional", description: "Massagem corporal adaptada para o conforto da gestante.", price: 200, duration: "60 min", page: "parceria-rosangela", category: "Drenagem & Massagem", images: [] },
-  { id: "rs3", title: "Yoga para Gestantes", description: "Prática de yoga adaptada para cada trimestre da gestação.", price: 120, duration: "60 min", page: "parceria-rosangela", category: "Preparação para o Parto", images: [] },
-  { id: "rs4", title: "Curso de Preparação para o Parto", description: "Aulas práticas sobre tipos de parto, respiração e relaxamento.", price: 350, duration: "120 min", page: "parceria-rosangela", category: "Preparação para o Parto", images: [] },
-  { id: "rs5", title: "Tratamento de Diástase Abdominal", description: "Protocolo para recuperação da separação dos músculos abdominais.", price: 300, duration: "50 min", page: "parceria-rosangela", category: "Cuidados Pós-Parto", images: [] },
-  { id: "rs6", title: "Tratamento Corporal Pós-Parto", description: "Protocolo completo para modelagem e firmeza corporal após a gestação.", price: 250, duration: "60 min", page: "parceria-rosangela", category: "Cuidados Pós-Parto", images: [] },
 ];
 
 export { pages, defaultCategoriesByPage };

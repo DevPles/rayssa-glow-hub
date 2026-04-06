@@ -20,7 +20,7 @@ import Index from "./pages/Index";
 import EsteticaAvancada from "./pages/EsteticaAvancada";
 import NucleoMaterno from "./pages/NucleoMaterno";
 import ProdutosProgramas from "./pages/ProdutosProgramas";
-import ParceriaRosangela from "./pages/ParceriaRosangela";
+
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import AdminRegistroClinico from "./pages/admin/AdminRegistroClinico";
@@ -67,7 +67,7 @@ const App = () => (
                 <Route path="/estetica-avancada" element={<EsteticaAvancada />} />
                 <Route path="/nucleo-materno" element={<NucleoMaterno />} />
                 <Route path="/produtos-programas" element={<ProdutosProgramas />} />
-                <Route path="/parceria-rosangela" element={<ParceriaRosangela />} />
+                
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin/registro-clinico" element={<AdminRegistroClinico />} />

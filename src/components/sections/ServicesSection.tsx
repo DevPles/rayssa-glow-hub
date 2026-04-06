@@ -30,14 +30,6 @@ const serviceCards = [
     gradient: "from-primary/20 to-secondary/10",
     link: "/produtos-programas",
   },
-  {
-    title: "Serviços Especializados",
-    description:
-      "Drenagem gestacional, massagem para gestantes, cuidados pós-parto e tratamentos estéticos seguros durante a gravidez.",
-    services: ["Drenagem Gestacional", "Massagem Gestacional", "Cuidados Pós-Parto", "Preparação para o Parto"],
-    gradient: "from-secondary/20 to-accent/10",
-    link: "/parceria-rosangela",
-  },
 ];
 
 const servicesWords = ["especializadas", "personalizadas"];
