@@ -189,6 +189,9 @@ const mockRecords: ClinicalRecord[] = [
     createdAt: "2026-01-15T10:00:00Z",
     updatedAt: "2026-04-01T14:30:00Z",
     prontuarioNumber: "RC-001",
+    assignedProfessionals: [
+      { id: "1b", name: "Admin Rayssa" },
+    ],
     fullName: "Maria Silva",
     birthDate: "1990-05-12",
     address: "Rua das Flores, 123 - São Paulo",
