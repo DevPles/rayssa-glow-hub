@@ -200,7 +200,7 @@ const RegistroClinicoTab = () => {
   // Vaccine dialog
   const [vaccineDialogOpen, setVaccineDialogOpen] = useState(false);
   const [vaccineForm, setVaccineForm] = useState<Omit<Vaccine, "id">>({
-    name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "",
+    name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "", manufacturer: "", reaction: "",
   });
 
   const filteredRecords = useMemo(() => {
