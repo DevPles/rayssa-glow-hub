@@ -55,7 +55,7 @@ const calcDPP = (dum: string): string => {
 const RegistroClinicoTab = () => {
   const { user, users } = useAuth();
   const { records, addRecord, updateRecord, deleteRecord, addPrenatalConsultation, addGestationalExam } = useClinicalRecords();
-  const professionals = users.filter((u) => u.role === "admin" || u.role === "afiliada");
+  const professionals = users.filter((u) => u.role === "admin");
 
   const [view, setView] = useState<View>("list");
   const [search, setSearch] = useState("");
@@ -105,7 +105,7 @@ const RegistroClinicoTab = () => {
   };
 
   const openNewRecord = () => {
-    const defaultProfessionals: AssignedProfessional[] = user && (user.role === "admin" || user.role === "afiliada")
+    const defaultProfessionals: AssignedProfessional[] = user && (user.role === "admin")
       ? [{ id: user.id, name: user.name }]
       : [];
     setFormData({ ...createEmptyRecord("", "", getNextRecordNumber(), defaultProfessionals) });

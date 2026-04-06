@@ -25,7 +25,6 @@ const Login = () => {
     switch (role) {
       case "super_admin":
       case "admin": navigate("/admin"); break;
-      case "afiliada": navigate("/dashboard-afiliada"); break;
       default: navigate("/dashboard"); break;
     }
   };

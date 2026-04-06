@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-export type RevenueType = "servico" | "produto" | "programa" | "afiliada";
+export type RevenueType = "servico" | "produto" | "programa" | "parceria";
 
 export interface RevenueEntry {
   id: string;
@@ -35,7 +35,7 @@ export const typeLabels: Record<string, string> = {
   servico: "Procedimento",
   produto: "Produto Vendido",
   programa: "Programa Online",
-  afiliada: "Comissão Afiliada",
+  parceria: "Parceria",
 };
 
 export interface Expense {
@@ -75,7 +75,7 @@ const initialRevenue: RevenueEntry[] = [
   { id: "r13", description: "Corte Feminino (x10)", type: "servico", amount: 800, date: "2026-02-06" },
   { id: "r14", description: "Mechas & Luzes (x4)", type: "servico", amount: 1000, date: "2026-02-15" },
   { id: "r15", description: "Pacote Dia da Noiva (x1)", type: "servico", amount: 500, date: "2026-02-20" },
-  { id: "r16", description: "Comissão Afiliada Maria (x1)", type: "afiliada", amount: 320, date: "2026-02-18" },
+  { id: "r16", description: "Parceria Lab Fleury - Exames", type: "parceria", amount: 320, date: "2026-02-18" },
 ];
 
 interface FaturamentoContextType {

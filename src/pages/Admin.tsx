@@ -17,7 +17,7 @@ const adminCards = [
   { key: "agenda", label: "Agenda", description: "Calendário e horários disponíveis", route: "/admin/agenda" },
   { key: "blog", label: "Blog", description: "Publicações e conteúdos", route: "/admin/blog" },
   { key: "usuarios", label: "Usuários", description: "Gestão de contas e permissões", route: "/admin/usuarios" },
-  { key: "afiliados", label: "Afiliados", description: "Rede de parceiras e comissões", route: "/admin/afiliados" },
+  { key: "parcerias", label: "Parcerias", description: "Clínicas, laboratórios e profissionais parceiros", route: "/admin/parcerias" },
   { key: "suporte", label: "Suporte", description: "Mensagens e atendimento ao cliente", route: "/admin/suporte" },
   { key: "sistema", label: "ADM Sistema", description: "Gestão de clientes e configurações do sistema", route: "/admin/sistema", superAdminOnly: true },
 ];
