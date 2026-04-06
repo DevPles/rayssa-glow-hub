@@ -2,6 +2,8 @@ import { createContext, useContext, useState, ReactNode, useEffect, useCallback 
 import { supabase } from "@/integrations/supabase/client";
 export type UserRole = "cliente" | "afiliada" | "admin" | "super_admin";
 
+export type ProfessionalSpecialty = "medico_obstetra" | "enfermeiro_obstetra" | "";
+
 export interface MockUser {
   id: string;
   name: string;
@@ -9,17 +11,18 @@ export interface MockUser {
   phone: string;
   password: string;
   role: UserRole;
+  specialty: ProfessionalSpecialty;
   tenantId?: string | null;
 }
 
 // Mock users database
 const mockUsersDB: MockUser[] = [
-  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", tenantId: null },
-  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", tenantId: null },
-  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", tenantId: null },
-  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "afiliada", tenantId: null },
-  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", tenantId: null },
-  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "afiliada", tenantId: null },
+  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", specialty: "", tenantId: null },
+  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", specialty: "medico_obstetra", tenantId: null },
+  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", specialty: "", tenantId: null },
+  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "admin", specialty: "enfermeiro_obstetra", tenantId: null },
+  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", specialty: "", tenantId: null },
+  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "admin", specialty: "medico_obstetra", tenantId: null },
 ];
 
 interface AuthContextType {
@@ -76,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: "",
       password: _password,
       role: "cliente",
+      specialty: "",
       tenantId: null,
     };
     setUsers((prev) => [...prev, newUser]);
@@ -91,6 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: "",
       password: "123456",
       role: "cliente",
+      specialty: "",
       tenantId: null,
     };
     setUsers((prev) => [...prev, newUser]);
@@ -106,6 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: data.phone || "",
       password: data.password || "123456",
       role: data.role || "cliente",
+      specialty: "",
       tenantId: data.tenantId || null,
     };
     setUsers((prev) => [...prev, newUser]);
