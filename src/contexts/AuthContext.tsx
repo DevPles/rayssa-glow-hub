@@ -79,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: "",
       password: _password,
       role: "cliente",
+      specialty: "",
       tenantId: null,
     };
     setUsers((prev) => [...prev, newUser]);
@@ -94,6 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: "",
       password: "123456",
       role: "cliente",
+      specialty: "",
       tenantId: null,
     };
     setUsers((prev) => [...prev, newUser]);
@@ -109,6 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: data.phone || "",
       password: data.password || "123456",
       role: data.role || "cliente",
+      specialty: "",
       tenantId: data.tenantId || null,
     };
     setUsers((prev) => [...prev, newUser]);
