@@ -61,9 +61,9 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid gap-12 items-center">
           {/* Left content */}
-          <div>
-            <img src={logo} alt="LeMater" className="w-[28rem] md:w-[36rem] lg:w-[44rem] object-contain mb-4 drop-shadow-2xl" />
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
+          <div className="relative">
+            <img src={logo} alt="LeMater" className="absolute -top-32 -left-10 w-[50rem] md:w-[60rem] lg:w-[70rem] object-contain opacity-30 pointer-events-none select-none drop-shadow-2xl" />
+            <h1 className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
               <span className="animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema de </span>
               <span className="animate-fade-in text-primary" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>Experiência Exclusiva</span>
               <br />
