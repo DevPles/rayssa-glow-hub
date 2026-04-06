@@ -856,7 +856,13 @@ const RegistroClinicoTab = () => {
           {/* CONSULTAS */}
           <TabsContent value="consultas" className="space-y-4 mt-4">
             <div className="flex justify-end">
-              <Button variant="secondary" size="sm" onClick={() => setConsultDialogOpen(true)}>Nova Consulta</Button>
+              <Button variant="secondary" size="sm" onClick={() => {
+                const dum = selectedRecord?.gestationalCard?.dum || "";
+                const today = new Date().toISOString().split("T")[0];
+                const autoIG = calcGestationalAgeAtDate(dum, today);
+                setConsultForm((prev) => ({ ...prev, date: today, gestationalAge: autoIG || prev.gestationalAge }));
+                setConsultDialogOpen(true);
+              }}>Nova Consulta</Button>
             </div>
             {r.prenatalConsultations.length === 0 ? (
               <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
