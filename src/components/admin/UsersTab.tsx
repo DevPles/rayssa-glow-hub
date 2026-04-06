@@ -15,7 +15,7 @@ import type { MockUser, UserRole } from "@/contexts/AuthContext";
 const roleMeta: Record<UserRole, { label: string; color: string; icon: typeof Users }> = {
   super_admin: { label: "Super Admin", color: "bg-amber-100 text-amber-800 border-amber-300", icon: Shield },
   admin: { label: "Administrador", color: "bg-purple-100 text-purple-800 border-purple-300", icon: UserCheck },
-  afiliada: { label: "Profissional", color: "bg-blue-100 text-blue-800 border-blue-300", icon: UserPlus },
+  afiliada: { label: "Parceiro(a)", color: "bg-blue-100 text-blue-800 border-blue-300", icon: UserPlus },
   cliente: { label: "Gestante", color: "bg-pink-100 text-pink-800 border-pink-300", icon: Users },
 };
 
@@ -190,7 +190,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
             <SelectItem value="all">Todos os tipos</SelectItem>
             <SelectItem value="cliente">Gestantes</SelectItem>
             <SelectItem value="admin">Administradores</SelectItem>
-            <SelectItem value="afiliada">Profissionais</SelectItem>
+            <SelectItem value="afiliada">Parceiros</SelectItem>
             <SelectItem value="super_admin">Super Admin</SelectItem>
           </SelectContent>
         </Select>
@@ -335,7 +335,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                       <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="cliente">Gestante</SelectItem>
-                        <SelectItem value="afiliada">Profissional</SelectItem>
+                        <SelectItem value="afiliada">Parceiro(a)</SelectItem>
                         <SelectItem value="admin">Administrador</SelectItem>
                       </SelectContent>
                     </Select>
@@ -466,7 +466,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cliente">Gestante</SelectItem>
-                    <SelectItem value="afiliada">Profissional</SelectItem>
+                    <SelectItem value="afiliada">Parceiro(a)</SelectItem>
                     <SelectItem value="admin">Administrador</SelectItem>
                   </SelectContent>
                 </Select>
