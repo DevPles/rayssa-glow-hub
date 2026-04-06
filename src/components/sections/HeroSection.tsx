@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import HeroBookingDialog from "@/components/HeroBookingDialog";
 import heroBg from "@/assets/hero-bg.jpg";
-import esteticaHero from "@/assets/estetica-hero.png";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
 
 const words = ["Privado", "Personalizado"];
@@ -59,7 +58,7 @@ const HeroSection = () => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid gap-12 items-center">
           {/* Left content */}
           <div>
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
@@ -91,17 +90,6 @@ const HeroSection = () => {
               >
                 Conhecer Serviços
               </Button>
-            </div>
-          </div>
-
-          {/* Right - Aesthetics card */}
-          <div className="hidden md:flex justify-center">
-            <div className="relative w-full max-w-md">
-              <img
-                src={esteticaHero}
-                alt="Estética e Saúde da Mulher"
-                className="w-full rounded-3xl shadow-2xl shadow-foreground/20"
-              />
             </div>
           </div>
         </div>
