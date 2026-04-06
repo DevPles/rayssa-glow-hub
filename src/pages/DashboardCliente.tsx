@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Star, Gift, Crown, Eye, User, MessageCircle, FileDown } from "lucide-react";
+import { ArrowLeft, LogOut, Eye, User, MessageCircle, FileDown } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoImg from "@/assets/logo.png";
@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import HeroBookingDialog from "@/components/HeroBookingDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -37,12 +36,6 @@ const mockScheduled = [
   { id: 3, date: "10/03/2026", service: "Radiofrequência Corporal", time: "16:00", status: "Confirmado" },
 ];
 
-const loyaltyTiers = [
-  { name: "Bronze", min: 0, max: 500, color: "text-amber-700", bg: "bg-amber-100" },
-  { name: "Prata", min: 500, max: 1500, color: "text-slate-500", bg: "bg-slate-100" },
-  { name: "Ouro", min: 1500, max: 3500, color: "text-yellow-600", bg: "bg-yellow-100" },
-  { name: "Diamante", min: 3500, max: 999999, color: "text-primary", bg: "bg-primary/10" },
-];
 
 const DashboardCliente = () => {
   const { user, logout } = useAuth();
@@ -491,10 +484,6 @@ const DashboardCliente = () => {
 
   const handleLogout = () => { logout(); navigate("/"); };
 
-  const totalSpent = 1358;
-  const currentTier = loyaltyTiers.find((t) => totalSpent >= t.min && totalSpent < t.max) || loyaltyTiers[0];
-  const nextTier = loyaltyTiers[loyaltyTiers.indexOf(currentTier) + 1];
-  const progressToNext = nextTier ? ((totalSpent - currentTier.min) / (nextTier.min - currentTier.min)) * 100 : 100;
 
   return (
     <div className="min-h-screen bg-background">
@@ -519,43 +508,6 @@ const DashboardCliente = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Loyalty Card */}
-        <Card className="border-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 shadow-lg overflow-hidden">
-          <CardContent className="p-6 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-3 flex-1">
-                <div className="flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-primary" />
-                  <h2 className="font-heading font-bold text-foreground text-lg">Plano de Fidelidade</h2>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge className={`${currentTier.bg} ${currentTier.color} border-0 text-sm px-3 py-1 font-semibold`}>{currentTier.name}</Badge>
-                  <span className="text-sm text-muted-foreground">R$ {totalSpent.toLocaleString("pt-BR")} acumulados</span>
-                </div>
-                {nextTier && (
-                  <div className="space-y-2 max-w-md">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{currentTier.name}</span>
-                      <span>{nextTier.name} — faltam R$ {(nextTier.min - totalSpent).toLocaleString("pt-BR")}</span>
-                    </div>
-                    <Progress value={progressToNext} className="h-2" />
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Star className="h-4 w-4 text-primary" />
-                  <span>5% de desconto em todos os serviços</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Gift className="h-4 w-4 text-primary" />
-                  <span>Brindes exclusivos a cada nível</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="border border-border/50 hover:shadow-md transition-shadow cursor-pointer group" onClick={() => setBookingOpen(true)}>
