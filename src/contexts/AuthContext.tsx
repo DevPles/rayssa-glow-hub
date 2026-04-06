@@ -2,6 +2,8 @@ import { createContext, useContext, useState, ReactNode, useEffect, useCallback 
 import { supabase } from "@/integrations/supabase/client";
 export type UserRole = "cliente" | "afiliada" | "admin" | "super_admin";
 
+export type ProfessionalSpecialty = "medico_obstetra" | "enfermeiro_obstetra" | "";
+
 export interface MockUser {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export interface MockUser {
   phone: string;
   password: string;
   role: UserRole;
+  specialty: ProfessionalSpecialty;
   tenantId?: string | null;
 }
 
