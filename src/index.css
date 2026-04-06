@@ -42,6 +42,26 @@
 
     --radius: 0.75rem;
 
+    /* Clinical Design Tokens */
+    --clinical-risk-low: 142 76% 36%;
+    --clinical-risk-medium: 38 92% 50%;
+    --clinical-risk-high: 0 84% 60%;
+    --clinical-risk-critical: 0 72% 51%;
+    --clinical-positive: 142 76% 36%;
+
+    --pregnancy-trimester-1: 190 80% 50%;
+    --pregnancy-trimester-2: 280 80% 50%;
+    --pregnancy-trimester-3: 30 80% 50%;
+
+    --exam-pending: 38 92% 50%;
+    --exam-completed: 142 76% 36%;
+    --exam-abnormal: 0 84% 60%;
+
+    --timeline-consultation: 210 80% 50%;
+    --timeline-exam: 280 80% 50%;
+    --timeline-vaccine: 142 76% 36%;
+    --timeline-alert: 0 84% 60%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 274 22% 52%;
@@ -130,6 +150,32 @@
 @keyframes float-blob5 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(-50px, 80px) scale(1.15); }
+}
+
+@keyframes pulse-alert {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 hsl(var(--clinical-risk-critical) / 0.4); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 8px hsl(var(--clinical-risk-critical) / 0); }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+  to { width: var(--progress-value); }
+}
+
+@layer components {
+  .clinical-card {
+    @apply bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg rounded-xl;
+  }
+  .clinical-alert-critical {
+    animation: pulse-alert 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .pregnancy-progress-fill {
+    background: linear-gradient(90deg,
+      hsl(var(--pregnancy-trimester-1)) 0%,
+      hsl(var(--pregnancy-trimester-2)) 50%,
+      hsl(var(--pregnancy-trimester-3)) 100%
+    );
+  }
 }
 
 /* Remove browser autofill yellow background */
