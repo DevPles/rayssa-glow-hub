@@ -36,10 +36,22 @@ const calcGestationalAge = (dum: string): string => {
   return `${weeks}s ${days}d`;
 };
 
-const calcGestationalWeeks = (dum: string): number => {
+const calcGestationalWeeks = (dum: string, refDate?: string): number => {
   if (!dum) return 0;
-  const diffMs = new Date().getTime() - new Date(dum).getTime();
+  const ref = refDate ? new Date(refDate) : new Date();
+  const diffMs = ref.getTime() - new Date(dum).getTime();
   return Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
+};
+
+const calcGestationalAgeAtDate = (dum: string, date: string): string => {
+  if (!dum || !date) return "";
+  const dumDate = new Date(dum);
+  const refDate = new Date(date);
+  const diffMs = refDate.getTime() - dumDate.getTime();
+  const weeks = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
+  const days = Math.floor((diffMs % (7 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+  if (weeks < 0) return "";
+  return `${weeks}s ${days}d`;
 };
 
 const calcDPP = (dum: string): string => {
