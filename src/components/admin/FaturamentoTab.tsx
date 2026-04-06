@@ -1170,7 +1170,7 @@ export const FinanceiroTab = () => {
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="servico">Procedimento</SelectItem><SelectItem value="produto">Produto Vendido</SelectItem>
-                    <SelectItem value="programa">Programa Online</SelectItem><SelectItem value="afiliada">Comissão Afiliada</SelectItem>
+                    <SelectItem value="programa">Programa Online</SelectItem><SelectItem value="parceria">Parceria</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
