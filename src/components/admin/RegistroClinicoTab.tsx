@@ -163,6 +163,7 @@ const RegistroClinicoTab = () => {
   const [formData, setFormData] = useState<Omit<ClinicalRecord, "id"> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [cpfLocked, setCpfLocked] = useState(false);
+  const [cpfLoading, setCpfLoading] = useState(false);
 
   // Professional filter in form
   const [formSpecialtyFilter, setFormSpecialtyFilter] = useState<string>("all");
@@ -246,22 +247,30 @@ const RegistroClinicoTab = () => {
     setView("form");
   };
 
-  const handleCPFChange = (value: string) => {
+  const handleCPFChange = useCallback(async (value: string) => {
     const formatted = formatCPF(value);
     updateForm("cpf", formatted);
     const clean = formatted.replace(/\D/g, "");
     if (clean.length === 11 && !cpfLocked) {
-      const data = mockCPFLookup(formatted);
-      if (data) {
+      setCpfLoading(true);
+      toast({ title: "Consultando CPF...", description: "Buscando dados da gestante" });
+      const data = await lookupCPF(formatted);
+      setCpfLoading(false);
+      if (data && data.name) {
         setFormData((prev) => prev ? {
           ...prev, cpf: formatted, fullName: data.name, patientName: data.name,
           birthDate: data.birthDate, address: data.address,
         } : prev);
         setCpfLocked(true);
-        toast({ title: "Dados preenchidos automaticamente via CPF" });
+        toast({ title: "Dados encontrados!", description: `${data.name}` });
+      } else if (data) {
+        setCpfLocked(true);
+        toast({ title: "CPF válido", description: "Dados não encontrados. Preencha manualmente." });
+      } else {
+        toast({ title: "CPF inválido", description: "Verifique os dígitos informados.", variant: "destructive" });
       }
     }
-  };
+  }, [cpfLocked]);
 
   const handleSave = () => {
     if (!formData || !formData.fullName) {
