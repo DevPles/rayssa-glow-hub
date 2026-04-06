@@ -96,7 +96,7 @@ const defaultPageConfigs: Record<string, PageConfig> = {
   "estetica-avancada": { photoUrl: null, expertName: "Equipe Médica", expertSubtitle: "Obstetrícia & Pré-Natal", pageTitle: "Pré-Natal & Consultas", pageDescription: "" },
   "nucleo-materno": { photoUrl: null, expertName: "Equipe Especializada", expertSubtitle: "Acompanhamento Gestacional", pageTitle: "Linha do Tempo & Cuidados Gestacionais", pageDescription: "" },
   "produtos-programas": { photoUrl: null, expertName: "Loja Gestante", expertSubtitle: "Produtos Selecionados", pageTitle: "Produtos para Gestantes", pageDescription: "" },
-  "parceria-rosangela": { photoUrl: null, expertName: "Equipe de Bem-estar", expertSubtitle: "Serviços para Gestantes", pageTitle: "Serviços Especializados", pageDescription: "" },
+  
 };
 
 const defaultSectionVisibility: SectionVisibility = { services: true, blog: true, testimonials: true };

@@ -53,7 +53,7 @@ const pageLabels: Record<string, string> = {
   "estetica-avancada": "Estética Avançada",
   "nucleo-materno": "Núcleo Materno",
   "produtos-programas": "Produtos & Programas",
-  "parceria-rosangela": "Parceria Rosângela",
+  
 };
 
 const formatPrice = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
