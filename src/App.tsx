@@ -37,7 +37,6 @@ import AdminSuporte from "./pages/admin/AdminSuporte";
 import AdminSistema from "./pages/admin/AdminSistema";
 import DashboardCliente from "./pages/DashboardCliente";
 import NotFound from "./pages/NotFound";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
