@@ -849,6 +849,120 @@ const RegistroClinicoTab = () => {
                     <p className="text-sm text-foreground">{gc.birthPlan}</p>
                   </div>
                 )}
+
+                {/* ===== CONSULTAS NO CARTÃO ===== */}
+                {r.prenatalConsultations.length > 0 && (
+                  <>
+                    <Separator />
+                    <p className="text-xs font-heading font-semibold text-foreground">Consultas Pré-natal ({r.prenatalConsultations.length})</p>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-border/30">
+                            {["#", "Data", "IG", "Peso", "PA", "AU", "BCF", "Edema", "Status"].map((h) => (
+                              <th key={h} className="text-left py-1.5 px-2 text-[10px] text-muted-foreground font-heading uppercase whitespace-nowrap">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {r.prenatalConsultations.map((c, idx) => (
+                            <tr key={c.id} className="border-b border-border/10 hover:bg-white/20">
+                              <td className="py-1.5 px-2 font-heading font-semibold">{idx + 1}</td>
+                              <td className="py-1.5 px-2 whitespace-nowrap">{format(new Date(c.date), "dd/MM/yy")}</td>
+                              <td className="py-1.5 px-2 whitespace-nowrap">{c.gestationalAge || "—"}</td>
+                              <td className="py-1.5 px-2">{c.weight ? `${c.weight}kg` : "—"}</td>
+                              <td className="py-1.5 px-2">{c.bloodPressure || "—"}</td>
+                              <td className="py-1.5 px-2">{c.uterineHeight ? `${c.uterineHeight}cm` : "—"}</td>
+                              <td className="py-1.5 px-2">{c.fetalHeartRate ? `${c.fetalHeartRate}bpm` : "—"}</td>
+                              <td className="py-1.5 px-2">{c.edema || "—"}</td>
+                              <td className="py-1.5 px-2">
+                                <Badge variant={c.status === "realizada" ? "default" : c.status === "cancelada" ? "destructive" : "secondary"} className="text-[9px] font-heading">
+                                  {c.status === "realizada" ? "Realiz." : c.status === "cancelada" ? "Cancel." : "Agend."}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+
+                {/* ===== EXAMES NO CARTÃO ===== */}
+                {r.gestationalExams.length > 0 && (
+                  <>
+                    <Separator />
+                    <p className="text-xs font-heading font-semibold text-foreground">Exames ({r.gestationalExams.length})</p>
+                    <div className="space-y-1.5">
+                      {(["1", "2", "3"] as const).map((tri) => {
+                        const exams = r.gestationalExams.filter((e) => e.trimester === tri);
+                        if (exams.length === 0) return null;
+                        return (
+                          <div key={tri}>
+                            <p className="text-[10px] text-muted-foreground font-heading uppercase mb-1">{tri}º Trimestre</p>
+                            {exams.map((exam) => (
+                              <div key={exam.id} className="bg-white/20 rounded-lg p-2 mb-1 flex items-center justify-between">
+                                <div>
+                                  <span className="text-xs font-heading font-semibold text-foreground">{exam.type}</span>
+                                  <span className="text-[10px] text-muted-foreground ml-2">{format(new Date(exam.date), "dd/MM/yy")}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {exam.interpretation && (
+                                    <Badge variant={exam.interpretation === "normal" ? "default" : exam.interpretation === "alterado" ? "destructive" : "secondary"} className="text-[9px] font-heading">
+                                      {exam.interpretation === "normal" ? "Normal" : exam.interpretation === "alterado" ? "Alterado" : "Inconcl."}
+                                    </Badge>
+                                  )}
+                                  <span className="text-[10px] text-muted-foreground max-w-[150px] truncate">{exam.result}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+
+                {/* ===== VACINAS NO CARTÃO ===== */}
+                {(r.vaccines || []).length > 0 && (
+                  <>
+                    <Separator />
+                    <p className="text-xs font-heading font-semibold text-foreground">Vacinas ({(r.vaccines || []).length})</p>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-border/30">
+                            {["Vacina", "Dose", "Data", "Lote", "Fabricante", "Profissional"].map((h) => (
+                              <th key={h} className="text-left py-1.5 px-2 text-[10px] text-muted-foreground font-heading uppercase whitespace-nowrap">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(r.vaccines || []).map((v) => (
+                            <tr key={v.id} className="border-b border-border/10 hover:bg-white/20">
+                              <td className="py-1.5 px-2 font-heading font-semibold whitespace-nowrap">{v.name === "Outra" ? v.customName || "Outra" : v.name}</td>
+                              <td className="py-1.5 px-2">{v.dose}</td>
+                              <td className="py-1.5 px-2 whitespace-nowrap">{format(new Date(v.date), "dd/MM/yy")}</td>
+                              <td className="py-1.5 px-2">{v.lot || "—"}</td>
+                              <td className="py-1.5 px-2">{v.manufacturer || "—"}</td>
+                              <td className="py-1.5 px-2">{v.professional}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {(r.vaccines || []).some((v) => v.reaction) && (
+                      <div className="space-y-1 mt-2">
+                        <p className="text-[10px] text-muted-foreground font-heading uppercase">Reações Adversas</p>
+                        {(r.vaccines || []).filter((v) => v.reaction).map((v) => (
+                          <div key={v.id} className="text-[11px] text-destructive">
+                            <span className="font-semibold">{v.name === "Outra" ? v.customName : v.name} ({v.dose}):</span> {v.reaction}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
