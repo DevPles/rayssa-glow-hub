@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import {
   type ClinicalRecord, type PrenatalConsultation, type GestationalExam,
   type AssignedProfessional, type Vaccine,
 } from "@/contexts/ClinicalRecordContext";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -63,15 +64,26 @@ const formatCPF = (value: string): string => {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 };
 
-const mockCPFLookup = (cpf: string): { name: string; birthDate: string; address: string } | null => {
+const lookupCPF = async (cpf: string): Promise<{ name: string; birthDate: string; address: string } | null> => {
   const clean = cpf.replace(/\D/g, "");
   if (clean.length !== 11) return null;
-  const mocks: Record<string, { name: string; birthDate: string; address: string }> = {
-    "12345678900": { name: "Maria Silva", birthDate: "1990-05-12", address: "Rua das Flores, 123 - São Paulo" },
-    "98765432100": { name: "Ana Carolina Santos", birthDate: "1988-11-03", address: "Av. Paulista, 1000 - São Paulo" },
-    "11122233344": { name: "Juliana Oliveira", birthDate: "1995-02-20", address: "Rua XV de Novembro, 50 - Curitiba" },
-  };
-  return mocks[clean] || { name: `Paciente CPF ${clean.slice(0,3)}`, birthDate: "1992-01-01", address: "Endereço não encontrado" };
+  try {
+    const { data, error } = await supabase.functions.invoke("cpf-lookup", {
+      body: { cpf: clean },
+    });
+    if (error || !data?.success) {
+      console.error("CPF lookup error:", error || data?.error);
+      return null;
+    }
+    return {
+      name: data.data.name || "",
+      birthDate: data.data.birthDate || "",
+      address: data.data.address || "",
+    };
+  } catch (e) {
+    console.error("CPF lookup failed:", e);
+    return null;
+  }
 };
 
 // Exames padrão por trimestre (protocolo MS)
