@@ -1114,64 +1114,176 @@ const RegistroClinicoTab = () => {
 
           {/* VACINAS */}
           <TabsContent value="vacinas" className="space-y-4 mt-4">
-            <div className="flex justify-end">
-              <Button variant="secondary" size="sm" onClick={() => setVaccineDialogOpen(true)}>Registrar Vacina</Button>
-            </div>
-            <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
-              <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Calendário Vacinal da Gestante</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                {VACCINES_BRAZIL.map((vac) => {
-                  const applied = (r.vaccines || []).filter((v) => v.name === vac.name);
-                  const hasAlert = vac.gestationalAlert.includes("⚠️");
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                {(["recomendada", "situacao", "contraindicada"] as VaccineCategory[]).map((cat) => {
+                  const labels: Record<VaccineCategory, string> = { recomendada: "Recomendadas", situacao: "Situações Especiais", contraindicada: "Contraindicadas" };
+                  const count = VACCINES_BRAZIL.filter(v => v.category === cat).length;
                   return (
-                    <div key={vac.name} className={`rounded-xl p-3 ${hasAlert ? "bg-destructive/5 border border-destructive/20" : "bg-white/30"}`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-heading font-semibold text-foreground">{vac.name}</p>
-                        <Badge variant={applied.length > 0 ? "default" : "outline"} className="text-[10px] font-heading">
-                          {applied.length > 0 ? `${applied.length} dose(s)` : "Pendente"}
-                        </Badge>
-                      </div>
-                      <p className={`text-[11px] mb-2 ${hasAlert ? "text-destructive" : "text-muted-foreground"}`}>{vac.gestationalAlert}</p>
-                      {applied.length > 0 && (
-                        <div className="space-y-1.5 mt-2 border-t border-border/30 pt-2">
-                          {applied.map((v) => (
-                            <div key={v.id} className="text-xs text-muted-foreground space-y-0.5">
-                              <div className="flex gap-3 flex-wrap">
-                                <span className="font-medium text-foreground">{v.dose}</span>
-                                <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
-                                <span>Lote: {v.lot || "—"}</span>
-                                {v.manufacturer && <span>Fab: {v.manufacturer}</span>}
-                                <span>{v.professional}</span>
-                              </div>
-                              {v.reaction && (
-                                <p className="text-destructive text-[11px]">Reação: {v.reaction}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <span key={cat} className={`text-[10px] px-2 py-0.5 rounded-full font-heading ${
+                      cat === "recomendada" ? "bg-green-100 text-green-700" :
+                      cat === "situacao" ? "bg-amber-100 text-amber-700" :
+                      "bg-red-100 text-red-700"
+                    }`}>
+                      {labels[cat]} ({count})
+                    </span>
                   );
                 })}
-                {/* Vacinas "Outra" que não estão na lista */}
-                {(r.vaccines || []).filter((v) => v.name === "Outra" && v.customName).map((v) => (
-                  <div key={v.id} className="bg-white/30 rounded-xl p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-heading font-semibold text-foreground">{v.customName}</p>
-                      <Badge variant="default" className="text-[10px] font-heading">Aplicada</Badge>
-                    </div>
-                    <div className="text-xs text-muted-foreground flex gap-3 flex-wrap">
-                      <span>{v.dose}</span>
-                      <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
-                      <span>Lote: {v.lot || "—"}</span>
-                      {v.manufacturer && <span>Fab: {v.manufacturer}</span>}
-                      <span>{v.professional}</span>
-                    </div>
-                    {v.reaction && <p className="text-destructive text-[11px] mt-1">Reação: {v.reaction}</p>}
+              </div>
+              <Button variant="secondary" size="sm" onClick={() => setVaccineDialogOpen(true)}>Registrar Vacina</Button>
+            </div>
+
+            {/* Summary cards */}
+            {(() => {
+              const totalVaccines = VACCINES_BRAZIL.filter(v => v.category !== "contraindicada").length;
+              const appliedNames = new Set((r.vaccines || []).map(v => v.name));
+              const appliedCount = VACCINES_BRAZIL.filter(v => v.category !== "contraindicada" && appliedNames.has(v.name)).length;
+              const pendingCount = totalVaccines - appliedCount;
+              return (
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-green-50/80 backdrop-blur-lg rounded-xl p-3 text-center">
+                    <p className="text-[10px] text-green-600 font-heading uppercase">Aplicadas</p>
+                    <p className="text-lg font-heading font-bold text-green-700">{appliedCount}</p>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
+                  <div className="bg-amber-50/80 backdrop-blur-lg rounded-xl p-3 text-center">
+                    <p className="text-[10px] text-amber-600 font-heading uppercase">Pendentes</p>
+                    <p className="text-lg font-heading font-bold text-amber-700">{pendingCount}</p>
+                  </div>
+                  <div className="bg-muted/30 backdrop-blur-lg rounded-xl p-3 text-center">
+                    <p className="text-[10px] text-muted-foreground font-heading uppercase">Total Doses</p>
+                    <p className="text-lg font-heading font-bold text-foreground">{(r.vaccines || []).length}</p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* RECOMENDADAS */}
+            {(["recomendada", "situacao", "contraindicada"] as VaccineCategory[]).map((cat) => {
+              const catLabels: Record<VaccineCategory, string> = { recomendada: "✅ Recomendadas na Gestação", situacao: "⚡ Situações Especiais", contraindicada: "⛔ Contraindicadas na Gestação" };
+              const catVaccines = VACCINES_BRAZIL.filter(v => v.category === cat);
+              return (
+                <Card key={cat} className={`backdrop-blur-xl border shadow-lg ${
+                  cat === "contraindicada" ? "bg-red-50/40 border-red-200/50" :
+                  cat === "situacao" ? "bg-amber-50/40 border-amber-200/50" :
+                  "bg-white/40 border-white/50"
+                }`}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-heading">{catLabels[cat]}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-border/30">
+                            <th className="text-left py-2 px-2 font-heading text-muted-foreground">Vacina</th>
+                            <th className="text-left py-2 px-2 font-heading text-muted-foreground">Período</th>
+                            <th className="text-center py-2 px-2 font-heading text-muted-foreground">Doses</th>
+                            <th className="text-center py-2 px-2 font-heading text-muted-foreground">Status</th>
+                            <th className="text-left py-2 px-2 font-heading text-muted-foreground">Detalhes</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {catVaccines.map((vac) => {
+                            const applied = (r.vaccines || []).filter(v => v.name === vac.name);
+                            const totalDoses = vac.doses.length;
+                            const appliedDoses = applied.length;
+                            const isComplete = appliedDoses >= totalDoses;
+                            const statusColor = isComplete ? "text-green-600" : appliedDoses > 0 ? "text-amber-600" : cat === "contraindicada" ? "text-red-500" : "text-muted-foreground";
+                            const statusLabel = isComplete ? "Completa" : appliedDoses > 0 ? `${appliedDoses}/${totalDoses}` : cat === "contraindicada" ? "N/A" : "Pendente";
+
+                            return (
+                              <Fragment key={vac.name}>
+                                <tr className="border-b border-border/20 hover:bg-white/30 transition-colors">
+                                  <td className="py-2 px-2">
+                                    <p className="font-heading font-semibold text-foreground text-xs">{vac.name}</p>
+                                    <p className="text-[10px] text-muted-foreground mt-0.5">{vac.gestationalAlert.replace("⚠️ ", "")}</p>
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-heading ${
+                                      cat === "contraindicada" ? "bg-red-100 text-red-600" : "bg-muted/50 text-foreground"
+                                    }`}>{vac.trimester}</span>
+                                  </td>
+                                  <td className="py-2 px-2 text-center">
+                                    <div className="flex justify-center gap-0.5">
+                                      {vac.doses.map((dose, di) => {
+                                        const doseApplied = applied.some(a => a.dose === dose);
+                                        return (
+                                          <span key={di} className={`w-4 h-4 rounded-full text-[8px] flex items-center justify-center font-bold ${
+                                            doseApplied ? "bg-green-500 text-white" : "bg-muted/60 text-muted-foreground"
+                                          }`}>{di + 1}</span>
+                                        );
+                                      })}
+                                    </div>
+                                  </td>
+                                  <td className="py-2 px-2 text-center">
+                                    <span className={`text-[10px] font-heading font-semibold ${statusColor}`}>{statusLabel}</span>
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    {applied.length > 0 ? (
+                                      <div className="space-y-1">
+                                        {applied.map(v => (
+                                          <div key={v.id} className="text-[10px] text-muted-foreground">
+                                            <span className="font-medium text-foreground">{v.dose}</span> — {format(new Date(v.date), "dd/MM/yy")}
+                                            {v.manufacturer && <span> · {v.manufacturer}</span>}
+                                            {v.lot && <span> · Lote {v.lot}</span>}
+                                            {v.reaction && <span className="text-destructive block">⚠ {v.reaction}</span>}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <span className="text-[10px] text-muted-foreground">—</span>
+                                    )}
+                                  </td>
+                                </tr>
+                                {/* Reações comuns como tooltip/info */}
+                                {applied.length > 0 && applied.some(v => v.reaction) && (
+                                  <tr><td colSpan={5} className="px-4 pb-2"><p className="text-[10px] text-destructive/80 italic">Reações comuns desta vacina: {vac.commonReactions.join(", ")}</p></td></tr>
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+
+            {/* Vacinas personalizadas (Outra) */}
+            {(r.vaccines || []).filter(v => v.name === "Outra" && v.customName).length > 0 && (
+              <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+                <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Vacinas Adicionais (fora do calendário)</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-border/30">
+                          <th className="text-left py-2 px-2 font-heading text-muted-foreground">Vacina</th>
+                          <th className="text-left py-2 px-2 font-heading text-muted-foreground">Dose</th>
+                          <th className="text-left py-2 px-2 font-heading text-muted-foreground">Data</th>
+                          <th className="text-left py-2 px-2 font-heading text-muted-foreground">Fabricante</th>
+                          <th className="text-left py-2 px-2 font-heading text-muted-foreground">Lote</th>
+                          <th className="text-left py-2 px-2 font-heading text-muted-foreground">Reação</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(r.vaccines || []).filter(v => v.name === "Outra" && v.customName).map(v => (
+                          <tr key={v.id} className="border-b border-border/20">
+                            <td className="py-2 px-2 font-heading font-semibold text-foreground">{v.customName}</td>
+                            <td className="py-2 px-2 text-muted-foreground">{v.dose}</td>
+                            <td className="py-2 px-2 text-muted-foreground">{format(new Date(v.date), "dd/MM/yyyy")}</td>
+                            <td className="py-2 px-2 text-muted-foreground">{v.manufacturer || "—"}</td>
+                            <td className="py-2 px-2 text-muted-foreground">{v.lot || "—"}</td>
+                            <td className="py-2 px-2 text-destructive">{v.reaction || "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* DADOS PESSOAIS */}
