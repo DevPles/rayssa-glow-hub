@@ -190,7 +190,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
             <SelectItem value="all">Todos os tipos</SelectItem>
             <SelectItem value="cliente">Gestantes</SelectItem>
             <SelectItem value="admin">Administradores</SelectItem>
-            <SelectItem value="afiliada">Profissionais</SelectItem>
+            <SelectItem value="afiliada">Parceiros</SelectItem>
             <SelectItem value="super_admin">Super Admin</SelectItem>
           </SelectContent>
         </Select>
@@ -335,7 +335,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                       <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="cliente">Gestante</SelectItem>
-                        <SelectItem value="afiliada">Profissional</SelectItem>
+                        <SelectItem value="afiliada">Parceiro(a)</SelectItem>
                         <SelectItem value="admin">Administrador</SelectItem>
                       </SelectContent>
                     </Select>
@@ -466,7 +466,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cliente">Gestante</SelectItem>
-                    <SelectItem value="afiliada">Profissional</SelectItem>
+                    <SelectItem value="afiliada">Parceiro(a)</SelectItem>
                     <SelectItem value="admin">Administrador</SelectItem>
                   </SelectContent>
                 </Select>
