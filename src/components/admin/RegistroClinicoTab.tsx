@@ -913,24 +913,32 @@ const RegistroClinicoTab = () => {
             <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Calendário Vacinal da Gestante</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                {REQUIRED_VACCINES.map((vac) => {
+                {VACCINES_BRAZIL.map((vac) => {
                   const applied = (r.vaccines || []).filter((v) => v.name === vac.name);
+                  const hasAlert = vac.gestationalAlert.includes("⚠️");
                   return (
-                    <div key={vac.name} className="bg-white/30 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-2">
+                    <div key={vac.name} className={`rounded-xl p-3 ${hasAlert ? "bg-destructive/5 border border-destructive/20" : "bg-white/30"}`}>
+                      <div className="flex items-center justify-between mb-1">
                         <p className="text-sm font-heading font-semibold text-foreground">{vac.name}</p>
                         <Badge variant={applied.length > 0 ? "default" : "outline"} className="text-[10px] font-heading">
-                          {applied.length > 0 ? `${applied.length} dose(s) aplicada(s)` : "Pendente"}
+                          {applied.length > 0 ? `${applied.length} dose(s)` : "Pendente"}
                         </Badge>
                       </div>
+                      <p className={`text-[11px] mb-2 ${hasAlert ? "text-destructive" : "text-muted-foreground"}`}>{vac.gestationalAlert}</p>
                       {applied.length > 0 && (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5 mt-2 border-t border-border/30 pt-2">
                           {applied.map((v) => (
-                            <div key={v.id} className="text-xs text-muted-foreground flex gap-3">
-                              <span>{v.dose}</span>
-                              <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
-                              <span>Lote: {v.lot || "—"}</span>
-                              <span>{v.professional}</span>
+                            <div key={v.id} className="text-xs text-muted-foreground space-y-0.5">
+                              <div className="flex gap-3 flex-wrap">
+                                <span className="font-medium text-foreground">{v.dose}</span>
+                                <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
+                                <span>Lote: {v.lot || "—"}</span>
+                                {v.manufacturer && <span>Fab: {v.manufacturer}</span>}
+                                <span>{v.professional}</span>
+                              </div>
+                              {v.reaction && (
+                                <p className="text-destructive text-[11px]">Reação: {v.reaction}</p>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -938,6 +946,23 @@ const RegistroClinicoTab = () => {
                     </div>
                   );
                 })}
+                {/* Vacinas "Outra" que não estão na lista */}
+                {(r.vaccines || []).filter((v) => v.name === "Outra" && v.customName).map((v) => (
+                  <div key={v.id} className="bg-white/30 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-heading font-semibold text-foreground">{v.customName}</p>
+                      <Badge variant="default" className="text-[10px] font-heading">Aplicada</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground flex gap-3 flex-wrap">
+                      <span>{v.dose}</span>
+                      <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
+                      <span>Lote: {v.lot || "—"}</span>
+                      {v.manufacturer && <span>Fab: {v.manufacturer}</span>}
+                      <span>{v.professional}</span>
+                    </div>
+                    {v.reaction && <p className="text-destructive text-[11px] mt-1">Reação: {v.reaction}</p>}
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>
