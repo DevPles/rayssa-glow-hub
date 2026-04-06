@@ -93,24 +93,24 @@ interface SystemSettingsContextType {
 }
 
 const defaultPageConfigs: Record<string, PageConfig> = {
-  "estetica-avancada": { photoUrl: null, expertName: "Rayssa Leslie", expertSubtitle: "Especialista em Estética Avançada", pageTitle: "Estética Avançada Feminina", pageDescription: "" },
-  "nucleo-materno": { photoUrl: null, expertName: "Rayssa Leslie", expertSubtitle: "Enfermeira Obstetra", pageTitle: "Núcleo Materno", pageDescription: "" },
-  "produtos-programas": { photoUrl: null, expertName: "Perila Lobato", expertSubtitle: "Designer de Produtos", pageTitle: "Produtos & Programas Online", pageDescription: "" },
-  "parceria-rosangela": { photoUrl: null, expertName: "Rosângela", expertSubtitle: "Especialista", pageTitle: "Parceria Rosângela", pageDescription: "" },
+  "estetica-avancada": { photoUrl: null, expertName: "Equipe Médica", expertSubtitle: "Obstetrícia & Pré-Natal", pageTitle: "Pré-Natal & Consultas", pageDescription: "" },
+  "nucleo-materno": { photoUrl: null, expertName: "Equipe Especializada", expertSubtitle: "Acompanhamento Gestacional", pageTitle: "Linha do Tempo & Cuidados Gestacionais", pageDescription: "" },
+  "produtos-programas": { photoUrl: null, expertName: "Loja Gestante", expertSubtitle: "Produtos Selecionados", pageTitle: "Produtos para Gestantes", pageDescription: "" },
+  "parceria-rosangela": { photoUrl: null, expertName: "Equipe de Bem-estar", expertSubtitle: "Serviços para Gestantes", pageTitle: "Serviços Especializados", pageDescription: "" },
 };
 
 const defaultSectionVisibility: SectionVisibility = { services: true, blog: true, testimonials: true };
 
 const defaults: SystemSettings = {
   id: "",
-  companyName: "Rayssa Leslie Estética & Saúde da Mulher",
-  companyShortName: "Rayssa Leslie",
-  companySubtitle: "Estética & Saúde da Mulher",
+  companyName: "Acompanhamento Gestacional",
+  companyShortName: "GestaCare",
+  companySubtitle: "Acompanhamento Gestacional",
   logoUrl: null,
   heroPhotoUrl: null,
-  heroCardName: "Rayssa Leslie",
-  heroCardSubtitle: "Esteticista & Enfermeira Obstetra",
-  heroDescription: "Estética avançada e cuidado materno integrados por meio de protocolos seguros e personalizados, sustentados por ampla experiência clínica — por Rayssa Leslie, Esteticista Avançada e Enfermeira Obstetra.",
+  heroCardName: "Equipe GestaCare",
+  heroCardSubtitle: "Especialistas em Saúde Materna",
+  heroDescription: "Acompanhamento gestacional completo com consultas pré-natal, linha do tempo da gestação, registro clínico digital e serviços especializados para gestantes e puérperas.",
   tenantId: null,
   pageConfigs: defaultPageConfigs,
   sectionVisibility: defaultSectionVisibility,
