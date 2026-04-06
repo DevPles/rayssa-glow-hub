@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useClinicalRecords, createEmptyRecord, emptyGestationalCard, type ClinicalRecord, type PrenatalConsultation, type GestationalExam } from "@/contexts/ClinicalRecordContext";
+import { useClinicalRecords, createEmptyRecord, emptyGestationalCard, type ClinicalRecord, type PrenatalConsultation, type GestationalExam, type AssignedProfessional } from "@/contexts/ClinicalRecordContext";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -53,12 +53,15 @@ const calcDPP = (dum: string): string => {
 };
 
 const RegistroClinicoTab = () => {
-  const { users } = useAuth();
+  const { user, users } = useAuth();
   const { records, addRecord, updateRecord, deleteRecord, addPrenatalConsultation, addGestationalExam } = useClinicalRecords();
-  const patients = users.filter((u) => u.role === "cliente");
+  const professionals = users.filter((u) => u.role === "admin" || u.role === "afiliada");
 
   const [view, setView] = useState<View>("list");
   const [search, setSearch] = useState("");
+  const [filterProfessionalId, setFilterProfessionalId] = useState<string>(
+    user?.role === "admin" ? user.id : "all"
+  );
   const [selectedRecord, setSelectedRecord] = useState<ClinicalRecord | null>(null);
   const [formData, setFormData] = useState<Omit<ClinicalRecord, "id"> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -75,9 +78,23 @@ const RegistroClinicoTab = () => {
     date: new Date().toISOString().split("T")[0], type: "", result: "", observations: "", fileUrl: "",
   });
 
-  const filteredRecords = records.filter((r) =>
-    r.patientName.toLowerCase().includes(search.toLowerCase()) || r.prontuarioNumber.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRecords = useMemo(() => {
+    let result = records;
+    // Filter by professional
+    if (filterProfessionalId !== "all") {
+      result = result.filter((r) =>
+        r.assignedProfessionals?.some((p) => p.id === filterProfessionalId)
+      );
+    }
+    // Filter by search
+    if (search) {
+      const s = search.toLowerCase();
+      result = result.filter((r) =>
+        r.patientName.toLowerCase().includes(s) || r.prontuarioNumber.toLowerCase().includes(s)
+      );
+    }
+    return result;
+  }, [records, filterProfessionalId, search]);
 
   const getNextRecordNumber = () => {
     const nums = records.map((r) => {
@@ -88,7 +105,10 @@ const RegistroClinicoTab = () => {
   };
 
   const openNewRecord = () => {
-    setFormData(createEmptyRecord("", "", getNextRecordNumber()));
+    const defaultProfessionals: AssignedProfessional[] = user && (user.role === "admin" || user.role === "afiliada")
+      ? [{ id: user.id, name: user.name }]
+      : [];
+    setFormData({ ...createEmptyRecord("", "", getNextRecordNumber(), defaultProfessionals) });
     setEditingId(null);
     setView("form");
   };
@@ -105,11 +125,14 @@ const RegistroClinicoTab = () => {
       toast({ title: "Preencha o nome completo da gestante", variant: "destructive" });
       return;
     }
+    if (!formData.assignedProfessionals || formData.assignedProfessionals.length === 0) {
+      toast({ title: "Selecione ao menos um profissional responsável", variant: "destructive" });
+      return;
+    }
     if (!formData.patientId) {
       formData.patientId = `new-${Date.now()}`;
       formData.patientName = formData.fullName;
     }
-    // Auto-calculate DPP from DUM
     if (formData.gestationalCard.dum && !formData.gestationalCard.dpp) {
       formData.gestationalCard.dpp = calcDPP(formData.gestationalCard.dum);
     }
@@ -124,6 +147,16 @@ const RegistroClinicoTab = () => {
   };
 
   const handleDelete = (id: string) => { deleteRecord(id); toast({ title: "Registro removido" }); };
+
+  const toggleProfessional = (profId: string, profName: string) => {
+    if (!formData) return;
+    const current = formData.assignedProfessionals || [];
+    const exists = current.some((p) => p.id === profId);
+    const updated = exists
+      ? current.filter((p) => p.id !== profId)
+      : [...current, { id: profId, name: profName }];
+    setFormData({ ...formData, assignedProfessionals: updated });
+  };
 
   const handleAddConsultation = () => {
     if (!selectedRecord || !consultForm.date) return;
@@ -156,7 +189,20 @@ const RegistroClinicoTab = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <Input placeholder="Buscar gestante ou registro..." value={search} onChange={(e) => setSearch(e.target.value)} className="rounded-xl max-w-sm" />
+          <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
+            <Input placeholder="Buscar gestante ou registro..." value={search} onChange={(e) => setSearch(e.target.value)} className="rounded-xl max-w-sm" />
+            <Select value={filterProfessionalId} onValueChange={setFilterProfessionalId}>
+              <SelectTrigger className="rounded-xl w-[220px]">
+                <SelectValue placeholder="Filtrar por profissional" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os profissionais</SelectItem>
+                {professionals.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Button onClick={openNewRecord} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading shadow-md shadow-secondary/20">
             Nova Ficha Gestacional
           </Button>
@@ -164,10 +210,10 @@ const RegistroClinicoTab = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { value: records.length, label: "Total de Fichas" },
-            { value: records.filter((r) => r.status === "ativo").length, label: "Ativas" },
-            { value: records.reduce((sum, r) => sum + r.prenatalConsultations.length, 0), label: "Consultas Registradas" },
-            { value: records.reduce((sum, r) => sum + r.gestationalExams.length, 0), label: "Exames" },
+            { value: filteredRecords.length, label: "Total de Fichas" },
+            { value: filteredRecords.filter((r) => r.status === "ativo").length, label: "Ativas" },
+            { value: filteredRecords.reduce((sum, r) => sum + r.prenatalConsultations.length, 0), label: "Consultas Registradas" },
+            { value: filteredRecords.reduce((sum, r) => sum + r.gestationalExams.length, 0), label: "Exames" },
           ].map((s) => (
             <Card key={s.label} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
               <CardContent className="p-4 text-center">
@@ -198,7 +244,7 @@ const RegistroClinicoTab = () => {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h3 className="font-heading font-bold text-foreground text-sm">{record.patientName}</h3>
                         <Badge variant="outline" className="text-[10px] font-heading">Gestacional</Badge>
                         <Badge variant={record.status === "ativo" ? "default" : "secondary"} className="text-[10px] font-heading">
@@ -209,7 +255,7 @@ const RegistroClinicoTab = () => {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">{record.prontuarioNumber}</p>
-                      <div className="flex gap-3 text-xs text-muted-foreground">
+                      <div className="flex gap-3 text-xs text-muted-foreground flex-wrap">
                         {record.gestationalCard.dum && (
                           <span>IG: {calcGestationalAge(record.gestationalCard.dum)}</span>
                         )}
@@ -218,6 +264,15 @@ const RegistroClinicoTab = () => {
                         )}
                         <span>{record.prenatalConsultations.length} consulta(s)</span>
                       </div>
+                      {record.assignedProfessionals && record.assignedProfessionals.length > 0 && (
+                        <div className="flex gap-1 mt-1 flex-wrap">
+                          {record.assignedProfessionals.map((p) => (
+                            <Badge key={p.id} variant="outline" className="text-[10px] font-heading bg-primary/5">
+                              {p.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
@@ -243,6 +298,38 @@ const RegistroClinicoTab = () => {
           <h2 className="font-heading font-bold text-foreground">{editingId ? "Editar Ficha Gestacional" : "Nova Ficha Gestacional"}</h2>
           <Button onClick={handleSave} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading shadow-md shadow-secondary/20">Salvar</Button>
         </div>
+
+        {/* Professionals */}
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Profissionais Responsáveis *</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">Selecione os médicos/enfermeiros responsáveis por esta gestante:</p>
+            <div className="flex flex-wrap gap-2">
+              {professionals.map((p) => {
+                const isSelected = formData.assignedProfessionals?.some((ap) => ap.id === p.id);
+                return (
+                  <Button
+                    key={p.id}
+                    type="button"
+                    size="sm"
+                    variant={isSelected ? "default" : "outline"}
+                    className={`rounded-full font-heading text-xs ${isSelected ? "bg-secondary text-secondary-foreground" : ""}`}
+                    onClick={() => toggleProfessional(p.id, p.name)}
+                  >
+                    {p.name} ({p.role === "admin" ? "Admin" : "Afiliada"})
+                  </Button>
+                );
+              })}
+            </div>
+            {formData.assignedProfessionals && formData.assignedProfessionals.length > 0 && (
+              <div className="flex gap-1 mt-3 flex-wrap">
+                {formData.assignedProfessionals.map((p) => (
+                  <Badge key={p.id} className="font-heading text-xs">{p.name}</Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Identification */}
         <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
@@ -387,6 +474,14 @@ const RegistroClinicoTab = () => {
                     {gc.riskClassification === "alto_risco" && <Badge variant="destructive" className="font-heading text-xs">Alto Risco</Badge>}
                     {gc.bloodType && <Badge variant="outline" className="font-heading text-xs">{gc.bloodType}{gc.rh}</Badge>}
                   </div>
+                  {r.assignedProfessionals && r.assignedProfessionals.length > 0 && (
+                    <div className="flex gap-1 mt-2 flex-wrap">
+                      <span className="text-[10px] text-muted-foreground mr-1">Profissionais:</span>
+                      {r.assignedProfessionals.map((p) => (
+                        <Badge key={p.id} variant="outline" className="text-[10px] font-heading bg-primary/5">{p.name}</Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="text-right space-y-1">

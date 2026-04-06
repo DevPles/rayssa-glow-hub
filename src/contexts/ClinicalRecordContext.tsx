@@ -94,6 +94,11 @@ export interface FollowUp {
   nextVisit: string;
 }
 
+export interface AssignedProfessional {
+  id: string;
+  name: string;
+}
+
 export interface ClinicalRecord {
   id: string;
   patientId: string;
@@ -102,6 +107,7 @@ export interface ClinicalRecord {
   createdAt: string;
   updatedAt: string;
   prontuarioNumber: string;
+  assignedProfessionals: AssignedProfessional[];
   fullName: string;
   birthDate: string;
   address: string;
@@ -124,7 +130,6 @@ export interface ClinicalRecord {
   procedures: ProcedureRecord[];
   followUps: FollowUp[];
   status: "ativo" | "arquivado";
-  // Gestational fields
   gestationalCard: GestationalCard;
   prenatalConsultations: PrenatalConsultation[];
   gestationalExams: GestationalExam[];
@@ -147,10 +152,11 @@ export const emptyGestationalCard: GestationalCard = {
   companion: "", companionPhone: "", pediatrician: "", hospital: "",
 };
 
-export const createEmptyRecord = (patientId: string, patientName: string, nextNumber: number): Omit<ClinicalRecord, "id"> => ({
+export const createEmptyRecord = (patientId: string, patientName: string, nextNumber: number, professionals: AssignedProfessional[] = []): Omit<ClinicalRecord, "id"> => ({
   patientId, patientName, patientPhoto: "",
   createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   prontuarioNumber: `RC-${String(nextNumber).padStart(3, "0")}`,
+  assignedProfessionals: professionals,
   fullName: patientName, birthDate: "", address: "", phone: "", emergencyContact: "",
   maritalStatus: "", profession: "", consentSigned: false, consentFile: "",
   consultationReason: "", expectations: "",
@@ -189,6 +195,9 @@ const mockRecords: ClinicalRecord[] = [
     createdAt: "2026-01-15T10:00:00Z",
     updatedAt: "2026-04-01T14:30:00Z",
     prontuarioNumber: "RC-001",
+    assignedProfessionals: [
+      { id: "1b", name: "Admin Rayssa" },
+    ],
     fullName: "Maria Silva",
     birthDate: "1990-05-12",
     address: "Rua das Flores, 123 - São Paulo",
