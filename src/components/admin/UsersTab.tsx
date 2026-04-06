@@ -137,12 +137,13 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
           </SelectContent>
         </Select>
         <Button
+          variant="secondary"
           onClick={() => {
             setNewUser({ name: "", email: "", phone: "", password: "123456" });
             setNewUserRole("cliente");
             setCreateDialogOpen(true);
           }}
-          className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading ml-auto px-6"
+          className="ml-auto font-heading"
         >
           Novo Usuário
         </Button>
@@ -251,7 +252,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleSave} className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading">
+              <Button variant="secondary" onClick={handleSave} className="w-full font-heading">
                 Salvar Alterações
               </Button>
             </div>
@@ -296,10 +297,7 @@ export const UsersTab = ({ users, currentUserId, updateUserRole, updateUser, del
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              onClick={handleCreate}
-              className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading"
-            >
+            <Button variant="secondary" onClick={handleCreate} className="w-full font-heading">
               Criar Usuário
             </Button>
           </div>
