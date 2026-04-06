@@ -67,14 +67,15 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-[45%] relative z-10 overflow-hidden rounded-r-[3rem]">
         <img
           src={loginSide}
-          alt="Rayssa Leslie Estética"
+          alt="LeMater"
           className="absolute inset-0 w-full h-full object-cover scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-black/10" />
-        <div className="absolute top-10 left-10">
-          <img src={logo} alt="RL Logo" className="w-14 h-14 object-contain drop-shadow-2xl" />
+        <div className="absolute top-0 left-0 h-32 w-44 bg-gradient-to-br from-foreground/80 via-foreground/40 to-transparent blur-md" />
+        <div className="absolute top-8 left-8 z-10">
+          <img src={logo} alt="LeMater" className="h-10 md:h-12 w-auto max-w-[10rem] object-contain drop-shadow-2xl" />
         </div>
-         <div className="absolute bottom-10 left-10 right-10">
+        <div className="absolute bottom-10 left-10 right-10">
           <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
             <h2 className="font-heading font-bold text-white text-2xl mb-2 tracking-tight">LeMater</h2>
             <p className="text-white/70 text-sm leading-relaxed">Sistema de Experiência Exclusiva de Parto — Acompanhamento gestacional completo e personalizado</p>
@@ -102,7 +103,7 @@ const Login = () => {
           <div className="w-full max-w-md space-y-8 bg-card/85 backdrop-blur-md rounded-3xl p-8 sm:p-10 border border-border/40 shadow-xl">
             {/* Logo mobile */}
             <div className="text-center space-y-3">
-              <img src={logo} alt="RL Logo" className="w-16 h-16 object-contain mx-auto lg:hidden drop-shadow-md" />
+              <img src={logo} alt="LeMater" className="h-12 w-auto max-w-[12rem] object-contain mx-auto lg:hidden drop-shadow-md" />
               <div>
                 <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">
                   {isSignUp ? "Criar conta" : "Bem-vinda de volta"}
