@@ -363,7 +363,7 @@ const RegistroClinicoTab = () => {
     addVaccine(selectedRecord.id, vaccineForm);
     setSelectedRecord((prev) => prev ? { ...prev, vaccines: [...(prev.vaccines || []), { ...vaccineForm, id: `v${Date.now()}` }] } : prev);
     setVaccineDialogOpen(false);
-    setVaccineForm({ name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "" });
+    setVaccineForm({ name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "", manufacturer: "", reaction: "" });
     toast({ title: "Vacina registrada!" });
   };
 
