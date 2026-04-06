@@ -34,7 +34,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
 
     // Post-term
     if (igWeeks >= 42) {
-      result.push({ id: "post-term", severity: "critical", icon: "🚨", title: "PÓS-TERMO — IG ≥ 42 semanas", description: "Gestação além do termo. Encaminhamento urgente para indução/avaliação.", action: { label: "Ver Cartão", tab: "cartao" } });
+      result.push({ id: "post-term", severity: "critical", icon: "", title: "PÓS-TERMO — IG ≥ 42 semanas", description: "Gestação além do termo. Encaminhamento urgente para indução/avaliação.", action: { label: "Ver Cartão", tab: "cartao" } });
     }
 
     // Consecutive high BP (2+ readings)
@@ -46,14 +46,14 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
     });
 
     if (hypertensiveReadings.length >= 2) {
-      result.push({ id: "bp-consecutive", severity: "critical", icon: "🩺", title: "PA elevada em 2+ consultas consecutivas", description: `HAS gestacional — investigar pré-eclâmpsia urgente. Últimas: ${hypertensiveReadings.map(c => c.bloodPressure).join(", ")}`, action: { label: "Ver Consultas", tab: "consultas" } });
+      result.push({ id: "bp-consecutive", severity: "critical", icon: "", title: "PA elevada em 2+ consultas consecutivas", description: `HAS gestacional — investigar pré-eclâmpsia urgente. Últimas: ${hypertensiveReadings.map(c => c.bloodPressure).join(", ")}`, action: { label: "Ver Consultas", tab: "consultas" } });
     } else if (hypertensiveReadings.length === 1) {
-      result.push({ id: "bp-single", severity: "warning", icon: "🩺", title: "PA elevada na última consulta", description: `PA ${hypertensiveReadings[0].bloodPressure} — monitorar na próxima consulta`, action: { label: "Ver Consultas", tab: "consultas" } });
+      result.push({ id: "bp-single", severity: "warning", icon: "", title: "PA elevada na última consulta", description: `PA ${hypertensiveReadings[0].bloodPressure} — monitorar na próxima consulta`, action: { label: "Ver Consultas", tab: "consultas" } });
     }
 
     // Severe edema
     if (realizadas[0]?.edema === "+++") {
-      result.push({ id: "edema-severe", severity: "critical", icon: "🦶", title: "Edema +++ detectado", description: "Edema severo — avaliar pré-eclâmpsia, função renal e hepática" });
+      result.push({ id: "edema-severe", severity: "critical", icon: "", title: "Edema +++ detectado", description: "Edema severo — avaliar pré-eclâmpsia, função renal e hepática" });
     }
 
     // No consultation in 30+ days in 3rd trimester
@@ -61,7 +61,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
       const lastDate = new Date(realizadas[0].date);
       const daysSince = (Date.now() - lastDate.getTime()) / (24 * 60 * 60 * 1000);
       if (daysSince > 30) {
-        result.push({ id: "no-consult-30d", severity: "critical", icon: "📅", title: "Sem consulta há mais de 30 dias (3º tri)", description: `Última consulta há ${Math.floor(daysSince)} dias. Risco de perda de seguimento.`, action: { label: "Agendar", tab: "consultas" } });
+        result.push({ id: "no-consult-30d", severity: "critical", icon: "", title: "Sem consulta há mais de 30 dias (3º tri)", description: `Última consulta há ${Math.floor(daysSince)} dias. Risco de perda de seguimento.`, action: { label: "Agendar", tab: "consultas" } });
       }
     }
 
@@ -73,9 +73,9 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
         const diffDays = (new Date(realizadas[0].date).getTime() - new Date(realizadas[1].date).getTime()) / (24 * 60 * 60 * 1000);
         const weeklyChange = diffDays > 0 ? ((curr - prev) / diffDays) * 7 : 0;
         if (weeklyChange < -1) {
-          result.push({ id: "weight-loss", severity: "critical", icon: "⚖️", title: "Perda de peso significativa", description: `${Math.abs(weeklyChange).toFixed(1)}kg/semana de perda. Investigar causa.` });
+          result.push({ id: "weight-loss", severity: "critical", icon: "", title: "Perda de peso significativa", description: `${Math.abs(weeklyChange).toFixed(1)}kg/semana de perda. Investigar causa.` });
         } else if (weeklyChange > 0.5) {
-          result.push({ id: "weight-gain", severity: "warning", icon: "⚖️", title: "Ganho de peso acima do esperado", description: `${weeklyChange.toFixed(1)}kg/semana (recomendado < 0.5kg/sem)` });
+          result.push({ id: "weight-gain", severity: "warning", icon: "", title: "Ganho de peso acima do esperado", description: `${weeklyChange.toFixed(1)}kg/semana (recomendado < 0.5kg/sem)` });
         }
       }
     }
@@ -85,7 +85,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
     // Overdue consultations
     const overdueConsults = record.prenatalConsultations.filter(c => c.status === "agendada" && new Date(c.date) < new Date());
     if (overdueConsults.length > 0) {
-      result.push({ id: "consult-overdue", severity: "warning", icon: "📅", title: `${overdueConsults.length} consulta(s) vencida(s)`, description: "Consultas agendadas passaram da data sem realização", action: { label: "Ver Consultas", tab: "consultas" } });
+      result.push({ id: "consult-overdue", severity: "warning", icon: "", title: `${overdueConsults.length} consulta(s) vencida(s)`, description: "Consultas agendadas passaram da data sem realização", action: { label: "Ver Consultas", tab: "consultas" } });
     }
 
     // Pending exams for current trimester
@@ -93,7 +93,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
     const doneExamTypes = record.gestationalExams.map(e => e.type);
     const pendingExams = expectedExams.filter(e => !doneExamTypes.includes(e));
     if (pendingExams.length > 0) {
-      result.push({ id: "exams-pending", severity: "warning", icon: "🔬", title: `${pendingExams.length} exame(s) pendente(s) do ${currentTrimester}º tri`, description: pendingExams.slice(0, 3).join(", ") + (pendingExams.length > 3 ? ` +${pendingExams.length - 3}` : ""), action: { label: "Solicitar", tab: "exames" } });
+      result.push({ id: "exams-pending", severity: "warning", icon: "", title: `${pendingExams.length} exame(s) pendente(s) do ${currentTrimester}º tri`, description: pendingExams.slice(0, 3).join(", ") + (pendingExams.length > 3 ? ` +${pendingExams.length - 3}` : ""), action: { label: "Solicitar", tab: "exames" } });
     }
 
     // Pending recommended vaccines
@@ -101,27 +101,27 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
     const appliedNames = (record.vaccines || []).map(v => v.name);
     const pendingVaccines = recommendedVaccines.filter(v => !appliedNames.includes(v.name));
     if (pendingVaccines.length > 0) {
-      result.push({ id: "vaccines-pending", severity: "warning", icon: "💉", title: `${pendingVaccines.length} vacina(s) recomendada(s) pendente(s)`, description: pendingVaccines.map(v => v.name).slice(0, 3).join(", "), action: { label: "Ver Vacinas", tab: "vacinas" } });
+      result.push({ id: "vaccines-pending", severity: "warning", icon: "", title: `${pendingVaccines.length} vacina(s) recomendada(s) pendente(s)`, description: pendingVaccines.map(v => v.name).slice(0, 3).join(", "), action: { label: "Ver Vacinas", tab: "vacinas" } });
     }
 
     // === INFO ALERTS (contextual milestones) ===
 
     if (igWeeks >= 11 && igWeeks <= 14 && !doneExamTypes.includes("Ultrassom 1º Trimestre")) {
-      result.push({ id: "nt-window", severity: "info", icon: "📸", title: "Translucência Nucal — janela ideal (11-14s)", description: "Solicitar ultrassom de 1º trimestre com TN", action: { label: "Solicitar", tab: "exames" } });
+      result.push({ id: "nt-window", severity: "info", icon: "", title: "Translucência Nucal — janela ideal (11-14s)", description: "Solicitar ultrassom de 1º trimestre com TN", action: { label: "Solicitar", tab: "exames" } });
     }
     if (igWeeks >= 18 && igWeeks <= 24 && !doneExamTypes.includes("Ultrassom Morfológico")) {
-      result.push({ id: "morpho-due", severity: "info", icon: "📸", title: "Ultrassom Morfológico — janela ideal (20-24s)", description: "Realizar entre 20ª e 24ª semana", action: { label: "Solicitar", tab: "exames" } });
+      result.push({ id: "morpho-due", severity: "info", icon: "", title: "Ultrassom Morfológico — janela ideal (20-24s)", description: "Realizar entre 20ª e 24ª semana", action: { label: "Solicitar", tab: "exames" } });
     }
     if (igWeeks >= 24 && igWeeks <= 28 && !doneExamTypes.includes("TOTG 75g")) {
-      result.push({ id: "totg-due", severity: "info", icon: "🧪", title: "TOTG 75g — período recomendado (24-28s)", description: "Rastreio de diabetes mellitus gestacional", action: { label: "Solicitar", tab: "exames" } });
+      result.push({ id: "totg-due", severity: "info", icon: "", title: "TOTG 75g — período recomendado (24-28s)", description: "Rastreio de diabetes mellitus gestacional", action: { label: "Solicitar", tab: "exames" } });
     }
     if (igWeeks >= 35 && igWeeks <= 37 && !doneExamTypes.includes("Estreptococo Grupo B (GBS)")) {
-      result.push({ id: "gbs-due", severity: "info", icon: "🦠", title: "Cultura GBS — período recomendado (35-37s)", description: "Streptococcus do grupo B", action: { label: "Solicitar", tab: "exames" } });
+      result.push({ id: "gbs-due", severity: "info", icon: "", title: "Cultura GBS — período recomendado (35-37s)", description: "Streptococcus do grupo B", action: { label: "Solicitar", tab: "exames" } });
     }
 
     // dTpa window
     if (igWeeks >= 20 && igWeeks <= 36 && !appliedNames.includes("dTpa (Tríplice Bacteriana)")) {
-      result.push({ id: "dtpa-window", severity: "info", icon: "💉", title: "dTpa — janela ideal (20-36s)", description: "Vacina contra coqueluche — protege o recém-nascido", action: { label: "Vacinar", tab: "vacinas" } });
+      result.push({ id: "dtpa-window", severity: "info", icon: "", title: "dTpa — janela ideal (20-36s)", description: "Vacina contra coqueluche — protege o recém-nascido", action: { label: "Vacinar", tab: "vacinas" } });
     }
 
     // === POSITIVE ALERTS ===
@@ -131,13 +131,13 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
     const consultasEmDia = overdueConsults.length === 0 && realizadas.length > 0;
 
     if (allCurrentExamsDone && allVaccinesDone && consultasEmDia && hypertensiveReadings.length === 0) {
-      result.push({ id: "all-good", severity: "positive", icon: "🌟", title: "Gestação em acompanhamento adequado!", description: "Exames, vacinas e consultas em dia. Parabéns!" });
+      result.push({ id: "all-good", severity: "positive", icon: "", title: "Gestação em acompanhamento adequado!", description: "Exames, vacinas e consultas em dia. Parabéns!" });
     } else {
       if (allCurrentExamsDone) {
-        result.push({ id: "exams-ok", severity: "positive", icon: "✅", title: `Exames do ${currentTrimester}º trimestre em dia`, description: "Todos os exames recomendados foram realizados" });
+        result.push({ id: "exams-ok", severity: "positive", icon: "", title: `Exames do ${currentTrimester}º trimestre em dia`, description: "Todos os exames recomendados foram realizados" });
       }
       if (allVaccinesDone) {
-        result.push({ id: "vaccines-ok", severity: "positive", icon: "✅", title: "Vacinas recomendadas em dia", description: "Todas as vacinas do calendário gestacional foram aplicadas" });
+        result.push({ id: "vaccines-ok", severity: "positive", icon: "", title: "Vacinas recomendadas em dia", description: "Todas as vacinas do calendário gestacional foram aplicadas" });
       }
     }
 
@@ -170,7 +170,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-heading font-bold text-foreground">
-            🚨 Painel de Inteligência Clínica
+            Alertas e Pendências
           </p>
           <div className="flex gap-1.5">
             {criticalCount > 0 && <Badge variant="destructive" className="text-[9px] font-heading clinical-alert-critical">{criticalCount} crítico(s)</Badge>}
@@ -180,7 +180,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
         <div className="space-y-2">
           {alerts.map((a) => (
             <div key={a.id} className={`flex items-start gap-3 rounded-xl border p-3 transition-all ${styleMap[a.severity]} ${a.severity === "critical" ? "clinical-alert-critical" : ""}`}>
-              <span className="text-lg shrink-0">{a.icon}</span>
+              {/* icon removed */}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-heading font-bold">{a.title}</p>
                 <p className="text-[11px] opacity-80">{a.description}</p>

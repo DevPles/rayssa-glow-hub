@@ -83,7 +83,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
     return result;
   }, [events, filter, trimFilter, dum]);
 
-  const iconMap = { consulta: "🩺", exame: "🔬", vacina: "💉" };
+  const iconMap = { consulta: "", exame: "", vacina: "" };
   const colorMap = { consulta: "border-l-blue-400", exame: "border-l-amber-400", vacina: "border-l-green-400" };
 
   return (
@@ -91,7 +91,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
       <div className="flex flex-wrap items-center gap-2">
         {(["all", "consulta", "exame", "vacina"] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} className={`text-[11px] px-3 py-1 rounded-full font-heading transition-colors ${filter === f ? "bg-secondary text-secondary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"}`}>
-            {f === "all" ? "Todos" : f === "consulta" ? "🩺 Consultas" : f === "exame" ? "🔬 Exames" : "💉 Vacinas"}
+            {f === "all" ? "Todos" : f === "consulta" ? "Consultas" : f === "exame" ? "Exames" : "Vacinas"}
           </button>
         ))}
         <span className="text-muted-foreground text-[10px]">|</span>

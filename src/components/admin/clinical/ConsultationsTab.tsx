@@ -282,7 +282,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
                       <Badge variant={c.status === "realizada" ? "default" : c.status === "cancelada" ? "destructive" : "secondary"} className="text-[10px] font-heading">
                         {c.status === "realizada" ? "Realizada" : c.status === "cancelada" ? "Cancelada" : "Agendada"}
                       </Badge>
-                      {hasBPAlert(c) && <Badge variant="destructive" className="text-[9px]">⚠ PA</Badge>}
+                      {hasBPAlert(c) && <Badge variant="destructive" className="text-[9px]">PA</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground">{format(new Date(c.date), "dd/MM/yyyy", { locale: ptBR })} • {c.gestationalAge || "—"}</p>
                   </div>
