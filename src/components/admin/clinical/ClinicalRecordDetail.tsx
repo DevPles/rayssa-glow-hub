@@ -146,7 +146,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
               {lastConsult && (
                 <>
                   {lastConsult.bloodPressure && (
-                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-red-100 dark:bg-red-950/30" : "bg-muted/30"}`}>
+                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-destructive/10" : "bg-muted/30"}`}>
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">PA</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.bloodPressure}</p>
                     </div>
