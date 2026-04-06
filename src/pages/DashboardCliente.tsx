@@ -116,7 +116,7 @@ const DashboardCliente = () => {
     doc.setFontSize(8);
     doc.setTextColor(...COL.muted);
     doc.text(`Registro: ${record.prontuarioNumber}  •  ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 47, 30);
-    doc.text(`Tipo: ${record.recordType === "estetica" ? "Estética" : record.recordType === "maternidade" ? "Maternidade" : "Ambos"}  •  Status: ${record.status === "ativo" ? "Ativo" : "Arquivado"}`, 47, 35);
+    doc.text(`Registro Gestacional  •  Status: ${record.status === "ativo" ? "Ativo" : "Arquivado"}`, 47, 35);
 
     // Patient photo on top-right
     if (record.patientPhoto) {
@@ -237,25 +237,23 @@ const DashboardCliente = () => {
       { label: "Histórico Obstétrico", value: record.obstetricHistory || "—" },
     ]);
 
-    // ====== AVALIAÇÃO ESTÉTICA ======
-    if (record.recordType !== "maternidade" && record.aestheticEval.skinType) {
-      addSectionTitle("Avaliação Estética");
+    // ====== CARTÃO GESTACIONAL ======
+    if (record.gestationalCard?.dum) {
+      addSectionTitle("Cartão da Gestante");
       addFieldGrid([
-        { label: "Tipo de Pele", value: record.aestheticEval.skinType },
-        { label: "Condições", value: record.aestheticEval.conditions },
-      ]);
-      addFieldGrid([
-        { label: "Manchas", value: record.aestheticEval.spots ? "Sim" : "Não" },
-        { label: "Rugas", value: record.aestheticEval.wrinkles ? "Sim" : "Não" },
-        { label: "Cicatrizes", value: record.aestheticEval.scars ? "Sim" : "Não" },
-        { label: "Estrias", value: record.aestheticEval.stretchMarks ? "Sim" : "Não" },
-        { label: "Lesões", value: record.aestheticEval.lesions ? "Sim" : "Não" },
-        { label: "Observações", value: record.aestheticEval.observations },
+        { label: "Tipo Sanguíneo", value: `${record.gestationalCard.bloodType} ${record.gestationalCard.rh}` },
+        { label: "G/P/A", value: `G${record.gestationalCard.gravida}P${record.gestationalCard.para}A${record.gestationalCard.abortions}` },
+        { label: "DUM", value: record.gestationalCard.dum },
+        { label: "DPP", value: record.gestationalCard.dpp },
+        { label: "Peso Pré-gestacional", value: record.gestationalCard.preGestationalWeight },
+        { label: "Hospital", value: record.gestationalCard.hospital },
       ], 3);
+    }
 
-      // Photos
-      const beforePhotos = record.aestheticEval.photosBefore || [];
-      const afterPhotos = record.aestheticEval.photosAfter || [];
+    // Placeholder to maintain structure
+    if (false) {
+      const beforePhotos: string[] = [];
+      const afterPhotos: string[] = [];
       if (beforePhotos.length > 0 || afterPhotos.length > 0) {
         const photoSize = 32;
         if (beforePhotos.length > 0) {
@@ -697,9 +695,7 @@ const DashboardCliente = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs font-heading">
-                        {record.recordType === "estetica" ? "Estética" : record.recordType === "maternidade" ? "Maternidade" : "Ambos"}
-                      </Badge>
+                      <Badge variant="outline" className="text-xs font-heading">Gestacional</Badge>
                       <Badge variant={record.status === "ativo" ? "default" : "secondary"} className="text-xs font-heading">{record.status}</Badge>
                       <Button variant="secondary" size="sm" className="rounded-full text-xs text-secondary-foreground" onClick={() => exportRecordPDF(record)}>
                         Exportar PDF
@@ -770,65 +766,28 @@ const DashboardCliente = () => {
                     </>
                   )}
 
-                  {/* Avaliação Estética */}
-                  {record.aestheticEval.skinType && (
+                  {/* Cartão Gestacional */}
+                  {record.gestationalCard?.dum && (
                     <>
                       <Separator />
-                      <p className="text-sm font-heading font-semibold text-foreground">Avaliação Estética</p>
+                      <p className="text-sm font-heading font-semibold text-foreground">Cartão da Gestante</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="bg-muted rounded-lg p-3">
-                          <p className="text-[11px] text-muted-foreground font-heading">Tipo de Pele</p>
-                          <p className="text-sm text-foreground">{record.aestheticEval.skinType}</p>
-                        </div>
-                        {record.aestheticEval.conditions && (
-                          <div className="bg-muted rounded-lg p-3 col-span-1 md:col-span-3">
-                            <p className="text-[11px] text-muted-foreground font-heading">Condições Cutâneas</p>
-                            <p className="text-sm text-foreground">{record.aestheticEval.conditions}</p>
+                        {[
+                          { label: "Tipo Sanguíneo", value: `${record.gestationalCard.bloodType} ${record.gestationalCard.rh}` },
+                          { label: "G/P/A", value: `G${record.gestationalCard.gravida}P${record.gestationalCard.para}A${record.gestationalCard.abortions}` },
+                          { label: "DUM", value: record.gestationalCard.dum },
+                          { label: "DPP", value: record.gestationalCard.dpp },
+                          { label: "Classificação de Risco", value: record.gestationalCard.riskClassification === "habitual" ? "Habitual" : "Alto Risco" },
+                          { label: "Hospital", value: record.gestationalCard.hospital || "—" },
+                          { label: "Pediatra", value: record.gestationalCard.pediatrician || "—" },
+                          { label: "Acompanhante", value: record.gestationalCard.companion || "—" },
+                        ].map((item) => (
+                          <div key={item.label} className="bg-muted rounded-lg p-3">
+                            <p className="text-[11px] text-muted-foreground font-heading">{item.label}</p>
+                            <p className="text-sm text-foreground">{item.value}</p>
                           </div>
-                        )}
+                        ))}
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {record.aestheticEval.spots && <Badge variant="outline" className="text-xs">Manchas</Badge>}
-                        {record.aestheticEval.wrinkles && <Badge variant="outline" className="text-xs">Rugas</Badge>}
-                        {record.aestheticEval.scars && <Badge variant="outline" className="text-xs">Cicatrizes</Badge>}
-                        {record.aestheticEval.stretchMarks && <Badge variant="outline" className="text-xs">Estrias</Badge>}
-                        {record.aestheticEval.lesions && <Badge variant="outline" className="text-xs">Lesões</Badge>}
-                      </div>
-                      {record.aestheticEval.observations && (
-                        <div className="bg-muted rounded-lg p-3">
-                          <p className="text-[11px] text-muted-foreground font-heading">Observações</p>
-                          <p className="text-sm text-foreground">{record.aestheticEval.observations}</p>
-                        </div>
-                      )}
-
-                      {/* Fotos Antes e Depois */}
-                      {(record.aestheticEval.photosBefore.length > 0 || record.aestheticEval.photosAfter.length > 0) && (
-                        <>
-                          <p className="text-xs font-heading font-semibold text-foreground mt-2">Registro Fotográfico</p>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                              <p className="text-[11px] text-muted-foreground font-heading">Antes</p>
-                              <div className="flex flex-wrap gap-2">
-                                {record.aestheticEval.photosBefore.map((img, i) => (
-                                  <div key={i} className="w-20 h-20 rounded-lg overflow-hidden border border-border cursor-pointer" onClick={() => { setLightboxPhotos(record.aestheticEval.photosBefore); setLightboxCompare(record.aestheticEval.photosAfter); setLightboxIndex(i); setLightboxOpen(true); }}>
-                                    <img src={img} alt="" className="w-full h-full object-cover" />
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="space-y-1.5">
-                              <p className="text-[11px] text-muted-foreground font-heading">Depois</p>
-                              <div className="flex flex-wrap gap-2">
-                                {record.aestheticEval.photosAfter.map((img, i) => (
-                                  <div key={i} className="w-20 h-20 rounded-lg overflow-hidden border border-border cursor-pointer" onClick={() => { setLightboxPhotos(record.aestheticEval.photosBefore); setLightboxCompare(record.aestheticEval.photosAfter); setLightboxIndex(i); setLightboxOpen(true); }}>
-                                    <img src={img} alt="" className="w-full h-full object-cover" />
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
                     </>
                   )}
 

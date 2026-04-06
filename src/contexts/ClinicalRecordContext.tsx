@@ -1,27 +1,54 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
-export interface AestheticEvaluation {
-  skinType: string;
-  conditions: string;
-  spots: boolean;
-  wrinkles: boolean;
-  scars: boolean;
-  stretchMarks: boolean;
-  lesions: boolean;
+// ===== TYPES =====
+
+export interface PrenatalConsultation {
+  id: string;
+  date: string;
+  gestationalAge: string;
+  weight: string;
+  bloodPressure: string;
+  uterineHeight: string;
+  fetalHeartRate: string;
+  edema: string;
+  fetalPresentation: string;
   observations: string;
-  photosBefore: string[];
-  photosAfter: string[];
+  conduct: string;
+  professional: string;
+  nextAppointment: string;
 }
 
-export interface ObstetricEvaluation {
-  gestationalAge: string;
-  pregnancyType: string;
-  prenatalExams: string;
-  symptoms: string;
-  fetalHeartRate: string;
-  emotionalState: string;
+export interface GestationalExam {
+  id: string;
+  date: string;
+  type: string;
+  result: string;
+  observations: string;
+  fileUrl: string;
+}
+
+export interface GestationalCard {
+  bloodType: string;
+  rh: string;
+  gravida: string; // G
+  para: string;    // P
+  abortions: string; // A
+  dum: string; // data última menstruação
+  dpp: string; // data provável do parto
+  preGestationalWeight: string;
+  height: string;
+  preGestationalBmi: string;
+  allergies: string;
+  medications: string;
+  preExistingConditions: string;
+  previousSurgeries: string;
+  familyHistory: string;
   birthPlan: string;
-  riskConditions: string;
+  riskClassification: "habitual" | "alto_risco";
+  companion: string;
+  companionPhone: string;
+  pediatrician: string;
+  hospital: string;
 }
 
 export interface VitalSigns {
@@ -93,14 +120,17 @@ export interface ClinicalRecord {
   previousProcedures: string;
   obstetricHistory: string;
   lastMenstruation: string;
-  aestheticEval: AestheticEvaluation;
   vitalSigns: VitalSigns;
-  obstetricEval: ObstetricEvaluation;
   procedures: ProcedureRecord[];
   followUps: FollowUp[];
-  recordType: "estetica" | "maternidade" | "ambos";
   status: "ativo" | "arquivado";
+  // Gestational fields
+  gestationalCard: GestationalCard;
+  prenatalConsultations: PrenatalConsultation[];
+  gestationalExams: GestationalExam[];
 }
+
+// ===== DEFAULTS =====
 
 export const emptyVitalSigns: VitalSigns = {
   weight: "", height: "", bmi: "", bloodPressure: "", heartRate: "", temperature: "",
@@ -109,12 +139,12 @@ export const emptyVitalSigns: VitalSigns = {
   posture: "",
 };
 
-const emptyAestheticEval: AestheticEvaluation = {
-  skinType: "", conditions: "", spots: false, wrinkles: false, scars: false, stretchMarks: false, lesions: false, observations: "", photosBefore: [], photosAfter: [],
-};
-
-const emptyObstetricEval: ObstetricEvaluation = {
-  gestationalAge: "", pregnancyType: "", prenatalExams: "", symptoms: "", fetalHeartRate: "", emotionalState: "", birthPlan: "", riskConditions: "",
+export const emptyGestationalCard: GestationalCard = {
+  bloodType: "", rh: "", gravida: "", para: "", abortions: "",
+  dum: "", dpp: "", preGestationalWeight: "", height: "", preGestationalBmi: "",
+  allergies: "", medications: "", preExistingConditions: "", previousSurgeries: "",
+  familyHistory: "", birthPlan: "", riskClassification: "habitual",
+  companion: "", companionPhone: "", pediatrician: "", hospital: "",
 };
 
 export const createEmptyRecord = (patientId: string, patientName: string, nextNumber: number): Omit<ClinicalRecord, "id"> => ({
@@ -126,12 +156,15 @@ export const createEmptyRecord = (patientId: string, patientName: string, nextNu
   consultationReason: "", expectations: "",
   preExistingConditions: "", medications: "", allergies: "", habits: "",
   previousProcedures: "", obstetricHistory: "", lastMenstruation: "",
-  aestheticEval: { ...emptyAestheticEval },
   vitalSigns: { ...emptyVitalSigns },
-  obstetricEval: { ...emptyObstetricEval },
   procedures: [], followUps: [],
-  recordType: "estetica", status: "ativo",
+  status: "ativo",
+  gestationalCard: { ...emptyGestationalCard },
+  prenatalConsultations: [],
+  gestationalExams: [],
 });
+
+// ===== CONTEXT =====
 
 interface ClinicalRecordContextType {
   records: ClinicalRecord[];
@@ -141,6 +174,8 @@ interface ClinicalRecordContextType {
   getRecordsByPatient: (patientId: string) => ClinicalRecord[];
   addProcedure: (recordId: string, procedure: Omit<ProcedureRecord, "id">) => void;
   addFollowUp: (recordId: string, followUp: Omit<FollowUp, "id">) => void;
+  addPrenatalConsultation: (recordId: string, consultation: Omit<PrenatalConsultation, "id">) => void;
+  addGestationalExam: (recordId: string, exam: Omit<GestationalExam, "id">) => void;
 }
 
 const ClinicalRecordContext = createContext<ClinicalRecordContextType | null>(null);
@@ -152,7 +187,7 @@ const mockRecords: ClinicalRecord[] = [
     patientName: "Maria Silva",
     patientPhoto: "",
     createdAt: "2026-01-15T10:00:00Z",
-    updatedAt: "2026-02-20T14:30:00Z",
+    updatedAt: "2026-04-01T14:30:00Z",
     prontuarioNumber: "RC-001",
     fullName: "Maria Silva",
     birthDate: "1990-05-12",
@@ -163,27 +198,39 @@ const mockRecords: ClinicalRecord[] = [
     profession: "Professora",
     consentSigned: true,
     consentFile: "",
-    consultationReason: "Tratamento de manchas faciais e rejuvenescimento",
-    expectations: "Redução significativa das manchas e pele mais uniforme",
+    consultationReason: "Acompanhamento gestacional completo",
+    expectations: "Parto humanizado e acompanhamento personalizado",
     preExistingConditions: "Nenhuma",
-    medications: "Vitamina D",
+    medications: "Ácido fólico, Sulfato ferroso",
     allergies: "Nenhuma conhecida",
-    habits: "Não fumante, pratica exercícios 3x/semana",
-    previousProcedures: "Limpeza de pele (2025)",
-    obstetricHistory: "",
-    lastMenstruation: "2026-02-01",
-    aestheticEval: { skinType: "Mista", conditions: "Manchas de sol, poros dilatados na zona T", spots: true, wrinkles: false, scars: false, stretchMarks: false, lesions: false, observations: "Pele com fotodano leve", photosBefore: [], photosAfter: [] },
-    vitalSigns: { weight: "62kg", height: "1.65m", bmi: "22.8", bloodPressure: "120/80", heartRate: "72bpm", temperature: "36.5°C", bust: "88cm", waist: "68cm", abdomen: "72cm", hips: "96cm", leftArm: "27cm", rightArm: "27cm", leftThigh: "52cm", rightThigh: "52cm", leftCalf: "35cm", rightCalf: "35cm", posture: "Normal" },
-    obstetricEval: { gestationalAge: "", pregnancyType: "", prenatalExams: "", symptoms: "", fetalHeartRate: "", emotionalState: "", birthPlan: "", riskConditions: "" },
-    procedures: [
-      { id: "p1", date: "2026-01-15", protocolName: "Limpeza de Pele Profunda", parameters: "Extração manual, peeling enzimático", intraObservations: "Paciente tolerou bem", postObservations: "Leve vermelhidão esperada", homeInstructions: "Protetor solar FPS 50, evitar sol direto por 48h", professional: "Dra. Rayssa", results: "Pele mais limpa e luminosa", photosBefore: [], photosAfter: [], popFile: "", vitalSigns: { weight: "62kg", height: "1.65m", bmi: "22.8", bloodPressure: "118/78", heartRate: "70bpm", temperature: "36.4°C", bust: "", waist: "", abdomen: "", hips: "", leftArm: "", rightArm: "", leftThigh: "", rightThigh: "", leftCalf: "", rightCalf: "", posture: "" } },
-      { id: "p2", date: "2026-02-10", protocolName: "Peeling Químico Superficial", parameters: "Ácido glicólico 30%, 3 min", intraObservations: "Ardência leve nos primeiros 30s", postObservations: "Descamação fina esperada em 3-5 dias", homeInstructions: "Hidratante calmante, FPS 50, não esfoliar", professional: "Dra. Rayssa", results: "Redução visível das manchas", photosBefore: [], photosAfter: [], popFile: "", vitalSigns: { weight: "61.5kg", height: "1.65m", bmi: "22.6", bloodPressure: "122/80", heartRate: "74bpm", temperature: "36.6°C", bust: "", waist: "", abdomen: "", hips: "", leftArm: "", rightArm: "", leftThigh: "", rightThigh: "", leftCalf: "", rightCalf: "", posture: "" } },
-    ],
-    followUps: [
-      { id: "f1", date: "2026-02-20", notes: "Manchas reduziram ~40%. Paciente satisfeita. Agendar próxima sessão de peeling.", nextVisit: "2026-03-10" },
-    ],
-    recordType: "estetica",
+    habits: "Não fumante, pratica yoga para gestantes",
+    previousProcedures: "",
+    obstetricHistory: "G2P1A0",
+    lastMenstruation: "2025-10-15",
+    vitalSigns: { weight: "68kg", height: "1.65m", bmi: "25.0", bloodPressure: "110/70", heartRate: "78bpm", temperature: "36.5°C", bust: "", waist: "", abdomen: "92cm", hips: "", leftArm: "", rightArm: "", leftThigh: "", rightThigh: "", leftCalf: "", rightCalf: "", posture: "Normal" },
+    procedures: [],
+    followUps: [],
     status: "ativo",
+    gestationalCard: {
+      bloodType: "O", rh: "+", gravida: "2", para: "1", abortions: "0",
+      dum: "2025-10-15", dpp: "2026-07-22", preGestationalWeight: "60kg", height: "1.65m", preGestationalBmi: "22.0",
+      allergies: "Nenhuma", medications: "Ácido fólico 5mg, Sulfato ferroso", preExistingConditions: "Nenhuma",
+      previousSurgeries: "Cesariana (2022)", familyHistory: "Mãe com hipertensão",
+      birthPlan: "Parto normal humanizado, com acompanhante, em banheira",
+      riskClassification: "habitual", companion: "João Silva", companionPhone: "(11) 97777-0000",
+      pediatrician: "Dr. Carlos Mendes", hospital: "Hospital São Lucas",
+    },
+    prenatalConsultations: [
+      { id: "pc1", date: "2026-01-15", gestationalAge: "13 semanas", weight: "62kg", bloodPressure: "110/70", uterineHeight: "12cm", fetalHeartRate: "150bpm", edema: "Ausente", fetalPresentation: "-", observations: "Gestação tópica, feto único, vitalidade preservada", conduct: "Solicitar exames do 1º trimestre", professional: "Dra. Rayssa", nextAppointment: "2026-02-12" },
+      { id: "pc2", date: "2026-02-12", gestationalAge: "17 semanas", weight: "63.5kg", bloodPressure: "108/68", uterineHeight: "16cm", fetalHeartRate: "148bpm", edema: "Ausente", fetalPresentation: "-", observations: "Exames do 1º trimestre normais. Morfológico agendado.", conduct: "Suplementação de ferro", professional: "Dra. Rayssa", nextAppointment: "2026-03-12" },
+      { id: "pc3", date: "2026-03-12", gestationalAge: "21 semanas", weight: "65kg", bloodPressure: "112/72", uterineHeight: "20cm", fetalHeartRate: "145bpm", edema: "Ausente", fetalPresentation: "Cefálica", observations: "Morfológico sem alterações. Desenvolvimento adequado.", conduct: "Manter suplementação", professional: "Dra. Rayssa", nextAppointment: "2026-04-09" },
+    ],
+    gestationalExams: [
+      { id: "ge1", date: "2026-01-20", type: "Ultrassom 1º Trimestre", result: "Gestação tópica, feto único, BCF+, IG compatível", observations: "TN 1.2mm - normal", fileUrl: "" },
+      { id: "ge2", date: "2026-01-22", type: "Hemograma Completo", result: "Hb 12.5 g/dL, Ht 37%, sem alterações", observations: "", fileUrl: "" },
+      { id: "ge3", date: "2026-01-22", type: "Tipagem Sanguínea", result: "O Rh+", observations: "Coombs indireto negativo", fileUrl: "" },
+      { id: "ge4", date: "2026-03-05", type: "Ultrassom Morfológico", result: "Anatomia fetal preservada, peso estimado 380g", observations: "Sexo: feminino. Placenta anterior grau 0", fileUrl: "" },
+    ],
   },
 ];
 
@@ -218,8 +265,20 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
     } : r));
   };
 
+  const addPrenatalConsultation = (recordId: string, consultation: Omit<PrenatalConsultation, "id">) => {
+    setRecords((prev) => prev.map((r) => r.id === recordId ? {
+      ...r, prenatalConsultations: [...r.prenatalConsultations, { ...consultation, id: `pc${Date.now()}` }], updatedAt: new Date().toISOString(),
+    } : r));
+  };
+
+  const addGestationalExam = (recordId: string, exam: Omit<GestationalExam, "id">) => {
+    setRecords((prev) => prev.map((r) => r.id === recordId ? {
+      ...r, gestationalExams: [...r.gestationalExams, { ...exam, id: `ge${Date.now()}` }], updatedAt: new Date().toISOString(),
+    } : r));
+  };
+
   return (
-    <ClinicalRecordContext.Provider value={{ records, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp }}>
+    <ClinicalRecordContext.Provider value={{ records, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp, addPrenatalConsultation, addGestationalExam }}>
       {children}
     </ClinicalRecordContext.Provider>
   );
