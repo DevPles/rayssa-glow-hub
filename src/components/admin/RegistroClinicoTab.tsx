@@ -795,8 +795,8 @@ const RegistroClinicoTab = () => {
 
                 {/* Gráficos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <SimpleLineChart data={weightData} label="Curva de Ganho de Peso (kg × semana)" />
-                  <SimpleLineChart data={uterineHeightData} label="Curva de Altura Uterina (cm × semana)" color="hsl(var(--primary))" />
+                  <FilterableChart data={weightData} label="Curva de Ganho de Peso (kg × semana)" currentWeek={igWeeks} />
+                  <FilterableChart data={uterineHeightData} label="Curva de Altura Uterina (cm × semana)" color="hsl(var(--primary))" currentWeek={igWeeks} />
                 </div>
 
                 <Separator />
