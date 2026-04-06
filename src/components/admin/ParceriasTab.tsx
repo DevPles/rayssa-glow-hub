@@ -152,8 +152,8 @@ export const ParceriasTab = () => {
             <SelectItem value="enfermeiro">Enfermeiros</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={openNew} className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading ml-auto">
-          + Nova Parceria
+        <Button variant="secondary" onClick={openNew} className="ml-auto font-heading">
+          Nova Parceria
         </Button>
       </div>
 
@@ -267,7 +267,7 @@ export const ParceriasTab = () => {
                 <Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} className="rounded-xl min-h-[60px]" placeholder="Detalhes da parceria..." />
               </div>
             </div>
-            <Button onClick={handleSave} className="w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading">
+            <Button variant="secondary" onClick={handleSave} className="w-full font-heading">
               {editingId ? "Salvar Alterações" : "Cadastrar Parceria"}
             </Button>
           </div>
