@@ -135,7 +135,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
       {lastConsult && (
         <Card className="clinical-card">
           <CardContent className="p-4">
-            <p className="text-[10px] text-muted-foreground font-heading uppercase mb-2">📊 Últimos dados — consulta {format(new Date(lastConsult.date), "dd/MM/yyyy")}</p>
+            <p className="text-[10px] text-muted-foreground font-heading uppercase mb-2">Últimos dados — consulta {format(new Date(lastConsult.date), "dd/MM/yyyy")}</p>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
               {[
                 { label: "Peso", value: lastConsult.weight ? `${lastConsult.weight}kg` : "—", sub: currentIMC ? `IMC ${currentIMC}` : undefined },
@@ -197,23 +197,23 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
               return (
                 <div key={tri} className={`bg-white/30 dark:bg-white/5 rounded-xl p-3 text-center ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
                   <p className="text-[10px] text-muted-foreground font-heading uppercase">
-                    {isCurrentTri ? "📍 " : ""}Exames {tri}º Tri
+                    {isCurrentTri ? "" : ""}Exames {tri}º Tri
                   </p>
                   <p className={`text-sm font-heading font-bold ${done === total ? "text-green-600" : "text-amber-600"}`}>{done}/{total}</p>
                   <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1">
                     <div className={`h-full rounded-full transition-all ${done === total ? "bg-green-500" : "bg-amber-400"}`} style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }} />
                   </div>
-                  {done === total && <span className="text-[9px] text-green-600">✅ Completo</span>}
+                  {done === total && <span className="text-[9px] text-green-600">Completo</span>}
                 </div>
               );
             })}
             <div className="bg-white/30 dark:bg-white/5 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-muted-foreground font-heading uppercase">💉 Vacinas Recom.</p>
+              <p className="text-[10px] text-muted-foreground font-heading uppercase">Vacinas Recom.</p>
               <p className={`text-sm font-heading font-bold ${vaccineChecklist.done === vaccineChecklist.total ? "text-green-600" : "text-amber-600"}`}>{vaccineChecklist.done}/{vaccineChecklist.total}</p>
               <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1">
                 <div className={`h-full rounded-full transition-all ${vaccineChecklist.done === vaccineChecklist.total ? "bg-green-500" : "bg-amber-400"}`} style={{ width: `${vaccineChecklist.total > 0 ? (vaccineChecklist.done / vaccineChecklist.total) * 100 : 0}%` }} />
               </div>
-              {vaccineChecklist.done === vaccineChecklist.total && <span className="text-[9px] text-green-600">✅ Completo</span>}
+              {vaccineChecklist.done === vaccineChecklist.total && <span className="text-[9px] text-green-600">Completo</span>}
             </div>
           </div>
         </CardContent>
