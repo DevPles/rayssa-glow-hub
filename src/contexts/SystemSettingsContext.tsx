@@ -103,9 +103,9 @@ const defaultSectionVisibility: SectionVisibility = { services: true, blog: true
 
 const defaults: SystemSettings = {
   id: "",
-  companyName: "Acompanhamento Gestacional",
-  companyShortName: "GestaCare",
-  companySubtitle: "Acompanhamento Gestacional",
+   companyName: "LeMater",
+   companyShortName: "LeMater",
+   companySubtitle: "Acompanhamento Gestacional",
   logoUrl: null,
   heroPhotoUrl: null,
   heroCardName: "Equipe GestaCare",
