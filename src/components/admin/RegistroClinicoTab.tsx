@@ -93,12 +93,22 @@ const EXAMS_BY_TRIMESTER: Record<string, string[]> = {
   "3": ["Hemograma", "Glicemia", "VDRL", "HIV", "Hepatite B", "Urocultura", "Estreptococo Grupo B (GBS)", "Ultrassom 3º Trimestre"],
 };
 
-// Vacinas obrigatórias na gestação
-const REQUIRED_VACCINES = [
-  { name: "Influenza (Gripe)", doses: ["Dose Única"] },
-  { name: "dTpa (Tríplice Bacteriana)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"] },
-  { name: "Hepatite B", doses: ["1ª Dose", "2ª Dose", "3ª Dose"] },
-  { name: "COVID-19", doses: ["1ª Dose", "2ª Dose", "Reforço"] },
+// Vacinas disponíveis no Brasil para gestantes
+const VACCINES_BRAZIL = [
+  { name: "Influenza (Gripe)", doses: ["Dose Única"], gestationalAlert: "Recomendada em qualquer trimestre da gestação. Protege contra complicações respiratórias graves." },
+  { name: "dTpa (Tríplice Bacteriana)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], gestationalAlert: "Aplicar entre 20ª e 36ª semana. Protege o recém-nascido contra coqueluche nos primeiros meses." },
+  { name: "Hepatite B", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], gestationalAlert: "Indicada para gestantes não vacinadas. Pode ser aplicada em qualquer trimestre." },
+  { name: "COVID-19", doses: ["1ª Dose", "2ª Dose", "Reforço"], gestationalAlert: "Gestantes são grupo prioritário. Pfizer e CoronaVac são recomendadas." },
+  { name: "dT (Dupla Adulto)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], gestationalAlert: "Alternativa à dTpa quando esta não estiver disponível. Não protege contra coqueluche." },
+  { name: "Febre Amarela", doses: ["Dose Única", "Reforço"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação, exceto em surtos com alto risco epidemiológico. Avaliar risco-benefício." },
+  { name: "Tríplice Viral (SCR)", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério imediato se suscetível." },
+  { name: "Varicela", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério se suscetível." },
+  { name: "HPV", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Completar esquema após o parto." },
+  { name: "Pneumocócica 23-valente", doses: ["Dose Única", "Reforço"], gestationalAlert: "Indicada para gestantes com comorbidades (diabetes, cardiopatias, pneumopatias)." },
+  { name: "Meningocócica ACWY", doses: ["Dose Única"], gestationalAlert: "Pode ser considerada em situações epidemiológicas especiais." },
+  { name: "Raiva", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "4ª Dose", "5ª Dose"], gestationalAlert: "Indicada em pós-exposição (mordida animal). Pode ser aplicada na gestação quando necessário." },
+  { name: "Hepatite A", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "Pode ser aplicada quando houver indicação epidemiológica." },
+  { name: "BCG", doses: ["Dose Única"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacina para o recém-nascido." },
 ];
 
 const handleFileUpload = (accept: string, onFiles: (urls: string[]) => void) => {
@@ -190,7 +200,7 @@ const RegistroClinicoTab = () => {
   // Vaccine dialog
   const [vaccineDialogOpen, setVaccineDialogOpen] = useState(false);
   const [vaccineForm, setVaccineForm] = useState<Omit<Vaccine, "id">>({
-    name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "",
+    name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "", manufacturer: "", reaction: "",
   });
 
   const filteredRecords = useMemo(() => {
@@ -353,7 +363,7 @@ const RegistroClinicoTab = () => {
     addVaccine(selectedRecord.id, vaccineForm);
     setSelectedRecord((prev) => prev ? { ...prev, vaccines: [...(prev.vaccines || []), { ...vaccineForm, id: `v${Date.now()}` }] } : prev);
     setVaccineDialogOpen(false);
-    setVaccineForm({ name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "" });
+    setVaccineForm({ name: "", dose: "", date: new Date().toISOString().split("T")[0], lot: "", professional: user?.name || "", manufacturer: "", reaction: "" });
     toast({ title: "Vacina registrada!" });
   };
 
@@ -903,24 +913,32 @@ const RegistroClinicoTab = () => {
             <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Calendário Vacinal da Gestante</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                {REQUIRED_VACCINES.map((vac) => {
+                {VACCINES_BRAZIL.map((vac) => {
                   const applied = (r.vaccines || []).filter((v) => v.name === vac.name);
+                  const hasAlert = vac.gestationalAlert.includes("⚠️");
                   return (
-                    <div key={vac.name} className="bg-white/30 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-2">
+                    <div key={vac.name} className={`rounded-xl p-3 ${hasAlert ? "bg-destructive/5 border border-destructive/20" : "bg-white/30"}`}>
+                      <div className="flex items-center justify-between mb-1">
                         <p className="text-sm font-heading font-semibold text-foreground">{vac.name}</p>
                         <Badge variant={applied.length > 0 ? "default" : "outline"} className="text-[10px] font-heading">
-                          {applied.length > 0 ? `${applied.length} dose(s) aplicada(s)` : "Pendente"}
+                          {applied.length > 0 ? `${applied.length} dose(s)` : "Pendente"}
                         </Badge>
                       </div>
+                      <p className={`text-[11px] mb-2 ${hasAlert ? "text-destructive" : "text-muted-foreground"}`}>{vac.gestationalAlert}</p>
                       {applied.length > 0 && (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5 mt-2 border-t border-border/30 pt-2">
                           {applied.map((v) => (
-                            <div key={v.id} className="text-xs text-muted-foreground flex gap-3">
-                              <span>{v.dose}</span>
-                              <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
-                              <span>Lote: {v.lot || "—"}</span>
-                              <span>{v.professional}</span>
+                            <div key={v.id} className="text-xs text-muted-foreground space-y-0.5">
+                              <div className="flex gap-3 flex-wrap">
+                                <span className="font-medium text-foreground">{v.dose}</span>
+                                <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
+                                <span>Lote: {v.lot || "—"}</span>
+                                {v.manufacturer && <span>Fab: {v.manufacturer}</span>}
+                                <span>{v.professional}</span>
+                              </div>
+                              {v.reaction && (
+                                <p className="text-destructive text-[11px]">Reação: {v.reaction}</p>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -928,6 +946,23 @@ const RegistroClinicoTab = () => {
                     </div>
                   );
                 })}
+                {/* Vacinas "Outra" que não estão na lista */}
+                {(r.vaccines || []).filter((v) => v.name === "Outra" && v.customName).map((v) => (
+                  <div key={v.id} className="bg-white/30 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-heading font-semibold text-foreground">{v.customName}</p>
+                      <Badge variant="default" className="text-[10px] font-heading">Aplicada</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground flex gap-3 flex-wrap">
+                      <span>{v.dose}</span>
+                      <span>{format(new Date(v.date), "dd/MM/yyyy")}</span>
+                      <span>Lote: {v.lot || "—"}</span>
+                      {v.manufacturer && <span>Fab: {v.manufacturer}</span>}
+                      <span>{v.professional}</span>
+                    </div>
+                    {v.reaction && <p className="text-destructive text-[11px] mt-1">Reação: {v.reaction}</p>}
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1179,25 +1214,39 @@ const RegistroClinicoTab = () => {
 
         {/* Vaccine Dialog */}
         <Dialog open={vaccineDialogOpen} onOpenChange={setVaccineDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle className="font-heading">Registrar Vacina</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-2">
               <div className="space-y-1.5">
                 <Label className="text-xs font-heading">Vacina *</Label>
-                <Select value={vaccineForm.name} onValueChange={(v) => setVaccineForm({ ...vaccineForm, name: v })}>
+                <Select value={vaccineForm.name} onValueChange={(v) => setVaccineForm({ ...vaccineForm, name: v, customName: v === "Outra" ? "" : undefined })}>
                   <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
-                    {REQUIRED_VACCINES.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
-                    <SelectItem value="Outra">Outra</SelectItem>
+                    {VACCINES_BRAZIL.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                    <SelectItem value="Outra">Outra (digitar nome)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              {vaccineForm.name === "Outra" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-heading">Nome da Vacina *</Label>
+                  <Input value={vaccineForm.customName || ""} onChange={(e) => setVaccineForm({ ...vaccineForm, customName: e.target.value })} className="rounded-xl" placeholder="Digite o nome da vacina" />
+                </div>
+              )}
+              {vaccineForm.name && vaccineForm.name !== "Outra" && (() => {
+                const info = VACCINES_BRAZIL.find((v) => v.name === vaccineForm.name);
+                return info?.gestationalAlert ? (
+                  <div className={`rounded-lg p-2.5 text-[11px] ${info.gestationalAlert.includes("⚠️") ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-secondary/10 text-secondary-foreground border border-secondary/20"}`}>
+                    {info.gestationalAlert}
+                  </div>
+                ) : null;
+              })()}
               <div className="space-y-1.5">
                 <Label className="text-xs font-heading">Dose</Label>
                 <Select value={vaccineForm.dose} onValueChange={(v) => setVaccineForm({ ...vaccineForm, dose: v })}>
                   <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
-                    {(REQUIRED_VACCINES.find((v) => v.name === vaccineForm.name)?.doses || ["Dose Única", "1ª Dose", "2ª Dose", "3ª Dose", "Reforço"]).map((d) => (
+                    {(VACCINES_BRAZIL.find((v) => v.name === vaccineForm.name)?.doses || ["Dose Única", "1ª Dose", "2ª Dose", "3ª Dose", "Reforço"]).map((d) => (
                       <SelectItem key={d} value={d}>{d}</SelectItem>
                     ))}
                   </SelectContent>
@@ -1207,7 +1256,20 @@ const RegistroClinicoTab = () => {
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Data</Label><Input type="date" value={vaccineForm.date} onChange={(e) => setVaccineForm({ ...vaccineForm, date: e.target.value })} className="rounded-xl" /></div>
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Lote</Label><Input value={vaccineForm.lot} onChange={(e) => setVaccineForm({ ...vaccineForm, lot: e.target.value })} className="rounded-xl" /></div>
               </div>
-              <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={vaccineForm.professional} onChange={(e) => setVaccineForm({ ...vaccineForm, professional: e.target.value })} className="rounded-xl" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Fabricante</Label><Input value={vaccineForm.manufacturer} onChange={(e) => setVaccineForm({ ...vaccineForm, manufacturer: e.target.value })} className="rounded-xl" placeholder="Ex: Butantan, Pfizer" /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={vaccineForm.professional} onChange={(e) => setVaccineForm({ ...vaccineForm, professional: e.target.value })} className="rounded-xl" /></div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-heading">Reação Adversa</Label>
+                <Textarea
+                  value={vaccineForm.reaction}
+                  onChange={(e) => setVaccineForm({ ...vaccineForm, reaction: e.target.value })}
+                  className="rounded-xl resize-none"
+                  rows={2}
+                  placeholder="Descreva reações observadas (dor local, febre, mal-estar, etc.)"
+                />
+              </div>
               <div className="flex gap-3 pt-2">
                 <Button variant="outline" onClick={() => setVaccineDialogOpen(false)} className="flex-1">Cancelar</Button>
                 <Button variant="secondary" onClick={handleAddVaccine} className="flex-1">Registrar</Button>
