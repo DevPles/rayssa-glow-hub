@@ -17,12 +17,12 @@ export interface MockUser {
 
 // Mock users database
 const mockUsersDB: MockUser[] = [
-  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", tenantId: null },
-  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", tenantId: null },
-  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", tenantId: null },
-  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "afiliada", tenantId: null },
-  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", tenantId: null },
-  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "afiliada", tenantId: null },
+  { id: "1", name: "Super Admin", email: "superadmin@sistema.com", phone: "(11) 99999-0000", password: "super123", role: "super_admin", specialty: "", tenantId: null },
+  { id: "1b", name: "Admin Rayssa", email: "admin@123.com", phone: "(11) 99999-0001", password: "admin123", role: "admin", specialty: "medico_obstetra", tenantId: null },
+  { id: "2", name: "Maria Silva", email: "maria@email.com", phone: "(11) 98888-1111", password: "123456", role: "cliente", specialty: "", tenantId: null },
+  { id: "3", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-0001", password: "123456", role: "admin", specialty: "enfermeiro_obstetra", tenantId: null },
+  { id: "4", name: "Camila Costa", email: "camila@email.com", phone: "(21) 97777-2222", password: "123456", role: "cliente", specialty: "", tenantId: null },
+  { id: "5", name: "Juliana Ferreira", email: "juliana@email.com", phone: "(11) 99999-0002", password: "123456", role: "admin", specialty: "medico_obstetra", tenantId: null },
 ];
 
 interface AuthContextType {
