@@ -59,7 +59,7 @@ const HeroSection = () => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid gap-12 items-center">
           {/* Left content */}
           <div>
 
@@ -94,24 +94,6 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right - Portrait */}
-          <div className="hidden lg:flex justify-center">
-            <div className="relative">
-              <div className="w-80 h-96 rounded-3xl overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 relative">
-                <img src={settings.heroPhotoUrl || rayssaPortrait} alt={settings.heroCardName || "Profissional"} className="w-full h-full object-cover" />
-                <div className="absolute bottom-0 left-0 right-0 bg-card/40 backdrop-blur-md border-t border-white/20 px-5 py-4">
-                  <p className="font-heading font-semibold text-foreground text-sm">{settings.heroCardName}</p>
-                  <p className="text-xs text-muted-foreground">{settings.heroCardSubtitle}</p>
-                </div>
-              </div>
-              <div className="absolute -top-4 -right-4 bg-secondary text-secondary-foreground rounded-2xl px-4 py-2 shadow-lg">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-current" />
-                  <span className="font-heading font-bold text-sm">5.0</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
