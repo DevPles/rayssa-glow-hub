@@ -1214,25 +1214,39 @@ const RegistroClinicoTab = () => {
 
         {/* Vaccine Dialog */}
         <Dialog open={vaccineDialogOpen} onOpenChange={setVaccineDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle className="font-heading">Registrar Vacina</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-2">
               <div className="space-y-1.5">
                 <Label className="text-xs font-heading">Vacina *</Label>
-                <Select value={vaccineForm.name} onValueChange={(v) => setVaccineForm({ ...vaccineForm, name: v })}>
+                <Select value={vaccineForm.name} onValueChange={(v) => setVaccineForm({ ...vaccineForm, name: v, customName: v === "Outra" ? "" : undefined })}>
                   <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
-                    {REQUIRED_VACCINES.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
-                    <SelectItem value="Outra">Outra</SelectItem>
+                    {VACCINES_BRAZIL.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                    <SelectItem value="Outra">Outra (digitar nome)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              {vaccineForm.name === "Outra" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-heading">Nome da Vacina *</Label>
+                  <Input value={vaccineForm.customName || ""} onChange={(e) => setVaccineForm({ ...vaccineForm, customName: e.target.value })} className="rounded-xl" placeholder="Digite o nome da vacina" />
+                </div>
+              )}
+              {vaccineForm.name && vaccineForm.name !== "Outra" && (() => {
+                const info = VACCINES_BRAZIL.find((v) => v.name === vaccineForm.name);
+                return info?.gestationalAlert ? (
+                  <div className={`rounded-lg p-2.5 text-[11px] ${info.gestationalAlert.includes("⚠️") ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-secondary/10 text-secondary-foreground border border-secondary/20"}`}>
+                    {info.gestationalAlert}
+                  </div>
+                ) : null;
+              })()}
               <div className="space-y-1.5">
                 <Label className="text-xs font-heading">Dose</Label>
                 <Select value={vaccineForm.dose} onValueChange={(v) => setVaccineForm({ ...vaccineForm, dose: v })}>
                   <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
-                    {(REQUIRED_VACCINES.find((v) => v.name === vaccineForm.name)?.doses || ["Dose Única", "1ª Dose", "2ª Dose", "3ª Dose", "Reforço"]).map((d) => (
+                    {(VACCINES_BRAZIL.find((v) => v.name === vaccineForm.name)?.doses || ["Dose Única", "1ª Dose", "2ª Dose", "3ª Dose", "Reforço"]).map((d) => (
                       <SelectItem key={d} value={d}>{d}</SelectItem>
                     ))}
                   </SelectContent>
@@ -1242,7 +1256,20 @@ const RegistroClinicoTab = () => {
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Data</Label><Input type="date" value={vaccineForm.date} onChange={(e) => setVaccineForm({ ...vaccineForm, date: e.target.value })} className="rounded-xl" /></div>
                 <div className="space-y-1.5"><Label className="text-xs font-heading">Lote</Label><Input value={vaccineForm.lot} onChange={(e) => setVaccineForm({ ...vaccineForm, lot: e.target.value })} className="rounded-xl" /></div>
               </div>
-              <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={vaccineForm.professional} onChange={(e) => setVaccineForm({ ...vaccineForm, professional: e.target.value })} className="rounded-xl" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Fabricante</Label><Input value={vaccineForm.manufacturer} onChange={(e) => setVaccineForm({ ...vaccineForm, manufacturer: e.target.value })} className="rounded-xl" placeholder="Ex: Butantan, Pfizer" /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={vaccineForm.professional} onChange={(e) => setVaccineForm({ ...vaccineForm, professional: e.target.value })} className="rounded-xl" /></div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-heading">Reação Adversa</Label>
+                <Textarea
+                  value={vaccineForm.reaction}
+                  onChange={(e) => setVaccineForm({ ...vaccineForm, reaction: e.target.value })}
+                  className="rounded-xl resize-none"
+                  rows={2}
+                  placeholder="Descreva reações observadas (dor local, febre, mal-estar, etc.)"
+                />
+              </div>
               <div className="flex gap-3 pt-2">
                 <Button variant="outline" onClick={() => setVaccineDialogOpen(false)} className="flex-1">Cancelar</Button>
                 <Button variant="secondary" onClick={handleAddVaccine} className="flex-1">Registrar</Button>
