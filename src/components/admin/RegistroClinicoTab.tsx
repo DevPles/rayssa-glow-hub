@@ -93,12 +93,22 @@ const EXAMS_BY_TRIMESTER: Record<string, string[]> = {
   "3": ["Hemograma", "Glicemia", "VDRL", "HIV", "Hepatite B", "Urocultura", "Estreptococo Grupo B (GBS)", "Ultrassom 3º Trimestre"],
 };
 
-// Vacinas obrigatórias na gestação
-const REQUIRED_VACCINES = [
-  { name: "Influenza (Gripe)", doses: ["Dose Única"] },
-  { name: "dTpa (Tríplice Bacteriana)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"] },
-  { name: "Hepatite B", doses: ["1ª Dose", "2ª Dose", "3ª Dose"] },
-  { name: "COVID-19", doses: ["1ª Dose", "2ª Dose", "Reforço"] },
+// Vacinas disponíveis no Brasil para gestantes
+const VACCINES_BRAZIL = [
+  { name: "Influenza (Gripe)", doses: ["Dose Única"], gestationalAlert: "Recomendada em qualquer trimestre da gestação. Protege contra complicações respiratórias graves." },
+  { name: "dTpa (Tríplice Bacteriana)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], gestationalAlert: "Aplicar entre 20ª e 36ª semana. Protege o recém-nascido contra coqueluche nos primeiros meses." },
+  { name: "Hepatite B", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], gestationalAlert: "Indicada para gestantes não vacinadas. Pode ser aplicada em qualquer trimestre." },
+  { name: "COVID-19", doses: ["1ª Dose", "2ª Dose", "Reforço"], gestationalAlert: "Gestantes são grupo prioritário. Pfizer e CoronaVac são recomendadas." },
+  { name: "dT (Dupla Adulto)", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "Reforço"], gestationalAlert: "Alternativa à dTpa quando esta não estiver disponível. Não protege contra coqueluche." },
+  { name: "Febre Amarela", doses: ["Dose Única", "Reforço"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação, exceto em surtos com alto risco epidemiológico. Avaliar risco-benefício." },
+  { name: "Tríplice Viral (SCR)", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério imediato se suscetível." },
+  { name: "Varicela", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacinar no puerpério se suscetível." },
+  { name: "HPV", doses: ["1ª Dose", "2ª Dose", "3ª Dose"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Completar esquema após o parto." },
+  { name: "Pneumocócica 23-valente", doses: ["Dose Única", "Reforço"], gestationalAlert: "Indicada para gestantes com comorbidades (diabetes, cardiopatias, pneumopatias)." },
+  { name: "Meningocócica ACWY", doses: ["Dose Única"], gestationalAlert: "Pode ser considerada em situações epidemiológicas especiais." },
+  { name: "Raiva", doses: ["1ª Dose", "2ª Dose", "3ª Dose", "4ª Dose", "5ª Dose"], gestationalAlert: "Indicada em pós-exposição (mordida animal). Pode ser aplicada na gestação quando necessário." },
+  { name: "Hepatite A", doses: ["1ª Dose", "2ª Dose"], gestationalAlert: "Pode ser aplicada quando houver indicação epidemiológica." },
+  { name: "BCG", doses: ["Dose Única"], gestationalAlert: "⚠️ CONTRAINDICADA na gestação. Vacina para o recém-nascido." },
 ];
 
 const handleFileUpload = (accept: string, onFiles: (urls: string[]) => void) => {
