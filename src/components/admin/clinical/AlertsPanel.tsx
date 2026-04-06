@@ -34,7 +34,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
 
     // Post-term
     if (igWeeks >= 42) {
-      result.push({ id: "post-term", severity: "critical", icon: "🚨", title: "PÓS-TERMO — IG ≥ 42 semanas", description: "Gestação além do termo. Encaminhamento urgente para indução/avaliação.", action: { label: "Ver Cartão", tab: "cartao" } });
+      result.push({ id: "post-term", severity: "critical", icon: "", title: "PÓS-TERMO — IG ≥ 42 semanas", description: "Gestação além do termo. Encaminhamento urgente para indução/avaliação.", action: { label: "Ver Cartão", tab: "cartao" } });
     }
 
     // Consecutive high BP (2+ readings)
