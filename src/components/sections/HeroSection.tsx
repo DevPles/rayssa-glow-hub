@@ -68,11 +68,10 @@ const HeroSection = () => {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-card mb-6 leading-[1.1]">
-              <span className="inline-block animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema desenvolvido{" "}</span>
-              <span className="inline-block animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>para proporcionar uma{" "}</span>
-              <span className="inline-block animate-fade-in text-primary" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>Experiência Exclusiva{" "}</span>
-              <span className="inline-block animate-fade-in" style={{ animationDelay: '900ms', animationFillMode: 'both' }}>de Parto{" "}</span>
-              <span className="inline-block animate-fade-in text-accent" style={{ animationDelay: '1200ms', animationFillMode: 'both' }}>{displayText}<span className="animate-pulse">|</span></span>
+              <span className="inline-block animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema de{" "}</span>
+              <span className="inline-block animate-fade-in text-primary" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>Experiência Exclusiva{" "}</span>
+              <span className="inline-block animate-fade-in" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>de Parto{" "}</span>
+              <span className="inline-block animate-fade-in text-accent" style={{ animationDelay: '900ms', animationFillMode: 'both' }}>{displayText}<span className="animate-pulse">|</span></span>
             </h1>
 
             <p className="text-lg text-card/70 mb-8 leading-relaxed max-w-lg">
