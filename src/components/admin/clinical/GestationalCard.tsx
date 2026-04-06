@@ -145,7 +145,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
                 { label: "Edema", value: lastConsult.edema || "—" },
                 { label: "Apresentação", value: lastConsult.fetalPresentation || "—" },
               ].map(item => (
-                <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-2.5 text-center">
+                <div key={item.label} className="bg-muted/20 rounded-xl p-2.5 text-center">
                   <p className="text-[9px] text-muted-foreground font-heading">{item.label}</p>
                   <p className="text-sm font-heading font-bold text-foreground">{item.value}</p>
                   {item.sub && <p className="text-[9px] text-muted-foreground">{item.sub}</p>}
@@ -168,7 +168,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
               { label: "Classificação", value: gc.riskClassification === "habitual" ? "Risco Habitual" : "Alto Risco" },
               { label: "Altura", value: gc.height ? `${gc.height}m` : "—" },
             ].map(item => (
-              <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3 text-center">
+              <div key={item.label} className="bg-muted/20 rounded-xl p-3 text-center">
                 <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                 <p className="text-sm font-heading font-bold text-foreground">{item.value}</p>
               </div>
@@ -195,7 +195,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
             {examChecklist.map(({ tri, total, done }) => {
               const isCurrentTri = tri === String(getTrimesterFromIG(igWeeks));
               return (
-                <div key={tri} className={`bg-white/30 dark:bg-white/5 rounded-xl p-3 text-center ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
+                <div key={tri} className={`bg-muted/20 rounded-xl p-3 text-center ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
                   <p className="text-[10px] text-muted-foreground font-heading uppercase">
                     {isCurrentTri ? "" : ""}Exames {tri}º Tri
                   </p>
@@ -207,7 +207,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
                 </div>
               );
             })}
-            <div className="bg-white/30 dark:bg-white/5 rounded-xl p-3 text-center">
+            <div className="bg-muted/20 rounded-xl p-3 text-center">
               <p className="text-[10px] text-muted-foreground font-heading uppercase">Vacinas Recom.</p>
               <p className={`text-sm font-heading font-bold ${vaccineChecklist.done === vaccineChecklist.total ? "text-primary" : "text-muted-foreground"}`}>{vaccineChecklist.done}/{vaccineChecklist.total}</p>
               <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1">
@@ -231,7 +231,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
               { label: "Cirurgias anteriores", value: gc.previousSurgeries },
               { label: "Histórico familiar", value: gc.familyHistory },
             ].filter(v => v.value).map(item => (
-              <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3">
+              <div key={item.label} className="bg-muted/20 rounded-xl p-3">
                 <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                 <p className="text-sm text-foreground">{item.value}</p>
               </div>
@@ -247,14 +247,14 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
               { label: "Pediatra", value: gc.pediatrician },
               { label: "Hospital", value: gc.hospital },
             ].filter(v => v.value).map(item => (
-              <div key={item.label} className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3">
+              <div key={item.label} className="bg-muted/20 rounded-xl p-3">
                 <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                 <p className="text-sm text-foreground">{item.value}</p>
               </div>
             ))}
           </div>
           {gc.birthPlan && (
-            <div className="bg-white/30 dark:bg-white/5 backdrop-blur-lg rounded-xl p-3">
+            <div className="bg-muted/20 rounded-xl p-3">
               <p className="text-[10px] text-muted-foreground font-heading uppercase">Plano de Parto</p>
               <p className="text-sm text-foreground">{gc.birthPlan}</p>
             </div>

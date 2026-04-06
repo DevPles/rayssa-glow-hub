@@ -175,7 +175,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-6 bg-white/40 backdrop-blur-xl rounded-xl">
+        <TabsList className="w-full grid grid-cols-6 bg-muted/30 rounded-xl">
           <TabsTrigger value="cartao" className="rounded-lg font-heading text-xs">Cartão</TabsTrigger>
           <TabsTrigger value="timeline" className="rounded-lg font-heading text-xs">Timeline</TabsTrigger>
           <TabsTrigger value="consultas" className="rounded-lg font-heading text-xs">Consultas ({record.prenatalConsultations.length})</TabsTrigger>
@@ -218,7 +218,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
                   { label: "Emergência", value: record.emergencyContact || "—" },
                   { label: "Consentimento", value: record.consentSigned ? "Assinado" : "Pendente" },
                 ].map(item => (
-                  <div key={item.label} className="bg-white/30 backdrop-blur-lg rounded-xl p-3">
+                  <div key={item.label} className="bg-muted/20 rounded-xl p-3">
                     <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                     <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
                   </div>

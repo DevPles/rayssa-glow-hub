@@ -69,7 +69,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
       {VACCINE_CATEGORIES.map(({ key: cat, label: catLabel, color: catColor }) => {
         const catVaccines = VACCINES_BRAZIL.filter(v => v.category === cat);
         return (
-          <Card key={cat} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+          <Card key={cat} className="border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className={`text-sm font-heading ${catColor}`}>{catLabel}</CardTitle>
               {cat === "contraindicada" && <p className="text-[10px] text-destructive/80">Vacinas de vírus vivo atenuado — NÃO aplicar na gestação</p>}
@@ -95,7 +95,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
 
                       return (
                         <Fragment key={vac.name}>
-                          <tr className="border-b border-border/10 hover:bg-white/20">
+                          <tr className="border-b border-border/10 hover:bg-muted/30">
                             <td className="py-2 px-2">
                               <span className="font-heading font-semibold text-foreground">{vac.name}</span>
                             </td>
@@ -148,7 +148,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
 
       {/* Custom vaccines */}
       {vaccines.filter(v => v.name === "Outra" && v.customName).length > 0 && (
-        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+        <Card className="border-border/50">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Vacinas Adicionais</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">

@@ -63,7 +63,7 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
         const expected = EXAMS_BY_TRIMESTER[tri];
         const exams = examsByTrimester(tri);
         return (
-          <Card key={tri} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg">
+          <Card key={tri} className="border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-heading flex items-center justify-between">
                 <span>{tri}º Trimestre</span>
@@ -78,7 +78,7 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                 })}
               </div>
               {exams.map(exam => (
-                <div key={exam.id} className="bg-white/30 backdrop-blur-lg rounded-xl p-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedExam(exam); setDetailOpen(true); }}>
+                <div key={exam.id} className="bg-muted/20 rounded-xl p-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedExam(exam); setDetailOpen(true); }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-heading font-bold text-foreground">{exam.type}</p>
@@ -166,24 +166,24 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                   { label: "Solicitado por", value: selectedExam.requestedBy || "—" },
                   { label: "Interpretação", value: selectedExam.interpretation === "normal" ? "Normal" : selectedExam.interpretation === "alterado" ? "Alterado" : selectedExam.interpretation === "inconclusivo" ? "Inconclusivo" : "—" },
                 ].map(item => (
-                  <div key={item.label} className="bg-white/30 rounded-xl p-3">
+                  <div key={item.label} className="bg-muted/20 rounded-xl p-3">
                     <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                     <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
                   </div>
                 ))}
               </div>
               {selectedExam.referenceValues && (
-                <div className="bg-white/30 rounded-xl p-3">
+                <div className="bg-muted/20 rounded-xl p-3">
                   <p className="text-[10px] text-muted-foreground font-heading uppercase">Valores de Referência</p>
                   <p className="text-sm text-foreground">{selectedExam.referenceValues}</p>
                 </div>
               )}
-              <div className="bg-white/30 rounded-xl p-3">
+              <div className="bg-muted/20 rounded-xl p-3">
                 <p className="text-[10px] text-muted-foreground font-heading uppercase">Resultado</p>
                 <p className="text-sm text-foreground">{selectedExam.result || "Aguardando resultado"}</p>
               </div>
               {selectedExam.observations && (
-                <div className="bg-white/30 rounded-xl p-3">
+                <div className="bg-muted/20 rounded-xl p-3">
                   <p className="text-[10px] text-muted-foreground font-heading uppercase">Observações</p>
                   <p className="text-sm text-foreground">{selectedExam.observations}</p>
                 </div>
