@@ -6,7 +6,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 import rayssaPortrait from "@/assets/rayssa-portrait.jpg";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
 
-const words = ["Parto Privado", "Parto Humanizado"];
+const words = ["Privado", "Personalizado"];
 
 const HeroSection = () => {
   const { settings } = useSystemSettings();
@@ -68,8 +68,11 @@ const HeroSection = () => {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-card mb-6 leading-[1.1]">
-              <span className="inline-block animate-fade-in text-primary" style={{ animationDelay: '0ms' }}>Sistema de Experiência Exclusiva</span>{" "}
-              <span className="inline-block animate-fade-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>de Parto Privado</span>
+              <span className="inline-block animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema desenvolvido{" "}</span>
+              <span className="inline-block animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>para proporcionar uma{" "}</span>
+              <span className="inline-block animate-fade-in text-primary" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>Experiência Exclusiva{" "}</span>
+              <span className="inline-block animate-fade-in" style={{ animationDelay: '900ms', animationFillMode: 'both' }}>de Parto{" "}</span>
+              <span className="inline-block animate-fade-in text-accent" style={{ animationDelay: '1200ms', animationFillMode: 'both' }}>{displayText}<span className="animate-pulse">|</span></span>
             </h1>
 
             <p className="text-lg text-card/70 mb-8 leading-relaxed max-w-lg">
