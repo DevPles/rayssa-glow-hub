@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return newUser;
   };
 
-  const addUser = (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null }): MockUser => {
+  const addUser = (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null; photoUrl?: string; cpf?: string; birthDate?: string; gender?: string; address?: string; city?: string; state?: string; zipCode?: string; notes?: string; specialty?: ProfessionalSpecialty }): MockUser => {
     const newUser: MockUser = {
       id: `u${Date.now()}`,
       name: data.name,
@@ -121,8 +121,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phone: data.phone || "",
       password: data.password || "123456",
       role: data.role || "cliente",
-      specialty: "",
+      specialty: data.specialty || "",
       tenantId: data.tenantId || null,
+      photoUrl: data.photoUrl || "",
+      cpf: data.cpf || "",
+      birthDate: data.birthDate || "",
+      gender: (data.gender as MockUser["gender"]) || "",
+      address: data.address || "",
+      city: data.city || "",
+      state: data.state || "",
+      zipCode: data.zipCode || "",
+      notes: data.notes || "",
+      createdAt: new Date().toISOString().split("T")[0],
     };
     setUsers((prev) => [...prev, newUser]);
     return newUser;
