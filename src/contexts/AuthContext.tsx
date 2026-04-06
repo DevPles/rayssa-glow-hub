@@ -40,10 +40,10 @@ interface AuthContextType {
   users: MockUser[];
   login: (email: string, password: string) => MockUser | null;
   signup: (name: string, email: string) => MockUser;
-  addUser: (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null }) => MockUser;
+  addUser: (data: { name: string; email: string; phone?: string; password?: string; role?: UserRole; tenantId?: string | null; photoUrl?: string; cpf?: string; birthDate?: string; gender?: string; address?: string; city?: string; state?: string; zipCode?: string; notes?: string; specialty?: ProfessionalSpecialty }) => MockUser;
   logout: () => void;
   updateUserRole: (userId: string, role: UserRole) => void;
-  updateUser: (userId: string, data: Partial<Pick<MockUser, "name" | "email" | "phone" | "password" | "tenantId">>) => void;
+  updateUser: (userId: string, data: Partial<Omit<MockUser, "id" | "role">>) => void;
   deleteUser: (userId: string) => void;
 }
 
