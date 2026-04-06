@@ -1410,6 +1410,70 @@ const RegistroClinicoTab = () => {
                     </div>
                     <div className="space-y-1.5"><Label className="text-xs font-heading">Observações</Label><Textarea value={selectedConsultation.observations} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, observations: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
                     <div className="space-y-1.5"><Label className="text-xs font-heading">Conduta</Label><Textarea value={selectedConsultation.conduct} onChange={(e) => setSelectedConsultation({ ...selectedConsultation, conduct: e.target.value })} className="rounded-xl min-h-[50px]" /></div>
+
+                    {/* Solicitação de Exames */}
+                    <Separator />
+                    <p className="text-xs font-heading font-semibold">Solicitar Exames:</p>
+                    {(() => {
+                      const cw = igWeeks || 20;
+                      const currentTrimester = cw <= 13 ? "1" : cw <= 27 ? "2" : "3";
+                      const suggestedExams = EXAMS_BY_TRIMESTER[currentTrimester] || [];
+                      const reqExams = selectedConsultation.requestedExams || [];
+                      return (
+                        <div className="space-y-2">
+                          <p className="text-[10px] text-muted-foreground">Exames sugeridos para o {currentTrimester}º trimestre (IG {igWeeks || "—"}s):</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {suggestedExams.map((ex) => {
+                              const isAdded = reqExams.some(r => r.examName === ex);
+                              return (
+                                <button
+                                  key={ex}
+                                  onClick={() => {
+                                    if (isAdded) {
+                                      setSelectedConsultation({ ...selectedConsultation, requestedExams: reqExams.filter(r => r.examName !== ex) });
+                                    } else {
+                                      setSelectedConsultation({ ...selectedConsultation, requestedExams: [...reqExams, { id: crypto.randomUUID(), examName: ex, trimester: currentTrimester as "1"|"2"|"3", observations: "", status: "solicitado" }] });
+                                    }
+                                  }}
+                                  className={`text-[10px] px-2 py-1 rounded-full font-heading transition-colors ${
+                                    isAdded ? "bg-secondary text-secondary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                                  }`}
+                                >
+                                  {isAdded ? "✓ " : "+ "}{ex}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {/* Exame personalizado */}
+                          <div className="flex gap-2 items-end">
+                            <div className="flex-1 space-y-1">
+                              <Label className="text-[10px] font-heading">Outro exame</Label>
+                              <Input id="custom-exam-input" placeholder="Nome do exame" className="rounded-xl h-7 text-xs" />
+                            </div>
+                            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
+                              const input = document.getElementById("custom-exam-input") as HTMLInputElement;
+                              const name = input?.value?.trim();
+                              if (name) {
+                                setSelectedConsultation({ ...selectedConsultation, requestedExams: [...reqExams, { id: crypto.randomUUID(), examName: name, trimester: currentTrimester as "1"|"2"|"3", observations: "", status: "solicitado" }] });
+                                input.value = "";
+                              }
+                            }}>Adicionar</Button>
+                          </div>
+                          {reqExams.length > 0 && (
+                            <div className="space-y-1 mt-2">
+                              <p className="text-[10px] font-heading font-semibold text-foreground">Exames solicitados ({reqExams.length}):</p>
+                              {reqExams.map((ex) => (
+                                <div key={ex.id} className="flex items-center justify-between bg-white/30 rounded-lg px-2 py-1">
+                                  <span className="text-[11px] font-heading text-foreground">{ex.examName}</span>
+                                  <button onClick={() => setSelectedConsultation({ ...selectedConsultation, requestedExams: reqExams.filter(r => r.id !== ex.id) })} className="text-[10px] text-destructive hover:underline">Remover</button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     <div className="flex gap-3 pt-2">
                       <Button variant="outline" onClick={handleCancelarConsulta} className="flex-1">Cancelar Consulta</Button>
                       <Button variant="secondary" onClick={handleRealizarConsulta} className="flex-1">Realizar Consulta</Button>
@@ -1437,6 +1501,22 @@ const RegistroClinicoTab = () => {
                     {selectedConsultation.observations && <div className="text-xs"><span className="text-muted-foreground">Observações:</span> {selectedConsultation.observations}</div>}
                     {selectedConsultation.conduct && <div className="text-xs"><span className="text-muted-foreground">Conduta:</span> {selectedConsultation.conduct}</div>}
                     {selectedConsultation.professional && <div className="text-xs text-muted-foreground">Profissional: {selectedConsultation.professional}</div>}
+                    {(selectedConsultation.requestedExams || []).length > 0 && (
+                      <div className="mt-2">
+                        <Separator className="mb-2" />
+                        <p className="text-[10px] font-heading font-semibold text-foreground mb-1">Exames Solicitados ({selectedConsultation.requestedExams!.length}):</p>
+                        <div className="space-y-1">
+                          {selectedConsultation.requestedExams!.map((ex) => (
+                            <div key={ex.id} className="flex items-center justify-between bg-white/30 rounded-lg px-2 py-1">
+                              <span className="text-[11px] font-heading text-foreground">{ex.examName}</span>
+                              <Badge variant={ex.status === "realizado" ? "default" : "secondary"} className="text-[9px] font-heading">
+                                {ex.status === "realizado" ? "Realizado" : "Solicitado"}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

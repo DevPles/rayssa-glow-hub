@@ -14,6 +14,14 @@ export interface Vaccine {
   reaction: string;
 }
 
+export interface ConsultationExamRequest {
+  id: string;
+  examName: string;
+  trimester: "1" | "2" | "3";
+  observations: string;
+  status: "solicitado" | "realizado" | "cancelado";
+}
+
 export interface PrenatalConsultation {
   id: string;
   date: string;
@@ -29,6 +37,7 @@ export interface PrenatalConsultation {
   professional: string;
   nextAppointment: string;
   status: "agendada" | "realizada" | "cancelada";
+  requestedExams?: ConsultationExamRequest[];
 }
 
 export interface GestationalExam {
