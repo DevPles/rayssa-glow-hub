@@ -59,12 +59,14 @@ Deno.serve(async (req) => {
 
     const clean = cpf.replace(/\D/g, "");
 
-    if (!isValidCPF(clean)) {
+    if (clean.length !== 11) {
       return new Response(
-        JSON.stringify({ success: false, error: "CPF inválido. Verifique os dígitos." }),
+        JSON.stringify({ success: false, error: "CPF deve conter 11 dígitos." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const validChecksum = isValidCPF(clean);
 
     const region = getRegion(clean);
 
