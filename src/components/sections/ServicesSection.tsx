@@ -7,34 +7,34 @@ import servicesBg from "@/assets/services-bg.jpg";
 
 const serviceCards = [
   {
-    title: "Estética Avançada Feminina",
+    title: "Pré-Natal & Consultas",
     description:
-      "Procedimentos personalizados para todas as fases da vida da mulher. Protocolos avançados com tecnologia e acompanhamento profissional.",
-    services: ["Limpeza de Pele", "Radiofrequência", "Microagulhamento", "Harmonização Facial"],
+      "Acompanhamento gestacional completo com consultas periódicas, monitoramento fetal e orientações personalizadas para cada trimestre.",
+    services: ["Consulta Pré-Natal", "Ultrassonografia", "Exames Laboratoriais", "Monitoramento Fetal"],
     gradient: "from-secondary/20 to-primary/10",
     link: "/estetica-avancada",
   },
   {
-    title: "Núcleo Materno Especializado",
+    title: "Linha do Tempo Gestacional",
     description:
-      "Protocolos e acompanhamento estético seguro durante gestação e pós-parto, com cuidado integrado de enfermeira obstetra.",
-    services: ["Drenagem Gestacional", "Massagem Gestacional", "Acompanhamento Pré-natal", "Cuidados Pós-Parto"],
+      "Acompanhe semana a semana o desenvolvimento do seu bebê, marcos importantes e cuidados recomendados para cada fase da gestação.",
+    services: ["Desenvolvimento Fetal", "Marcos por Semana", "Dicas de Cuidados", "Plano de Parto"],
     gradient: "from-accent/20 to-primary/10",
     link: "/nucleo-materno",
   },
   {
-    title: "Produtos & Programas",
+    title: "Produtos para Gestantes",
     description:
-      "Soluções integradas para cuidado contínuo. Produtos premium e programas especializados em estética e saúde da mulher. Afiliadas Leslie.",
-    services: ["Cosméticos", "Semijoias", "Kits Maternidade", "Programas Online"],
+      "Loja com produtos selecionados para gestantes e mamães: kits maternidade, cosméticos seguros, enxoval e itens de bem-estar.",
+    services: ["Kits Maternidade", "Cosméticos Gestacionais", "Enxoval do Bebê", "Bem-estar da Mamãe"],
     gradient: "from-primary/20 to-secondary/10",
     link: "/produtos-programas",
   },
   {
-    title: "Parceria Rosângela Salão de Beleza",
+    title: "Serviços Especializados",
     description:
-      "Atendimento integrado em parceria com o Salão Rosângela, unindo estética clínica e beleza em um só lugar para uma experiência completa.",
-    services: ["Corte Feminino", "Coloração Capilar", "Tratamentos Capilares", "Penteados & Escova"],
+      "Drenagem gestacional, massagem para gestantes, cuidados pós-parto e tratamentos estéticos seguros durante a gravidez.",
+    services: ["Drenagem Gestacional", "Massagem Gestacional", "Cuidados Pós-Parto", "Preparação para o Parto"],
     gradient: "from-secondary/20 to-accent/10",
     link: "/parceria-rosangela",
   },
@@ -87,11 +87,11 @@ const ServicesSection = () => {
             Nossos Serviços
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-card mb-5">
-            Quatro linhas de atuação{" "}
+            Quatro pilares de atuação{" "}
             <span className="text-primary">{displayText}<span className="animate-pulse">|</span></span>
           </h2>
           <p className="text-card/70 max-w-2xl mx-auto text-lg">
-            Cuidado integral para cada fase da vida da mulher, com profissionalismo e carinho.
+            Cuidado integral para cada fase da gestação e do pós-parto, com profissionalismo e acolhimento.
           </p>
         </div>
 
