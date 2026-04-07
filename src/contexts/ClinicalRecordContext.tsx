@@ -367,7 +367,8 @@ const mockRecords: ClinicalRecord[] = [
 export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) => {
   const [records, setRecords] = useState<ClinicalRecord[]>(mockRecords);
   const [loading, setLoading] = useState(false);
-  const { tenantId } = useAuth();
+  const { user } = useAuth();
+  const tenantId = user?.tenantId;
 
   // Load from Supabase on mount
   const loadFromSupabase = useCallback(async () => {
