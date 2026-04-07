@@ -347,6 +347,7 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
   );
 };
 
+
 export const useClinicalRecords = () => {
   const ctx = useContext(ClinicalRecordContext);
   if (!ctx) throw new Error("useClinicalRecords must be used within ClinicalRecordProvider");
