@@ -1,5 +1,6 @@
 import { Instagram, Facebook, MessageCircle, Mail, Phone, MapPin } from "lucide-react";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
+import prsLogo from "@/assets/prs-logo.png";
 
 const Footer = () => {
   const { settings, logoSrc } = useSystemSettings();
@@ -85,7 +86,12 @@ const Footer = () => {
           <div className="flex gap-6">
             <a href="#" className="text-xs text-card/30 hover:text-accent transition-colors">Política de Privacidade</a>
             <a href="#" className="text-xs text-card/30 hover:text-accent transition-colors">Termos de Uso</a>
-          </div>
+        </div>
+
+        <div className="border-t border-card/10 pt-6 mt-6 flex items-center justify-center gap-2">
+          <span className="text-[11px] text-card/40">Este Sistema foi Desenvolvido por</span>
+          <img src={prsLogo} alt="PRS" className="h-6 object-contain" />
+        </div>
         </div>
       </div>
     </footer>
