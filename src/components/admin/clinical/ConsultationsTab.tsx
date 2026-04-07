@@ -363,11 +363,11 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex gap-3">
-          <div className="clinical-card px-3 py-2 text-center">
+          <div className="bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 px-3 py-2 text-center">
             <p className="text-lg font-heading font-bold text-foreground">{realizadas.length}</p>
             <p className="text-[10px] text-muted-foreground">Realizadas</p>
           </div>
-          <div className="clinical-card px-3 py-2 text-center">
+          <div className="bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 px-3 py-2 text-center">
             <p className="text-lg font-heading font-bold text-foreground">{record.prenatalConsultations.filter(c => c.status === "agendada").length}</p>
             <p className="text-[10px] text-muted-foreground">Agendadas</p>
           </div>
@@ -376,7 +376,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
       </div>
 
       {record.prenatalConsultations.length === 0 ? (
-        <Card className="clinical-card">
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
           <CardContent className="p-8 text-center"><p className="text-sm text-muted-foreground font-heading">Nenhuma consulta registrada</p></CardContent>
         </Card>
       ) : (
