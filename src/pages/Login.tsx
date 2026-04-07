@@ -74,14 +74,8 @@ const Login = () => {
           <img src={logo} alt="LeMater" className="h-28 md:h-36 w-auto max-w-[20rem] object-contain drop-shadow-2xl" />
         </div>
         <div className="absolute bottom-10 left-10 right-10">
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
-            <h2 className="font-heading font-bold text-white text-2xl mb-2 tracking-tight">LeMater</h2>
-            <p className="text-white/70 text-sm leading-relaxed">Sistema de Experiência Exclusiva de Parto — Acompanhamento gestacional completo e personalizado</p>
-            <div className="flex gap-2 mt-4">
-              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Pré-Natal</span>
-              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Gestação</span>
-              <span className="bg-white/15 text-white/80 text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">Parto</span>
-            </div>
+          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl flex items-center justify-center">
+            <img src={logo} alt="LeMater" className="h-20 w-auto max-w-[16rem] object-contain drop-shadow-xl" />
           </div>
         </div>
       </div>
