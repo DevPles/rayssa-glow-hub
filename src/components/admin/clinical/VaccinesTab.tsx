@@ -69,7 +69,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
       {VACCINE_CATEGORIES.map(({ key: cat, label: catLabel, color: catColor }) => {
         const catVaccines = VACCINES_BRAZIL.filter(v => v.category === cat);
         return (
-          <Card key={cat} className="border-border/50">
+          <Card key={cat} className="clinical-card">
             <CardHeader className="pb-2">
               <CardTitle className={`text-sm font-heading ${catColor}`}>{catLabel}</CardTitle>
               {cat === "contraindicada" && <p className="text-[10px] text-destructive/80">Vacinas de vírus vivo atenuado — NÃO aplicar na gestação</p>}
@@ -148,7 +148,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
 
       {/* Custom vaccines */}
       {vaccines.filter(v => v.name === "Outra" && v.customName).length > 0 && (
-        <Card className="border-border/50">
+        <Card className="clinical-card">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Vacinas Adicionais</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
