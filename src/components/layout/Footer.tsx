@@ -1,5 +1,6 @@
 import { Instagram, Facebook, MessageCircle, Mail, Phone, MapPin } from "lucide-react";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
+import prsLogo from "@/assets/prs-logo.png";
 
 const Footer = () => {
   const { settings, logoSrc } = useSystemSettings();
