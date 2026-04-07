@@ -12,7 +12,7 @@ const AdminRegistroClinicoTimeline = () => {
   const record = records.find(r => r.id === selectedId);
 
   return (
-    <AdminLayout title="Timeline">
+    <AdminLayout title="Timeline" backTo="/admin/registro-clinico">
       <div className="space-y-4">
         <Select value={selectedId} onValueChange={setSelectedId}>
           <SelectTrigger className="rounded-xl max-w-sm">

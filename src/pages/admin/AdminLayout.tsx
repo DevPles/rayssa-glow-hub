@@ -8,9 +8,10 @@ import { useEffect, ReactNode } from "react";
 interface AdminLayoutProps {
   title: string;
   children: ReactNode;
+  backTo?: string;
 }
 
-const AdminLayout = ({ title, children }: AdminLayoutProps) => {
+const AdminLayout = ({ title, children, backTo = "/admin" }: AdminLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -34,7 +35,7 @@ const AdminLayout = ({ title, children }: AdminLayoutProps) => {
 
       <div className="relative z-10 bg-card/60 backdrop-blur-xl border-b border-border/30 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
-          <Link to="/admin">
+          <Link to={backTo}>
             <Button size="icon" className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90">
               <ArrowLeft className="h-5 w-5" />
             </Button>
