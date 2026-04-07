@@ -2,6 +2,7 @@ import { Star, Quote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { testimonials } from "@/data/mock";
+import Autoplay from "embla-carousel-autoplay";
 
 const TestimonialsSection = () => {
   return (
