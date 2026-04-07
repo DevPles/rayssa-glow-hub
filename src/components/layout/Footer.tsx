@@ -10,7 +10,7 @@ const Footer = () => {
           {/* About */}
           <div>
             <div className="flex items-center gap-2.5 mb-5">
-              <img src={logoSrc} alt="Logo" className="w-9 h-9 object-contain" />
+              <img src={logoSrc} alt="Logo" className="w-20 h-20 object-contain" />
             </div>
             <p className="text-sm text-card/50 leading-relaxed">
               Sistema completo de acompanhamento gestacional com consultas pré-natal, linha do tempo, registro clínico e serviços especializados para gestantes.
