@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,9 +38,15 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
   const [selectedConsultation, setSelectedConsultation] = useState<PrenatalConsultation | null>(null);
   const [consultForm, setConsultForm] = useState<Omit<PrenatalConsultation, "id">>(emptyConsultForm(user?.name || ""));
 
-  // Stepper for "Realizar Consulta"
   const [step, setStep] = useState(1);
   const totalSteps = 5;
+
+  // Previous consultation data for comparison
+  const realizadas = useMemo(() =>
+    record.prenatalConsultations.filter(c => c.status === "realizada").sort((a, b) => b.date.localeCompare(a.date)),
+    [record.prenatalConsultations]
+  );
+  const lastConsult = realizadas[0];
 
   const openNewConsultation = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -69,22 +75,13 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
     if (!selectedConsultation) return;
     const updated = { ...selectedConsultation, status: "realizada" as const };
 
-    // Add requested exams to the exams tab
     if (updated.requestedExams?.length) {
       updated.requestedExams.forEach(ex => {
         if (ex.status === "solicitado") {
           const trimester = getTrimesterFromIG(calcGestationalWeeks(dum, updated.date));
           addGestationalExam(record.id, {
-            date: updated.date,
-            type: ex.examName,
-            result: "",
-            observations: ex.observations || "Solicitado na consulta",
-            fileUrl: "",
-            trimester,
-            interpretation: "",
-            referenceValues: "",
-            requestedBy: updated.professional,
-            laboratory: "",
+            date: updated.date, type: ex.examName, result: "", observations: "Solicitado na consulta",
+            fileUrl: "", trimester, interpretation: "", referenceValues: "", requestedBy: updated.professional, laboratory: "",
           });
         }
       });
@@ -93,23 +90,15 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
     updatePrenatalConsultation(record.id, selectedConsultation.id, updated);
     const newConsults = record.prenatalConsultations.map(c => c.id === selectedConsultation.id ? updated : c);
 
-    // Also add exams to local state
     const newExams = [...record.gestationalExams];
     if (updated.requestedExams?.length) {
       updated.requestedExams.forEach(ex => {
         if (ex.status === "solicitado") {
           newExams.push({
-            id: `ge${Date.now()}-${Math.random()}`,
-            date: updated.date,
-            type: ex.examName,
-            result: "",
-            observations: "Solicitado na consulta",
-            fileUrl: "",
+            id: `ge${Date.now()}-${Math.random()}`, date: updated.date, type: ex.examName, result: "",
+            observations: "Solicitado na consulta", fileUrl: "",
             trimester: getTrimesterFromIG(calcGestationalWeeks(dum, updated.date)),
-            interpretation: "",
-            referenceValues: "",
-            requestedBy: updated.professional,
-            laboratory: "",
+            interpretation: "", referenceValues: "", requestedBy: updated.professional, laboratory: "",
           });
         }
       });
@@ -128,11 +117,9 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
     toast({ title: "Consulta cancelada" });
   };
 
-  // Suggested exams for current trimester
   const currentTrimester = getTrimesterFromIG(igWeeks);
   const suggestedExams = EXAMS_BY_TRIMESTER[currentTrimester] || [];
 
-  // Exam request helpers
   const toggleExamRequest = (examName: string) => {
     if (!selectedConsultation) return;
     const reqs = selectedConsultation.requestedExams || [];
@@ -154,23 +141,89 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
     });
   };
 
-  // PA alert
   const hasBPAlert = (c: PrenatalConsultation) => {
     const bp = parseBloodPressure(c.bloodPressure);
     return bp && (bp.systolic >= 140 || bp.diastolic >= 90);
   };
 
-  // Render step content for "Realizar Consulta"
+  // Real-time validation feedback for vital signs
+  const getVitalSignsAlerts = (sc: PrenatalConsultation) => {
+    const alerts: { message: string; severity: "danger" | "warn" | "info" }[] = [];
+
+    // BP validation
+    const bp = parseBloodPressure(sc.bloodPressure);
+    if (bp) {
+      if (bp.systolic >= 160 || bp.diastolic >= 110) {
+        alerts.push({ message: `PA ${sc.bloodPressure} — Emergência hipertensiva! Avaliar pré-eclâmpsia grave.`, severity: "danger" });
+      } else if (bp.systolic >= 140 || bp.diastolic >= 90) {
+        alerts.push({ message: `PA ${sc.bloodPressure} — PA elevada. Monitorar e investigar pré-eclâmpsia.`, severity: "warn" });
+      } else if (bp.systolic >= 130 || bp.diastolic >= 85) {
+        alerts.push({ message: `PA ${sc.bloodPressure} — Limítrofe. Atenção na próxima aferição.`, severity: "info" });
+      }
+    }
+
+    // Weight gain
+    if (sc.weight && lastConsult?.weight) {
+      const curr = parseFloat(sc.weight);
+      const prev = parseFloat(lastConsult.weight);
+      if (curr && prev) {
+        const diff = curr - prev;
+        const daysBetween = lastConsult.date ? (new Date(sc.date || Date.now()).getTime() - new Date(lastConsult.date).getTime()) / (24 * 60 * 60 * 1000) : 0;
+        const weeksBetween = daysBetween / 7;
+        if (weeksBetween > 0) {
+          const weeklyGain = diff / weeksBetween;
+          if (diff < -1) {
+            alerts.push({ message: `Perda de ${Math.abs(diff).toFixed(1)}kg desde última consulta. Investigar causa.`, severity: "danger" });
+          } else if (weeklyGain > 0.5) {
+            alerts.push({ message: `Ganho de ${weeklyGain.toFixed(2)}kg/sem (recomendado < 0.5kg/sem). Ganho total: +${diff.toFixed(1)}kg.`, severity: "warn" });
+          } else if (diff > 0) {
+            alerts.push({ message: `Ganho adequado: +${diff.toFixed(1)}kg (${weeklyGain.toFixed(2)}kg/sem).`, severity: "info" });
+          }
+        }
+      }
+    }
+
+    // Edema
+    if (sc.edema === "+++") {
+      alerts.push({ message: "Edema severo (+++) — Avaliar pré-eclâmpsia, função renal e hepática.", severity: "danger" });
+    } else if (sc.edema === "++") {
+      alerts.push({ message: "Edema moderado (++) — Monitorar evolução.", severity: "warn" });
+    }
+
+    // Fetal heart rate
+    if (sc.fetalHeartRate) {
+      const fhr = parseInt(sc.fetalHeartRate);
+      if (fhr > 0 && (fhr < 110 || fhr > 160)) {
+        alerts.push({ message: `BCF ${fhr}bpm fora da faixa normal (110-160bpm). Avaliar sofrimento fetal.`, severity: fhr < 100 || fhr > 180 ? "danger" : "warn" });
+      }
+    }
+
+    return alerts;
+  };
+
+  const alertStyles = {
+    danger: "bg-destructive/10 border-destructive/30 text-destructive",
+    warn: "bg-secondary/10 border-secondary/30 text-secondary-foreground",
+    info: "bg-accent/30 border-accent/50 text-accent-foreground",
+  };
+
+  // Render step content
   const renderStep = () => {
     if (!selectedConsultation) return null;
     const sc = selectedConsultation;
     const updateSC = (fields: Partial<PrenatalConsultation>) => setSelectedConsultation({ ...sc, ...fields });
 
     switch (step) {
-      case 1: // Sinais Vitais
+      case 1: {
+        const vitalAlerts = getVitalSignsAlerts(sc);
         return (
           <div className="space-y-3">
             <p className="text-xs font-heading font-bold text-foreground">Passo 1 — Sinais Vitais</p>
+            {lastConsult && (
+              <div className="bg-muted/20 rounded-xl p-2.5 text-[10px] text-muted-foreground">
+                Última consulta ({format(new Date(lastConsult.date), "dd/MM/yy")}): Peso {lastConsult.weight || "—"}kg · PA {lastConsult.bloodPressure || "—"} · BCF {lastConsult.fetalHeartRate || "—"}
+              </div>
+            )}
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5"><Label className="text-xs font-heading">Peso (kg) *</Label><Input value={sc.weight} onChange={e => updateSC({ weight: e.target.value })} className="rounded-xl" /></div>
               <div className="space-y-1.5"><Label className="text-xs font-heading">PA *</Label><Input value={sc.bloodPressure} onChange={e => updateSC({ bloodPressure: e.target.value })} className="rounded-xl" placeholder="120/80" /></div>
@@ -187,9 +240,19 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
               </div>
               <div className="space-y-1.5"><Label className="text-xs font-heading">Apresentação</Label><Input value={sc.fetalPresentation} onChange={e => updateSC({ fetalPresentation: e.target.value })} className="rounded-xl" /></div>
             </div>
+            {vitalAlerts.length > 0 && (
+              <div className="space-y-1.5 mt-2">
+                {vitalAlerts.map((a, i) => (
+                  <div key={i} className={`rounded-lg border p-2 text-[11px] font-heading ${alertStyles[a.severity]}`}>
+                    {a.message}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
-      case 2: // Avaliação Clínica
+      }
+      case 2:
         return (
           <div className="space-y-3">
             <p className="text-xs font-heading font-bold text-foreground">Passo 2 — Avaliação Clínica</p>
@@ -197,7 +260,8 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
             <div className="space-y-1.5"><Label className="text-xs font-heading">Conduta</Label><Textarea value={sc.conduct} onChange={e => updateSC({ conduct: e.target.value })} className="rounded-xl min-h-[60px]" /></div>
           </div>
         );
-      case 3: // Exames
+      case 3: {
+        const doneExamTypes = record.gestationalExams.map(e => e.type);
         return (
           <div className="space-y-3">
             <p className="text-xs font-heading font-bold text-foreground">Passo 3 — Solicitação de Exames</p>
@@ -205,9 +269,10 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
             <div className="flex flex-wrap gap-1.5">
               {suggestedExams.map(ex => {
                 const isAdded = (sc.requestedExams || []).some(r => r.examName === ex);
+                const alreadyDone = doneExamTypes.includes(ex);
                 return (
-                  <button key={ex} onClick={() => toggleExamRequest(ex)} className={`text-[10px] px-2 py-1 rounded-full font-heading transition-colors ${isAdded ? "bg-secondary text-secondary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"}`}>
-                    {isAdded ? "✓ " : "+ "}{ex}
+                  <button key={ex} onClick={() => !alreadyDone && toggleExamRequest(ex)} className={`text-[10px] px-2 py-1 rounded-full font-heading transition-colors ${alreadyDone ? "bg-primary/20 text-primary line-through cursor-default" : isAdded ? "bg-secondary text-secondary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"}`}>
+                    {alreadyDone ? "Já realizado" : isAdded ? "Selecionado" : "Selecionar"} — {ex}
                   </button>
                 );
               })}
@@ -235,7 +300,8 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
             )}
           </div>
         );
-      case 4: // Prescrições
+      }
+      case 4:
         return (
           <div className="space-y-3">
             <p className="text-xs font-heading font-bold text-foreground">Passo 4 — Prescrições e Orientações</p>
@@ -243,26 +309,58 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
             <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={sc.professional} onChange={e => updateSC({ professional: e.target.value })} className="rounded-xl" /></div>
           </div>
         );
-      case 5: // Agendamento
+      case 5: {
+        const suggestedDate = suggestNextAppointment(igWeeks);
+        const intervalDesc = igWeeks >= 36 ? "semanal (após 36s)" : igWeeks >= 28 ? "quinzenal (28-36s)" : "mensal (até 28s)";
         return (
           <div className="space-y-3">
             <p className="text-xs font-heading font-bold text-foreground">Passo 5 — Próxima Consulta</p>
-            <p className="text-[10px] text-muted-foreground">
-              Intervalo sugerido: {igWeeks >= 36 ? "semanal" : igWeeks >= 28 ? "quinzenal" : "mensal"} (IG {igWeeks}s)
-            </p>
+            <div className="bg-accent/20 rounded-xl p-3 text-[11px] text-accent-foreground">
+              <p className="font-heading font-semibold mb-1">Intervalo recomendado: {intervalDesc}</p>
+              <p>Data sugerida: {format(new Date(suggestedDate), "dd/MM/yyyy", { locale: ptBR })} (próximo dia útil)</p>
+            </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-heading">Data da Próxima Consulta</Label>
-              <Input type="date" value={sc.nextAppointment || suggestNextAppointment(igWeeks)} onChange={e => updateSC({ nextAppointment: e.target.value })} className="rounded-xl" />
+              <Input type="date" value={sc.nextAppointment || suggestedDate} onChange={e => updateSC({ nextAppointment: e.target.value })} className="rounded-xl" />
             </div>
+            {/* Summary of this consultation */}
+            <Separator />
+            <p className="text-[10px] font-heading font-bold text-foreground">Resumo desta consulta:</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: "Peso", value: sc.weight ? `${sc.weight}kg` : "—" },
+                { label: "PA", value: sc.bloodPressure || "—" },
+                { label: "BCF", value: sc.fetalHeartRate ? `${sc.fetalHeartRate}bpm` : "—" },
+              ].map(item => (
+                <div key={item.label} className="bg-muted/20 rounded-lg p-2 text-center">
+                  <p className="text-[9px] text-muted-foreground font-heading">{item.label}</p>
+                  <p className="text-xs font-heading font-semibold text-foreground">{item.value}</p>
+                </div>
+              ))}
+            </div>
+            {(sc.requestedExams || []).length > 0 && (
+              <p className="text-[10px] text-muted-foreground">{(sc.requestedExams || []).length} exame(s) solicitado(s)</p>
+            )}
           </div>
         );
+      }
       default: return null;
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <div className="flex gap-3">
+          <div className="bg-primary/10 rounded-xl px-3 py-2 text-center border border-primary/20">
+            <p className="text-lg font-heading font-bold text-primary">{realizadas.length}</p>
+            <p className="text-[10px] text-primary/80">Realizadas</p>
+          </div>
+          <div className="bg-secondary/10 rounded-xl px-3 py-2 text-center border border-secondary/20">
+            <p className="text-lg font-heading font-bold text-secondary-foreground">{record.prenatalConsultations.filter(c => c.status === "agendada").length}</p>
+            <p className="text-[10px] text-secondary-foreground/80">Agendadas</p>
+          </div>
+        </div>
         <Button variant="secondary" size="sm" onClick={openNewConsultation}>Nova Consulta</Button>
       </div>
 
@@ -282,9 +380,9 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
                       <Badge variant={c.status === "realizada" ? "default" : c.status === "cancelada" ? "destructive" : "secondary"} className="text-[10px] font-heading">
                         {c.status === "realizada" ? "Realizada" : c.status === "cancelada" ? "Cancelada" : "Agendada"}
                       </Badge>
-                      {hasBPAlert(c) && <Badge variant="destructive" className="text-[9px]">PA</Badge>}
+                      {hasBPAlert(c) && <Badge variant="destructive" className="text-[9px]">PA Elevada</Badge>}
                     </div>
-                    <p className="text-xs text-muted-foreground">{format(new Date(c.date), "dd/MM/yyyy", { locale: ptBR })} • {c.gestationalAge || "—"}</p>
+                    <p className="text-xs text-muted-foreground">{format(new Date(c.date), "dd/MM/yyyy", { locale: ptBR })} {c.gestationalAge ? `· ${c.gestationalAge}` : ""}</p>
                   </div>
                   {c.professional && <span className="text-xs text-muted-foreground">{c.professional}</span>}
                 </div>
@@ -378,7 +476,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
           {selectedConsultation && (
             <div className="space-y-3 mt-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-heading">{format(new Date(selectedConsultation.date), "dd/MM/yyyy")} • {selectedConsultation.gestationalAge || "—"}</p>
+                <p className="text-sm font-heading">{format(new Date(selectedConsultation.date), "dd/MM/yyyy")} {selectedConsultation.gestationalAge ? `· ${selectedConsultation.gestationalAge}` : ""}</p>
                 <Badge variant={selectedConsultation.status === "realizada" ? "default" : selectedConsultation.status === "cancelada" ? "destructive" : "secondary"} className="text-xs font-heading">
                   {selectedConsultation.status === "realizada" ? "Realizada" : selectedConsultation.status === "cancelada" ? "Cancelada" : "Agendada"}
                 </Badge>
@@ -386,7 +484,6 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
 
               {selectedConsultation.status === "agendada" && (
                 <>
-                  {/* Stepper */}
                   <div className="flex items-center gap-1 mb-2">
                     {Array.from({ length: totalSteps }, (_, i) => i + 1).map(s => (
                       <button key={s} onClick={() => setStep(s)} className={`flex-1 h-2 rounded-full transition-colors ${s <= step ? "bg-secondary" : "bg-muted/40"}`} />
@@ -403,7 +500,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
                     {step < totalSteps ? (
                       <Button variant="secondary" size="sm" onClick={() => setStep(step + 1)}>Próximo</Button>
                     ) : (
-                      <Button variant="secondary" size="sm" onClick={handleRealizarConsulta}>✓ Realizar Consulta</Button>
+                      <Button variant="secondary" size="sm" onClick={handleRealizarConsulta}>Realizar Consulta</Button>
                     )}
                   </div>
 
