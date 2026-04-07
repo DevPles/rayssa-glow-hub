@@ -213,6 +213,7 @@ interface ClinicalRecordContextType {
   addPrenatalConsultation: (recordId: string, consultation: Omit<PrenatalConsultation, "id">) => void;
   updatePrenatalConsultation: (recordId: string, consultationId: string, data: Partial<PrenatalConsultation>) => void;
   addGestationalExam: (recordId: string, exam: Omit<GestationalExam, "id">) => void;
+  updateGestationalExam: (recordId: string, examId: string, data: Partial<GestationalExam>) => void;
   addVaccine: (recordId: string, vaccine: Omit<Vaccine, "id">) => void;
 }
 
@@ -325,6 +326,14 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
     } : r));
   };
 
+  const updateGestationalExam = (recordId: string, examId: string, data: Partial<GestationalExam>) => {
+    setRecords((prev) => prev.map((r) => r.id === recordId ? {
+      ...r,
+      gestationalExams: r.gestationalExams.map((e) => e.id === examId ? { ...e, ...data } : e),
+      updatedAt: new Date().toISOString(),
+    } : r));
+  };
+
   const addVaccine = (recordId: string, vaccine: Omit<Vaccine, "id">) => {
     setRecords((prev) => prev.map((r) => r.id === recordId ? {
       ...r, vaccines: [...(r.vaccines || []), { ...vaccine, id: `v${Date.now()}` }], updatedAt: new Date().toISOString(),
@@ -332,7 +341,7 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
   };
 
   return (
-    <ClinicalRecordContext.Provider value={{ records, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp, addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam, addVaccine }}>
+    <ClinicalRecordContext.Provider value={{ records, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp, addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam, updateGestationalExam, addVaccine }}>
       {children}
     </ClinicalRecordContext.Provider>
   );

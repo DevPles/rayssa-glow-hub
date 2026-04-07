@@ -20,14 +20,15 @@ interface ExamsTabProps {
 
 const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
   const { user } = useAuth();
-  const { addGestationalExam } = useClinicalRecords();
+  const { addGestationalExam, updateGestationalExam } = useClinicalRecords();
   const dum = record.gestationalCard.dum;
+  const igWeeks = calcGestationalWeeks(dum);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState<GestationalExam | null>(null);
+  const [editMode, setEditMode] = useState(false);
 
-  // Auto-calculate trimester from date
   const autoTrimester = (date: string): "1" | "2" | "3" => {
     if (!dum) return "1";
     return getTrimesterFromIG(calcGestationalWeeks(dum, date));
@@ -45,16 +46,56 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
     const newExam = { ...examForm, id: `ge${Date.now()}` };
     onRecordUpdate({ ...record, gestationalExams: [...record.gestationalExams, newExam] });
     setDialogOpen(false);
-    setExamForm({ date: new Date().toISOString().split("T")[0], type: "", result: "", observations: "", fileUrl: "", trimester: autoTrimester(new Date().toISOString().split("T")[0]), interpretation: "", referenceValues: "", requestedBy: user?.name || "", laboratory: "" });
+    resetForm();
     toast({ title: "Exame registrado!" });
+  };
+
+  const handleUpdateResult = () => {
+    if (!selectedExam) return;
+    updateGestationalExam(record.id, selectedExam.id, selectedExam);
+    onRecordUpdate({
+      ...record,
+      gestationalExams: record.gestationalExams.map(e => e.id === selectedExam.id ? selectedExam : e),
+    });
+    setEditMode(false);
+    toast({ title: "Resultado atualizado!" });
+  };
+
+  const resetForm = () => {
+    setExamForm({
+      date: new Date().toISOString().split("T")[0], type: "", result: "", observations: "", fileUrl: "",
+      trimester: autoTrimester(new Date().toISOString().split("T")[0]),
+      interpretation: "", referenceValues: "", requestedBy: user?.name || "", laboratory: "",
+    });
   };
 
   const examsByTrimester = (tri: string) => record.gestationalExams.filter(e => e.trimester === tri);
   const getExamsDone = (tri: string) => examsByTrimester(tri).map(e => e.type);
 
+  // Stats
+  const pendingExams = record.gestationalExams.filter(e => !e.result);
+  const completedExams = record.gestationalExams.filter(e => e.result);
+  const alteredExams = record.gestationalExams.filter(e => e.interpretation === "alterado");
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <div className="flex gap-3">
+          <div className="bg-primary/10 rounded-xl px-3 py-2 text-center border border-primary/20">
+            <p className="text-lg font-heading font-bold text-primary">{completedExams.length}</p>
+            <p className="text-[10px] text-primary/80">Com resultado</p>
+          </div>
+          <div className="bg-secondary/10 rounded-xl px-3 py-2 text-center border border-secondary/20">
+            <p className="text-lg font-heading font-bold text-secondary-foreground">{pendingExams.length}</p>
+            <p className="text-[10px] text-secondary-foreground/80">Aguardando</p>
+          </div>
+          {alteredExams.length > 0 && (
+            <div className="bg-destructive/10 rounded-xl px-3 py-2 text-center border border-destructive/20">
+              <p className="text-lg font-heading font-bold text-destructive">{alteredExams.length}</p>
+              <p className="text-[10px] text-destructive/80">Alterados</p>
+            </div>
+          )}
+        </div>
         <Button variant="secondary" size="sm" onClick={() => setDialogOpen(true)}>Novo Exame</Button>
       </div>
 
@@ -62,11 +103,12 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
         const done = getExamsDone(tri);
         const expected = EXAMS_BY_TRIMESTER[tri];
         const exams = examsByTrimester(tri);
+        const isCurrentTri = tri === String(getTrimesterFromIG(igWeeks));
         return (
-          <Card key={tri} className="border-border/50">
+          <Card key={tri} className={`border-border/50 ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-heading flex items-center justify-between">
-                <span>{tri}º Trimestre</span>
+                <span>{tri}º Trimestre {isCurrentTri ? "(atual)" : ""}</span>
                 <span className="text-xs text-muted-foreground font-normal">{done.length}/{expected.length} realizados</span>
               </CardTitle>
             </CardHeader>
@@ -74,15 +116,15 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
               <div className="flex flex-wrap gap-1 mb-3">
                 {expected.map(examName => {
                   const isDone = done.includes(examName);
-                  return <Badge key={examName} variant={isDone ? "default" : "outline"} className="text-[10px] font-heading">{isDone ? "✓ " : ""}{examName}</Badge>;
+                  return <Badge key={examName} variant={isDone ? "default" : "outline"} className="text-[10px] font-heading">{isDone ? "Feito" : "Pendente"} — {examName}</Badge>;
                 })}
               </div>
               {exams.map(exam => (
-                <div key={exam.id} className="bg-muted/20 rounded-xl p-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedExam(exam); setDetailOpen(true); }}>
+                <div key={exam.id} className="bg-muted/20 rounded-xl p-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedExam({ ...exam }); setEditMode(false); setDetailOpen(true); }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-heading font-bold text-foreground">{exam.type}</p>
-                      <p className="text-[10px] text-muted-foreground">{format(new Date(exam.date), "dd/MM/yyyy")} {exam.laboratory ? `• ${exam.laboratory}` : ""}</p>
+                      <p className="text-[10px] text-muted-foreground">{format(new Date(exam.date), "dd/MM/yyyy")} {exam.laboratory ? `· ${exam.laboratory}` : ""}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {exam.interpretation && (
@@ -90,7 +132,7 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                           {exam.interpretation === "normal" ? "Normal" : exam.interpretation === "alterado" ? "Alterado" : "Inconcl."}
                         </Badge>
                       )}
-                      {!exam.result && <Badge variant="outline" className="text-[9px] font-heading">Aguardando</Badge>}
+                      {!exam.result && <Badge variant="outline" className="text-[9px] font-heading">Aguardando resultado</Badge>}
                     </div>
                   </div>
                   {exam.result && <p className="text-[11px] text-muted-foreground mt-1 truncate">{exam.result}</p>}
@@ -151,42 +193,82 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Exam Detail Dialog */}
+      {/* Exam Detail/Edit Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle className="font-heading">Detalhes do Exame</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center justify-between">
+              <span>{editMode ? "Editar Resultado" : "Detalhes do Exame"}</span>
+              {!editMode && selectedExam && (
+                <Button variant="outline" size="sm" className="text-xs" onClick={() => setEditMode(true)}>
+                  {selectedExam.result ? "Editar" : "Inserir Resultado"}
+                </Button>
+              )}
+            </DialogTitle>
+          </DialogHeader>
           {selectedExam && (
             <div className="space-y-3 mt-2">
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Exame", value: selectedExam.type },
-                  { label: "Data", value: format(new Date(selectedExam.date), "dd/MM/yyyy") },
-                  { label: "Trimestre", value: `${selectedExam.trimester}º` },
-                  { label: "Laboratório", value: selectedExam.laboratory || "—" },
-                  { label: "Solicitado por", value: selectedExam.requestedBy || "—" },
-                  { label: "Interpretação", value: selectedExam.interpretation === "normal" ? "Normal" : selectedExam.interpretation === "alterado" ? "Alterado" : selectedExam.interpretation === "inconclusivo" ? "Inconclusivo" : "—" },
-                ].map(item => (
-                  <div key={item.label} className="bg-muted/20 rounded-xl p-3">
-                    <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
-                    <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
+              {!editMode ? (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Exame", value: selectedExam.type },
+                      { label: "Data", value: format(new Date(selectedExam.date), "dd/MM/yyyy") },
+                      { label: "Trimestre", value: `${selectedExam.trimester}º` },
+                      { label: "Laboratório", value: selectedExam.laboratory || "—" },
+                      { label: "Solicitado por", value: selectedExam.requestedBy || "—" },
+                      { label: "Interpretação", value: selectedExam.interpretation === "normal" ? "Normal" : selectedExam.interpretation === "alterado" ? "Alterado" : selectedExam.interpretation === "inconclusivo" ? "Inconclusivo" : "—" },
+                    ].map(item => (
+                      <div key={item.label} className="bg-muted/20 rounded-xl p-3">
+                        <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
+                        <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              {selectedExam.referenceValues && (
-                <div className="bg-muted/20 rounded-xl p-3">
-                  <p className="text-[10px] text-muted-foreground font-heading uppercase">Valores de Referência</p>
-                  <p className="text-sm text-foreground">{selectedExam.referenceValues}</p>
-                </div>
-              )}
-              <div className="bg-muted/20 rounded-xl p-3">
-                <p className="text-[10px] text-muted-foreground font-heading uppercase">Resultado</p>
-                <p className="text-sm text-foreground">{selectedExam.result || "Aguardando resultado"}</p>
-              </div>
-              {selectedExam.observations && (
-                <div className="bg-muted/20 rounded-xl p-3">
-                  <p className="text-[10px] text-muted-foreground font-heading uppercase">Observações</p>
-                  <p className="text-sm text-foreground">{selectedExam.observations}</p>
-                </div>
+                  {selectedExam.referenceValues && (
+                    <div className="bg-muted/20 rounded-xl p-3">
+                      <p className="text-[10px] text-muted-foreground font-heading uppercase">Valores de Referência</p>
+                      <p className="text-sm text-foreground">{selectedExam.referenceValues}</p>
+                    </div>
+                  )}
+                  <div className={`rounded-xl p-3 ${selectedExam.result ? "bg-muted/20" : "bg-secondary/10 border border-secondary/20"}`}>
+                    <p className="text-[10px] text-muted-foreground font-heading uppercase">Resultado</p>
+                    <p className="text-sm text-foreground">{selectedExam.result || "Aguardando resultado — clique em 'Inserir Resultado' para adicionar"}</p>
+                  </div>
+                  {selectedExam.observations && (
+                    <div className="bg-muted/20 rounded-xl p-3">
+                      <p className="text-[10px] text-muted-foreground font-heading uppercase">Observações</p>
+                      <p className="text-sm text-foreground">{selectedExam.observations}</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="bg-muted/20 rounded-xl p-3">
+                    <p className="text-xs font-heading font-bold text-foreground">{selectedExam.type}</p>
+                    <p className="text-[10px] text-muted-foreground">{format(new Date(selectedExam.date), "dd/MM/yyyy")} · {selectedExam.trimester}º trimestre</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-heading">Resultado *</Label>
+                    <Textarea value={selectedExam.result} onChange={e => setSelectedExam({ ...selectedExam, result: e.target.value })} className="rounded-xl min-h-[80px]" placeholder="Digite o resultado do exame..." />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-heading">Interpretação</Label>
+                      <Select value={selectedExam.interpretation || "none"} onValueChange={v => setSelectedExam({ ...selectedExam, interpretation: v === "none" ? "" : v as any })}>
+                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="none">—</SelectItem><SelectItem value="normal">Normal</SelectItem><SelectItem value="alterado">Alterado</SelectItem><SelectItem value="inconclusivo">Inconclusivo</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5"><Label className="text-xs font-heading">Laboratório</Label><Input value={selectedExam.laboratory} onChange={e => setSelectedExam({ ...selectedExam, laboratory: e.target.value })} className="rounded-xl" /></div>
+                  </div>
+                  <div className="space-y-1.5"><Label className="text-xs font-heading">Valores de Referência</Label><Input value={selectedExam.referenceValues} onChange={e => setSelectedExam({ ...selectedExam, referenceValues: e.target.value })} className="rounded-xl" /></div>
+                  <div className="space-y-1.5"><Label className="text-xs font-heading">Observações</Label><Textarea value={selectedExam.observations} onChange={e => setSelectedExam({ ...selectedExam, observations: e.target.value })} className="rounded-xl min-h-[40px]" /></div>
+                  <div className="flex gap-3 pt-2">
+                    <Button variant="outline" onClick={() => setEditMode(false)} className="flex-1">Cancelar</Button>
+                    <Button variant="secondary" onClick={handleUpdateResult} className="flex-1">Salvar Resultado</Button>
+                  </div>
+                </>
               )}
             </div>
           )}
