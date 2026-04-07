@@ -43,7 +43,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
       .filter(c => c.weight && c.gestationalAge)
       .map(c => {
         const m = c.gestationalAge.match(/(\d+)/);
-        return { week: m ? parseInt(m[1]) : 0, value: parseFloat(c.weight) };
+        return { week: m ? parseInt(m[1]) : 0, value: parseFloat(c.weight), date: c.date };
       })
       .filter(d => d.week > 0 && !isNaN(d.value))
       .sort((a, b) => a.week - b.week),
@@ -55,7 +55,7 @@ const GestationalCard = ({ record }: GestationalCardProps) => {
       .filter(c => c.uterineHeight && c.gestationalAge)
       .map(c => {
         const m = c.gestationalAge.match(/(\d+)/);
-        return { week: m ? parseInt(m[1]) : 0, value: parseFloat(c.uterineHeight) };
+        return { week: m ? parseInt(m[1]) : 0, value: parseFloat(c.uterineHeight), date: c.date };
       })
       .filter(d => d.week > 0 && !isNaN(d.value))
       .sort((a, b) => a.week - b.week),
