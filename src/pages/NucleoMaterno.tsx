@@ -4,7 +4,7 @@ import { ArrowLeft, Plus, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import ServiceDetailDialog from "@/components/ServiceDetailDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useServices } from "@/contexts/ServicesContext";
