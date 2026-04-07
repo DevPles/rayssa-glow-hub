@@ -8,7 +8,7 @@ const AdminRegistroClinicoAlertas = () => {
   const activeRecords = records.filter(r => r.status === "ativo");
 
   return (
-    <AdminLayout title="Alertas Clínicos">
+    <AdminLayout title="Alertas Clínicos" backTo="/admin/registro-clinico">
       <div className="space-y-4">
         {activeRecords.length === 0 ? (
           <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
