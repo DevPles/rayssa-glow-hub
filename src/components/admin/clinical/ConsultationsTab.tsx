@@ -357,8 +357,8 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
             <p className="text-[10px] text-muted-foreground">Realizadas</p>
           </div>
           <div className="clinical-card px-3 py-2 text-center">
-            <p className="text-lg font-heading font-bold text-secondary-foreground">{record.prenatalConsultations.filter(c => c.status === "agendada").length}</p>
-            <p className="text-[10px] text-secondary-foreground/80">Agendadas</p>
+            <p className="text-lg font-heading font-bold text-foreground">{record.prenatalConsultations.filter(c => c.status === "agendada").length}</p>
+            <p className="text-[10px] text-muted-foreground">Agendadas</p>
           </div>
         </div>
         <Button variant="secondary" size="sm" onClick={openNewConsultation}>Nova Consulta</Button>
