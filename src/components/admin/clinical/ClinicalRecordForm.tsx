@@ -114,9 +114,9 @@ const ClinicalRecordForm = ({ initialData, nextNumber, onSave, onCancel }: Clini
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Button variant="secondary" onClick={onCancel}>← Voltar</Button>
+        <Button onClick={onCancel} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">← Voltar</Button>
         <h2 className="font-heading font-bold text-foreground">{initialData ? "Editar Ficha" : "Nova Ficha Gestacional"}</h2>
-        <Button variant="secondary" onClick={handleSave}>Salvar</Button>
+        <Button onClick={handleSave} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">Salvar</Button>
       </div>
 
       {/* CPF */}
