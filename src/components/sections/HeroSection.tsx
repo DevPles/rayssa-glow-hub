@@ -71,9 +71,6 @@ const HeroSection = () => {
               <span className="animate-fade-in text-accent" style={{ animationDelay: '900ms', animationFillMode: 'both' }}>{displayText}<span className="animate-pulse">|</span></span>
             </h1>
 
-            <p className="text-lg text-card/70 mb-8 leading-relaxed max-w-lg">
-              {settings.heroDescription || "Acompanhamento gestacional completo com consultas pré-natal, linha do tempo da gestação, registro clínico digital e serviços especializados para gestantes e puérperas."}
-            </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <Button
