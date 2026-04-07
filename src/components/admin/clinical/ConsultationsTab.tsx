@@ -28,7 +28,8 @@ const emptyConsultForm = (userName: string): Omit<PrenatalConsultation, "id"> =>
 });
 
 const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => {
-  const { user } = useAuth();
+  const { user, users } = useAuth();
+  const professionals = users.filter(u => u.role === "admin" || u.role === "super_admin");
   const { addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam } = useClinicalRecords();
   const dum = record.gestationalCard.dum;
   const igWeeks = calcGestationalWeeks(dum);
