@@ -81,16 +81,16 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex gap-3">
-          <div className="clinical-card px-3 py-2 text-center">
+          <div className="bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 px-3 py-2 text-center">
             <p className="text-lg font-heading font-bold text-foreground">{completedExams.length}</p>
             <p className="text-[10px] text-muted-foreground">Com resultado</p>
           </div>
-          <div className="clinical-card px-3 py-2 text-center">
+          <div className="bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 px-3 py-2 text-center">
             <p className="text-lg font-heading font-bold text-foreground">{pendingExams.length}</p>
             <p className="text-[10px] text-muted-foreground">Aguardando</p>
           </div>
           {alteredExams.length > 0 && (
-            <div className="clinical-card px-3 py-2 text-center">
+            <div className="bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 px-3 py-2 text-center">
               <p className="text-lg font-heading font-bold text-foreground">{alteredExams.length}</p>
               <p className="text-[10px] text-muted-foreground">Alterados</p>
             </div>
