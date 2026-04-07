@@ -210,7 +210,7 @@ const AlertsPanel = ({ record, onNavigateTab }: AlertsPanelProps) => {
   const warningCount = alerts.filter(a => a.severity === "warning").length;
 
   return (
-    <Card className="clinical-card">
+    <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-heading font-bold text-foreground">Alertas e Pendencias</p>
