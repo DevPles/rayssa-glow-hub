@@ -14,6 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
+      clinical_records: {
+        Row: {
+          address: string | null
+          birth_date: string | null
+          consent_signed: boolean
+          cpf: string | null
+          created_at: string
+          email: string | null
+          emergency_contact: string | null
+          full_name: string
+          gestational_card: Json
+          id: string
+          marital_status: string | null
+          notes: string | null
+          patient_photo: string | null
+          phone: string | null
+          profession: string | null
+          prontuario_number: string
+          status: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          birth_date?: string | null
+          consent_signed?: boolean
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          emergency_contact?: string | null
+          full_name: string
+          gestational_card?: Json
+          id?: string
+          marital_status?: string | null
+          notes?: string | null
+          patient_photo?: string | null
+          phone?: string | null
+          profession?: string | null
+          prontuario_number: string
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          birth_date?: string | null
+          consent_signed?: boolean
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          emergency_contact?: string | null
+          full_name?: string
+          gestational_card?: Json
+          id?: string
+          marital_status?: string | null
+          notes?: string | null
+          patient_photo?: string | null
+          phone?: string | null
+          profession?: string | null
+          prontuario_number?: string
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_records_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gestational_exams: {
+        Row: {
+          clinical_record_id: string
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          result: string | null
+          status: string
+          tenant_id: string | null
+          trimester: number | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          clinical_record_id: string
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string | null
+          result?: string | null
+          status?: string
+          tenant_id?: string | null
+          trimester?: number | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          clinical_record_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          result?: string | null
+          status?: string
+          tenant_id?: string | null
+          trimester?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gestational_exams_clinical_record_id_fkey"
+            columns: ["clinical_record_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gestational_exams_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number
@@ -297,6 +428,81 @@ export type Database = {
         }
         Relationships: []
       }
+      prenatal_consultations: {
+        Row: {
+          blood_pressure: string | null
+          clinical_record_id: string
+          complaints: string | null
+          conduct: string | null
+          created_at: string
+          date: string
+          edema: string | null
+          fetal_heart_rate: string | null
+          fetal_presentation: string | null
+          gestational_age: string | null
+          id: string
+          notes: string | null
+          status: string
+          tenant_id: string | null
+          updated_at: string
+          uterine_height: number | null
+          weight: number | null
+        }
+        Insert: {
+          blood_pressure?: string | null
+          clinical_record_id: string
+          complaints?: string | null
+          conduct?: string | null
+          created_at?: string
+          date: string
+          edema?: string | null
+          fetal_heart_rate?: string | null
+          fetal_presentation?: string | null
+          gestational_age?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          uterine_height?: number | null
+          weight?: number | null
+        }
+        Update: {
+          blood_pressure?: string | null
+          clinical_record_id?: string
+          complaints?: string | null
+          conduct?: string | null
+          created_at?: string
+          date?: string
+          edema?: string | null
+          fetal_heart_rate?: string | null
+          fetal_presentation?: string | null
+          gestational_age?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          uterine_height?: number | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prenatal_consultations_clinical_record_id_fkey"
+            columns: ["clinical_record_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prenatal_consultations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number
@@ -469,6 +675,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      vaccines: {
+        Row: {
+          clinical_record_id: string
+          created_at: string
+          date: string
+          dose: string | null
+          id: string
+          lot: string | null
+          name: string
+          notes: string | null
+          status: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          clinical_record_id: string
+          created_at?: string
+          date: string
+          dose?: string | null
+          id?: string
+          lot?: string | null
+          name: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          clinical_record_id?: string
+          created_at?: string
+          date?: string
+          dose?: string | null
+          id?: string
+          lot?: string | null
+          name?: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaccines_clinical_record_id_fkey"
+            columns: ["clinical_record_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       whatsapp_notifications: {
         Row: {

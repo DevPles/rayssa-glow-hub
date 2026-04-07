@@ -1,17 +1,17 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { ClinicalRecord, PrenatalConsultation, GestationalExam } from "@/contexts/ClinicalRecordContext";
+import type { ClinicalRecord } from "@/contexts/ClinicalRecordContext";
 import { format } from "date-fns";
-import { calcGestationalAge, calcGestationalWeeks, getTrimesterFromIG, EXAMS_BY_TRIMESTER, VACCINES_BRAZIL, parseBloodPressure, suggestNextAppointment } from "./constants";
+import { calcGestationalAge, calcGestationalWeeks, getTrimesterFromIG, EXAMS_BY_TRIMESTER, VACCINES_BRAZIL, parseBloodPressure } from "./constants";
 import AlertsPanel from "./AlertsPanel";
 import GestationalCard from "./GestationalCard";
 import ConsultationsTab from "./ConsultationsTab";
 import ExamsTab from "./ExamsTab";
 import VaccinesTab from "./VaccinesTab";
 import TimelineTab from "./TimelineTab";
+import CollapsibleSection from "./CollapsibleSection";
 
 interface ClinicalRecordDetailProps {
   record: ClinicalRecord;
@@ -26,13 +26,9 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
   const igWeeks = calcGestationalWeeks(gc.dum);
   const currentTrimester = getTrimesterFromIG(igWeeks);
 
-  const [activeTab, setActiveTab] = useState("cartao");
-
-  // Quick stats from latest consultation
   const realizadas = record.prenatalConsultations.filter(c => c.status === "realizada").sort((a, b) => b.date.localeCompare(a.date));
   const lastConsult = realizadas[0];
 
-  // Alert counts for header badge
   const alertCounts = useMemo(() => {
     let critical = 0, warning = 0;
     if (igWeeks >= 42) critical++;
@@ -43,70 +39,29 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
     if (recentBP.length >= 2) critical++;
     else if (recentBP.length === 1) warning++;
     if (realizadas[0]?.edema === "+++") critical++;
-
     const overdueConsults = record.prenatalConsultations.filter(c => c.status === "agendada" && new Date(c.date) < new Date());
     if (overdueConsults.length > 0) warning++;
-
     const expectedExams = EXAMS_BY_TRIMESTER[currentTrimester] || [];
     const doneExamTypes = record.gestationalExams.map(e => e.type);
     const pendingExams = expectedExams.filter(e => !doneExamTypes.includes(e));
     if (pendingExams.length > 0) warning++;
-
     const pendingVaccines = VACCINES_BRAZIL.filter(v => v.category === "recomendada").filter(v => !(record.vaccines || []).map(vv => vv.name).includes(v.name));
     if (pendingVaccines.length > 0) warning++;
-
     return { critical, warning, total: critical + warning };
   }, [record, igWeeks, currentTrimester, realizadas]);
-
-  // Context-aware quick actions
-  const quickActions = useMemo(() => {
-    const actions: { label: string; icon: string; tab: string }[] = [];
-    const doneExamTypes = record.gestationalExams.map(e => e.type);
-
-    if (igWeeks >= 11 && igWeeks <= 14 && !doneExamTypes.includes("Ultrassom 1º Trimestre")) {
-      actions.push({ label: "Solicitar NT", icon: "", tab: "exames" });
-    }
-    if (igWeeks >= 20 && igWeeks <= 24 && !doneExamTypes.includes("Ultrassom Morfológico")) {
-      actions.push({ label: "Solicitar Morfo", icon: "", tab: "exames" });
-    }
-    if (igWeeks >= 24 && igWeeks <= 28 && !doneExamTypes.includes("TOTG 75g")) {
-      actions.push({ label: "Solicitar TOTG", icon: "", tab: "exames" });
-    }
-    if (igWeeks >= 35 && igWeeks <= 37 && !doneExamTypes.includes("Estreptococo Grupo B (GBS)")) {
-      actions.push({ label: "Solicitar GBS", icon: "", tab: "exames" });
-    }
-
-    const overdueConsults = record.prenatalConsultations.filter(c => c.status === "agendada" && new Date(c.date) < new Date());
-    if (overdueConsults.length > 0) {
-      actions.push({ label: "Reagendar", icon: "", tab: "consultas" });
-    }
-
-    return actions.slice(0, 4);
-  }, [record, igWeeks]);
-
-  const handleConsultClick = () => setActiveTab("consultas");
-  const handleExamClick = () => setActiveTab("exames");
 
   return (
     <div className="space-y-4">
       {/* Top bar */}
       <div className="flex items-center justify-between">
-        <Button variant="secondary" onClick={onBack}>← Voltar</Button>
-        <div className="flex gap-2">
-          {quickActions.map(qa => (
-            <Button key={qa.label} variant="outline" size="sm" className="text-[10px] font-heading h-7" onClick={() => setActiveTab(qa.tab)}>
-              {qa.label}
-            </Button>
-          ))}
-          <Button variant="outline" onClick={onEdit}>Editar</Button>
-        </div>
+        <Button variant="secondary" onClick={onBack} className="rounded-full font-heading">← Voltar</Button>
+        <Button variant="outline" onClick={onEdit} className="rounded-full font-heading">Editar</Button>
       </div>
 
       {/* Dashboard Header */}
-      <Card className="clinical-card">
+      <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
         <CardContent className="p-5">
           <div className="flex items-start justify-between gap-4">
-            {/* Patient info */}
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border shrink-0 overflow-hidden">
                 {record.patientPhoto ? (
@@ -134,10 +89,9 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
               </div>
             </div>
 
-            {/* Quick stats cards */}
             <div className="flex gap-3 shrink-0">
               {gc.dum && (
-                <div className="clinical-card px-4 py-2 text-center min-w-[80px]">
+                <div className="bg-white/30 backdrop-blur-lg rounded-xl px-4 py-2 text-center min-w-[80px] border border-white/40">
                   <p className="text-[9px] text-muted-foreground font-heading uppercase">IG</p>
                   <p className="text-lg font-heading font-bold text-secondary">{igAtual}</p>
                   <p className="text-[9px] text-muted-foreground">{currentTrimester}º tri</p>
@@ -146,19 +100,19 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
               {lastConsult && (
                 <>
                   {lastConsult.bloodPressure && (
-                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-destructive/10" : "clinical-card"}`}>
+                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] border border-white/40 ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-destructive/10" : "bg-white/30 backdrop-blur-lg"}`}>
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">PA</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.bloodPressure}</p>
                     </div>
                   )}
                   {lastConsult.weight && (
-                    <div className="clinical-card px-3 py-2 text-center min-w-[60px]">
+                    <div className="bg-white/30 backdrop-blur-lg rounded-xl px-3 py-2 text-center min-w-[60px] border border-white/40">
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">Peso</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.weight}kg</p>
                     </div>
                   )}
                   {lastConsult.fetalHeartRate && (
-                    <div className="clinical-card px-3 py-2 text-center min-w-[60px]">
+                    <div className="bg-white/30 backdrop-blur-lg rounded-xl px-3 py-2 text-center min-w-[60px] border border-white/40">
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">BCF</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.fetalHeartRate}</p>
                     </div>
@@ -171,63 +125,60 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
       </Card>
 
       {/* Alerts */}
-      <AlertsPanel record={record} onNavigateTab={setActiveTab} />
+      <AlertsPanel record={record} onNavigateTab={() => {}} />
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-6 bg-muted/30 rounded-xl">
-          <TabsTrigger value="cartao" className="rounded-lg font-heading text-xs">Cartão</TabsTrigger>
-          <TabsTrigger value="timeline" className="rounded-lg font-heading text-xs">Timeline</TabsTrigger>
-          <TabsTrigger value="consultas" className="rounded-lg font-heading text-xs">Consultas ({record.prenatalConsultations.length})</TabsTrigger>
-          <TabsTrigger value="exames" className="rounded-lg font-heading text-xs">Exames ({record.gestationalExams.length})</TabsTrigger>
-          <TabsTrigger value="vacinas" className="rounded-lg font-heading text-xs">Vacinas ({(record.vaccines || []).length})</TabsTrigger>
-          <TabsTrigger value="dados" className="rounded-lg font-heading text-xs">Dados</TabsTrigger>
-        </TabsList>
+      {/* Collapsible Cards */}
+      <CollapsibleSection title="Cartão Gestacional" defaultOpen={true}>
+        <GestationalCard record={record} />
+      </CollapsibleSection>
 
-        <TabsContent value="cartao" className="mt-4">
-          <GestationalCard record={record} />
-        </TabsContent>
+      <CollapsibleSection title="Dados Pessoais" defaultOpen={false}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "CPF", value: record.cpf || "—" },
+            { label: "Nascimento", value: record.birthDate ? format(new Date(record.birthDate), "dd/MM/yyyy") : "—" },
+            { label: "Telefone", value: record.phone || "—" },
+            { label: "Estado Civil", value: record.maritalStatus || "—" },
+            { label: "Profissão", value: record.profession || "—" },
+            { label: "Endereço", value: record.address || "—" },
+            { label: "Emergência", value: record.emergencyContact || "—" },
+            { label: "Consentimento", value: record.consentSigned ? "Assinado" : "Pendente" },
+          ].map(item => (
+            <div key={item.label} className="bg-white/30 backdrop-blur-lg rounded-xl p-3 border border-white/40">
+              <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
+              <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </CollapsibleSection>
 
-        <TabsContent value="timeline" className="mt-4">
-          <TimelineTab record={record} onConsultClick={handleConsultClick} onExamClick={handleExamClick} />
-        </TabsContent>
+      <CollapsibleSection
+        title="Consultas Pré-Natal"
+        count={record.prenatalConsultations.length}
+        defaultOpen={true}
+      >
+        <ConsultationsTab record={record} onRecordUpdate={onRecordUpdate} />
+      </CollapsibleSection>
 
-        <TabsContent value="consultas" className="mt-4">
-          <ConsultationsTab record={record} onRecordUpdate={onRecordUpdate} />
-        </TabsContent>
+      <CollapsibleSection
+        title="Exames"
+        count={record.gestationalExams.length}
+        defaultOpen={false}
+      >
+        <ExamsTab record={record} onRecordUpdate={onRecordUpdate} />
+      </CollapsibleSection>
 
-        <TabsContent value="exames" className="mt-4">
-          <ExamsTab record={record} onRecordUpdate={onRecordUpdate} />
-        </TabsContent>
+      <CollapsibleSection
+        title="Vacinas"
+        count={(record.vaccines || []).length}
+        defaultOpen={false}
+      >
+        <VaccinesTab record={record} onRecordUpdate={onRecordUpdate} />
+      </CollapsibleSection>
 
-        <TabsContent value="vacinas" className="mt-4">
-          <VaccinesTab record={record} onRecordUpdate={onRecordUpdate} />
-        </TabsContent>
-
-        <TabsContent value="dados" className="mt-4">
-          <Card className="clinical-card">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { label: "CPF", value: record.cpf || "—" },
-                  { label: "Nascimento", value: record.birthDate ? format(new Date(record.birthDate), "dd/MM/yyyy") : "—" },
-                  { label: "Telefone", value: record.phone || "—" },
-                  { label: "Estado Civil", value: record.maritalStatus || "—" },
-                  { label: "Profissão", value: record.profession || "—" },
-                  { label: "Endereço", value: record.address || "—" },
-                  { label: "Emergência", value: record.emergencyContact || "—" },
-                  { label: "Consentimento", value: record.consentSigned ? "Assinado" : "Pendente" },
-                ].map(item => (
-                  <div key={item.label} className="bg-muted/20 rounded-xl p-3">
-                    <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
-                    <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <CollapsibleSection title="Timeline" defaultOpen={false}>
+        <TimelineTab record={record} />
+      </CollapsibleSection>
     </div>
   );
 };

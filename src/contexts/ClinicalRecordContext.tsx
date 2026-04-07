@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ===== TYPES =====
 
@@ -200,10 +202,96 @@ export const createEmptyRecord = (patientId: string, patientName: string, nextNu
   vaccines: [],
 });
 
+// ===== HELPERS: DB <-> App mapping =====
+
+const mapDbRecordToApp = (
+  dbRec: any,
+  consultations: any[],
+  exams: any[],
+  vaccines: any[]
+): ClinicalRecord => ({
+  id: dbRec.id,
+  patientId: dbRec.id,
+  patientName: dbRec.full_name,
+  patientPhoto: dbRec.patient_photo || "",
+  cpf: dbRec.cpf || "",
+  createdAt: dbRec.created_at,
+  updatedAt: dbRec.updated_at,
+  prontuarioNumber: dbRec.prontuario_number,
+  assignedProfessionals: [],
+  fullName: dbRec.full_name,
+  birthDate: dbRec.birth_date || "",
+  address: dbRec.address || "",
+  phone: dbRec.phone || "",
+  emergencyContact: dbRec.emergency_contact || "",
+  maritalStatus: dbRec.marital_status || "",
+  profession: "",
+  consentSigned: dbRec.consent_signed || false,
+  consentFile: "",
+  consultationReason: "",
+  expectations: "",
+  preExistingConditions: (dbRec.gestational_card as any)?.preExistingConditions || "",
+  medications: (dbRec.gestational_card as any)?.medications || "",
+  allergies: (dbRec.gestational_card as any)?.allergies || "",
+  habits: "",
+  previousProcedures: "",
+  obstetricHistory: "",
+  lastMenstruation: (dbRec.gestational_card as any)?.dum || "",
+  vitalSigns: emptyVitalSigns,
+  procedures: [],
+  followUps: [],
+  status: (dbRec.status as "ativo" | "arquivado") || "ativo",
+  gestationalCard: {
+    ...emptyGestationalCard,
+    ...((dbRec.gestational_card as any) || {}),
+  },
+  prenatalConsultations: consultations.map(c => ({
+    id: c.id,
+    date: c.date,
+    gestationalAge: c.gestational_age || "",
+    weight: c.weight ? String(c.weight) : "",
+    bloodPressure: c.blood_pressure || "",
+    uterineHeight: c.uterine_height ? String(c.uterine_height) : "",
+    fetalHeartRate: c.fetal_heart_rate || "",
+    edema: c.edema || "",
+    fetalPresentation: c.fetal_presentation || "",
+    observations: c.notes || "",
+    conduct: c.conduct || "",
+    professional: "",
+    nextAppointment: "",
+    status: (c.status as "agendada" | "realizada" | "cancelada") || "agendada",
+    requestedExams: [],
+  })),
+  gestationalExams: exams.map(e => ({
+    id: e.id,
+    date: e.date,
+    type: e.type,
+    result: e.result || "",
+    observations: e.notes || "",
+    fileUrl: "",
+    trimester: (String(e.trimester || "1") as "1" | "2" | "3"),
+    interpretation: "" as any,
+    referenceValues: "",
+    requestedBy: "",
+    laboratory: "",
+  })),
+  vaccines: vaccines.map(v => ({
+    id: v.id,
+    name: v.name,
+    dose: v.dose || "",
+    date: v.date,
+    lot: v.lot || "",
+    professional: "",
+    manufacturer: "",
+    reaction: "",
+  })),
+});
+
 // ===== CONTEXT =====
 
 interface ClinicalRecordContextType {
   records: ClinicalRecord[];
+  loading: boolean;
   addRecord: (record: Omit<ClinicalRecord, "id">) => ClinicalRecord;
   updateRecord: (id: string, data: Partial<ClinicalRecord>) => void;
   deleteRecord: (id: string) => void;
@@ -219,6 +307,7 @@ interface ClinicalRecordContextType {
 
 const ClinicalRecordContext = createContext<ClinicalRecordContextType | null>(null);
 
+// Mock data for fallback
 const mockRecords: ClinicalRecord[] = [
   {
     id: "cr1",
@@ -277,19 +366,129 @@ const mockRecords: ClinicalRecord[] = [
 
 export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) => {
   const [records, setRecords] = useState<ClinicalRecord[]>(mockRecords);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const tenantId = user?.tenantId;
+
+  // Load from Supabase on mount
+  const loadFromSupabase = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data: dbRecords, error } = await supabase
+        .from("clinical_records")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error || !dbRecords || dbRecords.length === 0) {
+        // Keep mock data as fallback
+        setLoading(false);
+        return;
+      }
+
+      const recordIds = dbRecords.map(r => r.id);
+
+      const [consultsRes, examsRes, vaccinesRes] = await Promise.all([
+        supabase.from("prenatal_consultations").select("*").in("clinical_record_id", recordIds),
+        supabase.from("gestational_exams").select("*").in("clinical_record_id", recordIds),
+        supabase.from("vaccines").select("*").in("clinical_record_id", recordIds),
+      ]);
+
+      const allConsults = consultsRes.data || [];
+      const allExams = examsRes.data || [];
+      const allVaccines = vaccinesRes.data || [];
+
+      const mapped = dbRecords.map(dbRec =>
+        mapDbRecordToApp(
+          dbRec,
+          allConsults.filter(c => c.clinical_record_id === dbRec.id),
+          allExams.filter(e => e.clinical_record_id === dbRec.id),
+          allVaccines.filter(v => v.clinical_record_id === dbRec.id),
+        )
+      );
+
+      setRecords(mapped);
+    } catch (err) {
+      console.error("Error loading clinical records:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadFromSupabase();
+  }, [loadFromSupabase]);
+
+  // ===== CRUD with Supabase sync =====
 
   const addRecord = (record: Omit<ClinicalRecord, "id">): ClinicalRecord => {
     const newRecord: ClinicalRecord = { ...record, id: `cr${Date.now()}` };
     setRecords((prev) => [...prev, newRecord]);
+
+    // Async save to Supabase
+    (async () => {
+      try {
+        const { data, error } = await supabase.from("clinical_records").insert({
+          tenant_id: tenantId || undefined,
+          prontuario_number: record.prontuarioNumber,
+          full_name: record.fullName,
+          cpf: record.cpf || null,
+          birth_date: record.birthDate || null,
+          phone: record.phone || null,
+          email: null,
+          address: record.address || null,
+          marital_status: record.maritalStatus || null,
+          profession: record.profession || null,
+          emergency_contact: record.emergencyContact || null,
+          patient_photo: record.patientPhoto || null,
+          status: record.status,
+          consent_signed: record.consentSigned,
+          gestational_card: record.gestationalCard as any,
+          notes: null,
+        }).select().single();
+
+        if (data && !error) {
+          // Update local ID to the Supabase UUID
+          setRecords(prev => prev.map(r => r.id === newRecord.id ? { ...r, id: data.id } : r));
+        }
+      } catch (err) {
+        console.error("Error saving record to DB:", err);
+      }
+    })();
+
     return newRecord;
   };
 
   const updateRecord = (id: string, data: Partial<ClinicalRecord>) => {
     setRecords((prev) => prev.map((r) => r.id === id ? { ...r, ...data, updatedAt: new Date().toISOString() } : r));
+
+    // Async update
+    (async () => {
+      try {
+        const updateData: any = {};
+        if (data.fullName) updateData.full_name = data.fullName;
+        if (data.cpf !== undefined) updateData.cpf = data.cpf;
+        if (data.birthDate !== undefined) updateData.birth_date = data.birthDate || null;
+        if (data.phone !== undefined) updateData.phone = data.phone;
+        if (data.address !== undefined) updateData.address = data.address;
+        if (data.maritalStatus !== undefined) updateData.marital_status = data.maritalStatus;
+        if (data.emergencyContact !== undefined) updateData.emergency_contact = data.emergencyContact;
+        if (data.patientPhoto !== undefined) updateData.patient_photo = data.patientPhoto;
+        if (data.status) updateData.status = data.status;
+        if (data.consentSigned !== undefined) updateData.consent_signed = data.consentSigned;
+        if (data.gestationalCard) updateData.gestational_card = data.gestationalCard;
+
+        if (Object.keys(updateData).length > 0) {
+          await supabase.from("clinical_records").update(updateData).eq("id", id);
+        }
+      } catch (err) {
+        console.error("Error updating record in DB:", err);
+      }
+    })();
   };
 
   const deleteRecord = (id: string) => {
     setRecords((prev) => prev.filter((r) => r.id !== id));
+    supabase.from("clinical_records").delete().eq("id", id).then(() => {});
   };
 
   const getRecordsByPatient = (patientId: string) => records.filter((r) => r.patientId === patientId);
@@ -307,9 +506,41 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
   };
 
   const addPrenatalConsultation = (recordId: string, consultation: Omit<PrenatalConsultation, "id">) => {
+    const newId = `pc${Date.now()}`;
     setRecords((prev) => prev.map((r) => r.id === recordId ? {
-      ...r, prenatalConsultations: [...r.prenatalConsultations, { ...consultation, id: `pc${Date.now()}` }], updatedAt: new Date().toISOString(),
+      ...r, prenatalConsultations: [...r.prenatalConsultations, { ...consultation, id: newId }], updatedAt: new Date().toISOString(),
     } : r));
+
+    // Async save
+    (async () => {
+      try {
+        const { data } = await supabase.from("prenatal_consultations").insert({
+          clinical_record_id: recordId,
+          tenant_id: tenantId || undefined,
+          date: consultation.date,
+          status: consultation.status,
+          gestational_age: consultation.gestationalAge || null,
+          weight: consultation.weight ? parseFloat(consultation.weight) : null,
+          blood_pressure: consultation.bloodPressure || null,
+          uterine_height: consultation.uterineHeight ? parseFloat(consultation.uterineHeight) : null,
+          fetal_heart_rate: consultation.fetalHeartRate || null,
+          fetal_presentation: consultation.fetalPresentation || null,
+          edema: consultation.edema || null,
+          complaints: consultation.observations || null,
+          conduct: consultation.conduct || null,
+          notes: consultation.observations || null,
+        }).select().single();
+
+        if (data) {
+          setRecords(prev => prev.map(r => r.id === recordId ? {
+            ...r,
+            prenatalConsultations: r.prenatalConsultations.map(c => c.id === newId ? { ...c, id: data.id } : c),
+          } : r));
+        }
+      } catch (err) {
+        console.error("Error saving consultation:", err);
+      }
+    })();
   };
 
   const updatePrenatalConsultation = (recordId: string, consultationId: string, data: Partial<PrenatalConsultation>) => {
@@ -318,12 +549,59 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
       prenatalConsultations: r.prenatalConsultations.map((c) => c.id === consultationId ? { ...c, ...data } : c),
       updatedAt: new Date().toISOString(),
     } : r));
+
+    // Async update
+    (async () => {
+      try {
+        const updateData: any = {};
+        if (data.status) updateData.status = data.status;
+        if (data.weight !== undefined) updateData.weight = data.weight ? parseFloat(data.weight) : null;
+        if (data.bloodPressure !== undefined) updateData.blood_pressure = data.bloodPressure;
+        if (data.uterineHeight !== undefined) updateData.uterine_height = data.uterineHeight ? parseFloat(data.uterineHeight) : null;
+        if (data.fetalHeartRate !== undefined) updateData.fetal_heart_rate = data.fetalHeartRate;
+        if (data.edema !== undefined) updateData.edema = data.edema;
+        if (data.conduct !== undefined) updateData.conduct = data.conduct;
+        if (data.observations !== undefined) updateData.notes = data.observations;
+
+        if (Object.keys(updateData).length > 0) {
+          await supabase.from("prenatal_consultations").update(updateData).eq("id", consultationId);
+        }
+      } catch (err) {
+        console.error("Error updating consultation:", err);
+      }
+    })();
   };
 
   const addGestationalExam = (recordId: string, exam: Omit<GestationalExam, "id">) => {
+    const newId = `ge${Date.now()}`;
     setRecords((prev) => prev.map((r) => r.id === recordId ? {
-      ...r, gestationalExams: [...r.gestationalExams, { ...exam, id: `ge${Date.now()}` }], updatedAt: new Date().toISOString(),
+      ...r, gestationalExams: [...r.gestationalExams, { ...exam, id: newId }], updatedAt: new Date().toISOString(),
     } : r));
+
+    // Async save
+    (async () => {
+      try {
+        const { data } = await supabase.from("gestational_exams").insert({
+          clinical_record_id: recordId,
+          tenant_id: tenantId || undefined,
+          type: exam.type,
+          date: exam.date,
+          result: exam.result || null,
+          status: exam.result ? "completo" : "pendente",
+          notes: exam.observations || null,
+          trimester: parseInt(exam.trimester) || null,
+        }).select().single();
+
+        if (data) {
+          setRecords(prev => prev.map(r => r.id === recordId ? {
+            ...r,
+            gestationalExams: r.gestationalExams.map(e => e.id === newId ? { ...e, id: data.id } : e),
+          } : r));
+        }
+      } catch (err) {
+        console.error("Error saving exam:", err);
+      }
+    })();
   };
 
   const updateGestationalExam = (recordId: string, examId: string, data: Partial<GestationalExam>) => {
@@ -332,16 +610,58 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
       gestationalExams: r.gestationalExams.map((e) => e.id === examId ? { ...e, ...data } : e),
       updatedAt: new Date().toISOString(),
     } : r));
+
+    // Async update
+    (async () => {
+      try {
+        const updateData: any = {};
+        if (data.result !== undefined) updateData.result = data.result;
+        if (data.observations !== undefined) updateData.notes = data.observations;
+        if (data.result) updateData.status = "completo";
+
+        if (Object.keys(updateData).length > 0) {
+          await supabase.from("gestational_exams").update(updateData).eq("id", examId);
+        }
+      } catch (err) {
+        console.error("Error updating exam:", err);
+      }
+    })();
   };
 
   const addVaccine = (recordId: string, vaccine: Omit<Vaccine, "id">) => {
+    const newId = `v${Date.now()}`;
     setRecords((prev) => prev.map((r) => r.id === recordId ? {
-      ...r, vaccines: [...(r.vaccines || []), { ...vaccine, id: `v${Date.now()}` }], updatedAt: new Date().toISOString(),
+      ...r, vaccines: [...(r.vaccines || []), { ...vaccine, id: newId }], updatedAt: new Date().toISOString(),
     } : r));
+
+    // Async save
+    (async () => {
+      try {
+        const { data } = await supabase.from("vaccines").insert({
+          clinical_record_id: recordId,
+          tenant_id: tenantId || undefined,
+          name: vaccine.name,
+          date: vaccine.date,
+          dose: vaccine.dose || null,
+          lot: vaccine.lot || null,
+          status: "aplicada",
+          notes: vaccine.reaction || null,
+        }).select().single();
+
+        if (data) {
+          setRecords(prev => prev.map(r => r.id === recordId ? {
+            ...r,
+            vaccines: (r.vaccines || []).map(v => v.id === newId ? { ...v, id: data.id } : v),
+          } : r));
+        }
+      } catch (err) {
+        console.error("Error saving vaccine:", err);
+      }
+    })();
   };
 
   return (
-    <ClinicalRecordContext.Provider value={{ records, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp, addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam, updateGestationalExam, addVaccine }}>
+    <ClinicalRecordContext.Provider value={{ records, loading, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp, addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam, updateGestationalExam, addVaccine }}>
       {children}
     </ClinicalRecordContext.Provider>
   );
