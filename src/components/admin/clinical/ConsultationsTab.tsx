@@ -371,7 +371,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
       ) : (
         <div className="space-y-3">
           {record.prenatalConsultations.map((c, idx) => (
-            <Card key={c.id} className="border-border/50 cursor-pointer hover:shadow-xl transition-shadow" onClick={() => openConsultDetail(c)}>
+            <Card key={c.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 cursor-pointer hover:shadow-xl transition-shadow" onClick={() => openConsultDetail(c)}>
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
