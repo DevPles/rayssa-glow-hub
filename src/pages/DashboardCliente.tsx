@@ -509,11 +509,11 @@ const DashboardCliente = () => {
 
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <Card className="border border-border/50 hover:shadow-md transition-shadow cursor-pointer group" onClick={() => setBookingOpen(true)}>
-            <CardContent className="p-4 text-center">
-              <h3 className="font-heading font-semibold text-foreground text-sm">Agendar Serviço</h3>
-              <p className="text-xs text-muted-foreground mt-1">Explore o catálogo</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <h3 className="font-heading font-semibold text-foreground text-xs sm:text-sm">Agendar Serviço</h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Explore o catálogo</p>
             </CardContent>
           </Card>
           <Card className="border border-border/50 hover:shadow-md transition-shadow cursor-pointer group" onClick={() => navigate("/produtos-programas")}>
