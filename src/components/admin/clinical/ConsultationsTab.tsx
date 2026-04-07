@@ -220,7 +220,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
           <div className="space-y-3">
             <p className="text-xs font-heading font-bold text-foreground">Passo 1 — Sinais Vitais</p>
             {lastConsult && (
-              <div className="bg-muted/20 rounded-xl p-2.5 text-[10px] text-muted-foreground">
+              <div className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-2.5 text-[10px] text-muted-foreground">
                 Última consulta ({format(new Date(lastConsult.date), "dd/MM/yy")}): Peso {lastConsult.weight || "—"}kg · PA {lastConsult.bloodPressure || "—"} · BCF {lastConsult.fetalHeartRate || "—"}
               </div>
             )}
@@ -291,7 +291,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
               <div className="space-y-1">
                 <p className="text-[10px] font-heading font-semibold">Exames solicitados ({(sc.requestedExams || []).length}):</p>
                 {(sc.requestedExams || []).map(ex => (
-                  <div key={ex.id} className="flex items-center justify-between bg-muted/20 rounded-lg px-2 py-1">
+                  <div key={ex.id} className="flex items-center justify-between bg-white/30 backdrop-blur-lg border border-white/40 rounded-lg px-2 py-1">
                     <span className="text-[11px] font-heading text-foreground">{ex.examName}</span>
                     <button onClick={() => setSelectedConsultation({ ...sc, requestedExams: (sc.requestedExams || []).filter(r => r.id !== ex.id) })} className="text-[10px] text-destructive hover:underline">Remover</button>
                   </div>
@@ -332,7 +332,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
                 { label: "PA", value: sc.bloodPressure || "—" },
                 { label: "BCF", value: sc.fetalHeartRate ? `${sc.fetalHeartRate}bpm` : "—" },
               ].map(item => (
-                <div key={item.label} className="bg-muted/20 rounded-lg p-2 text-center">
+                <div key={item.label} className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-lg p-2 text-center">
                   <p className="text-[9px] text-muted-foreground font-heading">{item.label}</p>
                   <p className="text-xs font-heading font-semibold text-foreground">{item.value}</p>
                 </div>
@@ -396,7 +396,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
                       { label: "Edema", value: c.edema },
                       { label: "Apresentação", value: c.fetalPresentation },
                     ].filter(v => v.value).map(item => (
-                      <div key={item.label} className="bg-muted/20 rounded-lg p-2 text-center">
+                      <div key={item.label} className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-lg p-2 text-center">
                         <p className="text-[10px] text-muted-foreground font-heading">{item.label}</p>
                         <p className="text-xs font-heading font-semibold text-foreground">{item.value}</p>
                       </div>
@@ -520,7 +520,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
                       { label: "Edema", value: selectedConsultation.edema || "—" },
                       { label: "Apresentação", value: selectedConsultation.fetalPresentation || "—" },
                     ].map(item => (
-                      <div key={item.label} className="bg-muted/20 rounded-lg p-2 text-center">
+                      <div key={item.label} className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-lg p-2 text-center">
                         <p className="text-[10px] text-muted-foreground font-heading">{item.label}</p>
                         <p className="text-xs font-heading font-semibold text-foreground">{item.value}</p>
                       </div>
@@ -535,7 +535,7 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
                       <p className="text-[10px] font-heading font-semibold mb-1">Exames Solicitados ({selectedConsultation.requestedExams!.length}):</p>
                       <div className="space-y-1">
                         {selectedConsultation.requestedExams!.map(ex => (
-                          <div key={ex.id} className="flex items-center justify-between bg-muted/20 rounded-lg px-2 py-1">
+                          <div key={ex.id} className="flex items-center justify-between bg-white/30 backdrop-blur-lg border border-white/40 rounded-lg px-2 py-1">
                             <span className="text-[11px] font-heading text-foreground">{ex.examName}</span>
                             <Badge variant={ex.status === "realizado" ? "default" : "secondary"} className="text-[9px] font-heading">{ex.status === "realizado" ? "Realizado" : "Solicitado"}</Badge>
                           </div>

@@ -219,24 +219,24 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                       { label: "Solicitado por", value: selectedExam.requestedBy || "—" },
                       { label: "Interpretação", value: selectedExam.interpretation === "normal" ? "Normal" : selectedExam.interpretation === "alterado" ? "Alterado" : selectedExam.interpretation === "inconclusivo" ? "Inconclusivo" : "—" },
                     ].map(item => (
-                      <div key={item.label} className="bg-muted/20 rounded-xl p-3">
+                      <div key={item.label} className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                         <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                         <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
                       </div>
                     ))}
                   </div>
                   {selectedExam.referenceValues && (
-                    <div className="bg-muted/20 rounded-xl p-3">
+                    <div className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                       <p className="text-[10px] text-muted-foreground font-heading uppercase">Valores de Referência</p>
                       <p className="text-sm text-foreground">{selectedExam.referenceValues}</p>
                     </div>
                   )}
-                  <div className={`rounded-xl p-3 ${selectedExam.result ? "bg-muted/20" : "bg-secondary/10 border border-secondary/20"}`}>
+                  <div className={`rounded-xl p-3 ${selectedExam.result ? "bg-muted/20" : "bg-white/30 backdrop-blur-lg border border-white/40"}`}>
                     <p className="text-[10px] text-muted-foreground font-heading uppercase">Resultado</p>
                     <p className="text-sm text-foreground">{selectedExam.result || "Aguardando resultado — clique em 'Inserir Resultado' para adicionar"}</p>
                   </div>
                   {selectedExam.observations && (
-                    <div className="bg-muted/20 rounded-xl p-3">
+                    <div className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                       <p className="text-[10px] text-muted-foreground font-heading uppercase">Observações</p>
                       <p className="text-sm text-foreground">{selectedExam.observations}</p>
                     </div>
@@ -244,7 +244,7 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                 </>
               ) : (
                 <>
-                  <div className="bg-muted/20 rounded-xl p-3">
+                  <div className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                     <p className="text-xs font-heading font-bold text-foreground">{selectedExam.type}</p>
                     <p className="text-[10px] text-muted-foreground">{format(new Date(selectedExam.date), "dd/MM/yyyy")} · {selectedExam.trimester}º trimestre</p>
                   </div>
