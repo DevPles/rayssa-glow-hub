@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import HeroBookingDialog from "@/components/HeroBookingDialog";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
+import lematerLogoText from "@/assets/lemater-logo-text.png";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
 
 const words = ["Privado", "Personalizado"];
