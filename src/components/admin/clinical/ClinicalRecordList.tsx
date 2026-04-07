@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ClinicalRecord } from "@/contexts/ClinicalRecordContext";
@@ -44,118 +45,79 @@ const ClinicalRecordList = ({ records, onOpenRecord, onEditRecord, onDeleteRecor
 
   return (
     <div className="space-y-6">
-      {/* Header: search + filter + button */}
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
-          <Input
-            placeholder="Buscar por nome, registro ou CPF..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="rounded-xl max-w-sm bg-white/80 border-border/40"
-          />
+          <Input placeholder="Buscar por nome, registro ou CPF..." value={search} onChange={e => setSearch(e.target.value)} className="rounded-xl max-w-sm" />
           <Select value={filterProfessionalId} onValueChange={setFilterProfessionalId}>
-            <SelectTrigger className="rounded-xl w-[220px] bg-white/80 border-border/40">
-              <SelectValue placeholder="Filtrar por profissional" />
-            </SelectTrigger>
+            <SelectTrigger className="rounded-xl w-[220px]"><SelectValue placeholder="Filtrar por profissional" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os profissionais</SelectItem>
               {professionals.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-        <Button
-          onClick={onNewRecord}
-          className="rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading"
-        >
+        <Button onClick={onNewRecord} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading shadow-md shadow-secondary/20">
           Nova Ficha Gestacional
         </Button>
       </div>
 
-      {/* KPI cards - horizontal row with gradient */}
+      {/* KPI cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map(s => (
-          <div
-            key={s.label}
-            className="rounded-2xl p-5 text-center"
-            style={{
-              background: "linear-gradient(135deg, hsl(40,35%,93%) 0%, hsl(38,30%,90%) 50%, hsl(35,25%,85%) 100%)",
-            }}
-          >
-            <p className="text-2xl font-heading font-bold text-foreground">{s.value}</p>
-            <p className="text-xs text-muted-foreground">{s.label}</p>
-          </div>
+          <Card key={s.label} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-heading font-bold text-foreground">{s.value}</p>
+              <p className="text-xs text-muted-foreground">{s.label}</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
       {/* Record list */}
       <div className="space-y-3">
         {filteredRecords.length === 0 ? (
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{
-              background: "linear-gradient(135deg, hsl(40,35%,96%) 0%, hsl(38,30%,93%) 100%)",
-            }}
-          >
-            <p className="text-sm text-muted-foreground font-heading">Nenhum registro encontrado</p>
-          </div>
+          <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+            <CardContent className="p-8 text-center">
+              <p className="text-sm text-muted-foreground font-heading">Nenhum registro encontrado</p>
+            </CardContent>
+          </Card>
         ) : filteredRecords.map(record => (
-          <div
-            key={record.id}
-            className="rounded-2xl p-5 transition-shadow hover:shadow-lg cursor-pointer"
-            style={{
-              background: "linear-gradient(135deg, hsl(40,35%,96%) 0%, hsl(38,30%,93%) 50%, hsl(35,25%,88%) 100%)",
-            }}
-            onClick={() => onOpenRecord(record)}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <h3 className="font-heading font-bold text-foreground text-sm">{record.patientName}</h3>
-                  <Badge variant={record.status === "ativo" ? "default" : "secondary"} className="text-[10px] font-heading">
-                    {record.status === "ativo" ? "Ativo" : "Arquivado"}
-                  </Badge>
-                  {record.gestationalCard.riskClassification === "alto_risco" && (
-                    <Badge variant="destructive" className="text-[10px] font-heading">Alto Risco</Badge>
-                  )}
+          <Card key={record.id} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => onOpenRecord(record)}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <h3 className="font-heading font-bold text-foreground text-sm">{record.patientName}</h3>
+                    <Badge variant={record.status === "ativo" ? "default" : "secondary"} className="text-[10px] font-heading">
+                      {record.status === "ativo" ? "Ativo" : "Arquivado"}
+                    </Badge>
+                    {record.gestationalCard.riskClassification === "alto_risco" && (
+                      <Badge variant="destructive" className="text-[10px] font-heading">Alto Risco</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                    {record.prontuarioNumber}
+                    {record.cpf ? ` • CPF: ${record.cpf}` : ""}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                    {record.gestationalCard.dum && <span className="text-[10px] text-muted-foreground">IG: {calcGestationalAge(record.gestationalCard.dum)}</span>}
+                    {record.gestationalCard.dpp && <span className="text-[10px] text-muted-foreground">DPP: {format(new Date(record.gestationalCard.dpp), "dd/MM/yyyy")}</span>}
+                    <span className="text-[10px] text-muted-foreground">{record.prenatalConsultations.length} consulta(s)</span>
+                    {record.gestationalExams.length > 0 && <span className="text-[10px] text-muted-foreground">{record.gestationalExams.length} exame(s)</span>}
+                    {record.assignedProfessionals?.length > 0 && (
+                      <span className="text-[10px] text-muted-foreground">{record.assignedProfessionals.map(p => p.name).join(", ")}</span>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {record.prontuarioNumber}
-                  {record.cpf ? ` • CPF: ${record.cpf}` : ""}
-                </p>
-                <div className="flex gap-3 text-xs text-muted-foreground flex-wrap mt-1">
-                  {record.gestationalCard.dum && <span>IG: {calcGestationalAge(record.gestationalCard.dum)}</span>}
-                  {record.gestationalCard.dpp && <span>DPP: {format(new Date(record.gestationalCard.dpp), "dd/MM/yyyy")}</span>}
-                  <span>{record.prenatalConsultations.length} consulta(s)</span>
-                  {record.gestationalExams.length > 0 && <span>{record.gestationalExams.length} exame(s)</span>}
-                  {record.assignedProfessionals?.length > 0 && (
-                    <span>
-                      {record.assignedProfessionals.map(p => p.name).join(", ")}
-                    </span>
-                  )}
+                <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                  <Button size="sm" variant="ghost" className="text-xs font-heading" onClick={() => onOpenRecord(record)}>Ver</Button>
+                  <Button size="sm" variant="ghost" className="text-xs font-heading" onClick={() => onEditRecord(record)}>Editar</Button>
+                  <Button size="sm" variant="ghost" className="text-xs font-heading hover:text-destructive" onClick={() => onDeleteRecord(record.id)}>Excluir</Button>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                <button
-                  className="text-xs text-muted-foreground hover:text-foreground font-heading transition-colors"
-                  onClick={() => onOpenRecord(record)}
-                >
-                  Ver
-                </button>
-                <button
-                  className="text-xs text-muted-foreground hover:text-foreground font-heading transition-colors"
-                  onClick={() => onEditRecord(record)}
-                >
-                  Editar
-                </button>
-                <button
-                  className="text-xs text-muted-foreground hover:text-destructive font-heading transition-colors"
-                  onClick={() => onDeleteRecord(record.id)}
-                >
-                  Excluir
-                </button>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
