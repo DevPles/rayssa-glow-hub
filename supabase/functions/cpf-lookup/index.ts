@@ -67,7 +67,6 @@ Deno.serve(async (req) => {
     }
 
     const validChecksum = isValidCPF(clean);
-
     const region = getRegion(clean);
 
     // 1) Try Consultar.io API (requires CPF_API_TOKEN secret)
@@ -88,7 +87,7 @@ Deno.serve(async (req) => {
           return new Response(
             JSON.stringify({
               success: true,
-              source: "receita",
+              source: "api_real",
               data: {
                 name: data.nome || "",
                 birthDate: data.data_nascimento || "",
@@ -106,35 +105,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2) Try BrasilAPI (free, no key)
-    try {
-      const brasilResp = await fetch(
-        `https://brasilapi.com.br/api/cpf/v1/${clean}`,
-        { signal: AbortSignal.timeout(5000) }
-      );
-
-      if (brasilResp.ok) {
-        const data = await brasilResp.json();
-        console.log("BrasilAPI CPF lookup success");
-        return new Response(
-          JSON.stringify({
-            success: true,
-            source: "receita",
-            data: {
-              name: data.nome || "",
-              birthDate: data.data_nascimento || "",
-              situation: data.situacao || "Regular",
-              region,
-            },
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-    } catch (e) {
-      console.log("BrasilAPI unavailable:", e);
-    }
-
-    // 3) Validate CPF exists via SUS/Saúde backend (free, returns true/false)
+    // 2) Validate CPF exists via SUS/Saúde backend (free, returns true/false)
     let cpfExists = false;
     try {
       const susResp = await fetch(
@@ -150,7 +121,7 @@ Deno.serve(async (req) => {
       console.log("SUS validation unavailable:", e);
     }
 
-    // 4) AI fallback for generating realistic data
+    // 3) AI fallback for generating placeholder data
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (LOVABLE_API_KEY) {
@@ -183,16 +154,17 @@ Deno.serve(async (req) => {
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            console.log("AI-generated data for region:", region);
+            const source = cpfExists ? "sus_validated_simulated" : "simulated";
+            console.log("AI-generated data for region:", region, "source:", source);
             return new Response(
               JSON.stringify({
                 success: true,
-                source: cpfExists ? "sus_validated" : "simulated",
+                source,
                 data: {
                   name: parsed.name || "",
                   birthDate: parsed.birthDate || "",
                   address: parsed.address || "",
-                  situation: cpfExists ? "Regular (validado)" : "Dados simulados",
+                  situation: cpfExists ? "CPF válido (SUS)" : "Dados simulados",
                   region,
                 },
               }),
@@ -207,7 +179,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 5) Last resort
+    // 4) Last resort — no data, just validation info
     return new Response(
       JSON.stringify({
         success: true,
@@ -216,7 +188,7 @@ Deno.serve(async (req) => {
           name: "",
           birthDate: "",
           address: "",
-          situation: cpfExists ? "CPF válido na Receita" : "CPF válido (formato)",
+          situation: cpfExists ? "CPF válido (SUS)" : validChecksum ? "CPF válido (formato)" : "CPF com formato irregular",
           region,
         },
       }),
