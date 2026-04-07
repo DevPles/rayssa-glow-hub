@@ -213,6 +213,7 @@ interface ClinicalRecordContextType {
   addPrenatalConsultation: (recordId: string, consultation: Omit<PrenatalConsultation, "id">) => void;
   updatePrenatalConsultation: (recordId: string, consultationId: string, data: Partial<PrenatalConsultation>) => void;
   addGestationalExam: (recordId: string, exam: Omit<GestationalExam, "id">) => void;
+  updateGestationalExam: (recordId: string, examId: string, data: Partial<GestationalExam>) => void;
   addVaccine: (recordId: string, vaccine: Omit<Vaccine, "id">) => void;
 }
 
@@ -332,7 +333,7 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
   };
 
   return (
-    <ClinicalRecordContext.Provider value={{ records, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp, addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam, addVaccine }}>
+    <ClinicalRecordContext.Provider value={{ records, addRecord, updateRecord, deleteRecord, getRecordsByPatient, addProcedure, addFollowUp, addPrenatalConsultation, updatePrenatalConsultation, addGestationalExam, updateGestationalExam, addVaccine }}>
       {children}
     </ClinicalRecordContext.Provider>
   );
