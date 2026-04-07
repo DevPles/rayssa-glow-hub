@@ -137,7 +137,7 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
             {/* Quick stats cards */}
             <div className="flex gap-3 shrink-0">
               {gc.dum && (
-                <div className="bg-secondary/10 rounded-xl px-4 py-2 text-center min-w-[80px]">
+                <div className="clinical-card px-4 py-2 text-center min-w-[80px]">
                   <p className="text-[9px] text-muted-foreground font-heading uppercase">IG</p>
                   <p className="text-lg font-heading font-bold text-secondary">{igAtual}</p>
                   <p className="text-[9px] text-muted-foreground">{currentTrimester}º tri</p>
@@ -146,19 +146,19 @@ const ClinicalRecordDetail = ({ record, onBack, onEdit, onRecordUpdate }: Clinic
               {lastConsult && (
                 <>
                   {lastConsult.bloodPressure && (
-                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-destructive/10" : "bg-muted/30"}`}>
+                    <div className={`rounded-xl px-3 py-2 text-center min-w-[70px] ${parseBloodPressure(lastConsult.bloodPressure) && ((parseBloodPressure(lastConsult.bloodPressure))!.systolic >= 140 || (parseBloodPressure(lastConsult.bloodPressure))!.diastolic >= 90) ? "bg-destructive/10" : "clinical-card"}`}>
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">PA</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.bloodPressure}</p>
                     </div>
                   )}
                   {lastConsult.weight && (
-                    <div className="bg-muted/30 rounded-xl px-3 py-2 text-center min-w-[60px]">
+                    <div className="clinical-card px-3 py-2 text-center min-w-[60px]">
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">Peso</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.weight}kg</p>
                     </div>
                   )}
                   {lastConsult.fetalHeartRate && (
-                    <div className="bg-muted/30 rounded-xl px-3 py-2 text-center min-w-[60px]">
+                    <div className="clinical-card px-3 py-2 text-center min-w-[60px]">
                       <p className="text-[9px] text-muted-foreground font-heading uppercase">BCF</p>
                       <p className="text-sm font-heading font-bold text-foreground">{lastConsult.fetalHeartRate}</p>
                     </div>

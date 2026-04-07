@@ -49,9 +49,9 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex gap-3">
-          <div className="bg-primary/10 rounded-xl px-3 py-2 text-center border border-primary/20">
-            <p className="text-lg font-heading font-bold text-primary">{appliedCount}</p>
-            <p className="text-[10px] text-primary/80">Aplicadas</p>
+          <div className="clinical-card px-3 py-2 text-center">
+            <p className="text-lg font-heading font-bold text-foreground">{appliedCount}</p>
+            <p className="text-[10px] text-muted-foreground">Aplicadas</p>
           </div>
           <div className="bg-secondary/10 rounded-xl px-3 py-2 text-center border border-secondary/20">
             <p className="text-lg font-heading font-bold text-secondary-foreground">{pendingCount}</p>
@@ -69,7 +69,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
       {VACCINE_CATEGORIES.map(({ key: cat, label: catLabel, color: catColor }) => {
         const catVaccines = VACCINES_BRAZIL.filter(v => v.category === cat);
         return (
-          <Card key={cat} className="border-border/50">
+          <Card key={cat} className="clinical-card">
             <CardHeader className="pb-2">
               <CardTitle className={`text-sm font-heading ${catColor}`}>{catLabel}</CardTitle>
               {cat === "contraindicada" && <p className="text-[10px] text-destructive/80">Vacinas de vírus vivo atenuado — NÃO aplicar na gestação</p>}
@@ -148,7 +148,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
 
       {/* Custom vaccines */}
       {vaccines.filter(v => v.name === "Outra" && v.customName).length > 0 && (
-        <Card className="border-border/50">
+        <Card className="clinical-card">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Vacinas Adicionais</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">

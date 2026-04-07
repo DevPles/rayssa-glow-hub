@@ -352,20 +352,20 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex gap-3">
-          <div className="bg-primary/10 rounded-xl px-3 py-2 text-center border border-primary/20">
-            <p className="text-lg font-heading font-bold text-primary">{realizadas.length}</p>
-            <p className="text-[10px] text-primary/80">Realizadas</p>
+          <div className="clinical-card px-3 py-2 text-center">
+            <p className="text-lg font-heading font-bold text-foreground">{realizadas.length}</p>
+            <p className="text-[10px] text-muted-foreground">Realizadas</p>
           </div>
-          <div className="bg-secondary/10 rounded-xl px-3 py-2 text-center border border-secondary/20">
-            <p className="text-lg font-heading font-bold text-secondary-foreground">{record.prenatalConsultations.filter(c => c.status === "agendada").length}</p>
-            <p className="text-[10px] text-secondary-foreground/80">Agendadas</p>
+          <div className="clinical-card px-3 py-2 text-center">
+            <p className="text-lg font-heading font-bold text-foreground">{record.prenatalConsultations.filter(c => c.status === "agendada").length}</p>
+            <p className="text-[10px] text-muted-foreground">Agendadas</p>
           </div>
         </div>
         <Button variant="secondary" size="sm" onClick={openNewConsultation}>Nova Consulta</Button>
       </div>
 
       {record.prenatalConsultations.length === 0 ? (
-        <Card className="border-border/50">
+        <Card className="clinical-card">
           <CardContent className="p-8 text-center"><p className="text-sm text-muted-foreground font-heading">Nenhuma consulta registrada</p></CardContent>
         </Card>
       ) : (

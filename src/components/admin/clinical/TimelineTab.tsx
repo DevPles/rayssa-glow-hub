@@ -102,7 +102,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
       </div>
 
       {filtered.length === 0 ? (
-        <Card className="border-border/50">
+        <Card className="clinical-card">
           <CardContent className="p-8 text-center"><p className="text-sm text-muted-foreground font-heading">Nenhum evento encontrado</p></CardContent>
         </Card>
       ) : (
