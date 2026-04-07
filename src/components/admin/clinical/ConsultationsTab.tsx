@@ -306,7 +306,17 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
           <div className="space-y-3">
             <p className="text-xs font-heading font-bold text-foreground">Passo 4 — Prescrições e Orientações</p>
             <div className="space-y-1.5"><Label className="text-xs font-heading">Prescrições / Receitas</Label><Textarea value={sc.conduct} onChange={e => updateSC({ conduct: e.target.value })} className="rounded-xl min-h-[80px]" placeholder="Medicamentos, suplementos, orientações..." /></div>
-            <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={sc.professional} onChange={e => updateSC({ professional: e.target.value })} className="rounded-xl" /></div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-heading">Profissional</Label>
+              <Select value={sc.professional} onValueChange={v => updateSC({ professional: v })}>
+                <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {professionals.map(p => (
+                    <SelectItem key={p.id} value={p.name}>{p.name}{p.specialty ? ` (${p.specialty === "medico_obstetra" ? "Médico(a)" : "Enfermeiro(a)"})` : ""}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         );
       case 5: {
@@ -458,7 +468,17 @@ const ConsultationsTab = ({ record, onRecordUpdate }: ConsultationsTabProps) => 
               </>
             )}
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5"><Label className="text-xs font-heading">Profissional</Label><Input value={consultForm.professional} onChange={e => setConsultForm({ ...consultForm, professional: e.target.value })} className="rounded-xl" /></div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-heading">Profissional</Label>
+                <Select value={consultForm.professional} onValueChange={v => setConsultForm({ ...consultForm, professional: v })}>
+                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {professionals.map(p => (
+                      <SelectItem key={p.id} value={p.name}>{p.name}{p.specialty ? ` (${p.specialty === "medico_obstetra" ? "Médico(a)" : "Enfermeiro(a)"})` : ""}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-1.5"><Label className="text-xs font-heading">Próxima Consulta</Label><Input type="date" value={consultForm.nextAppointment} onChange={e => setConsultForm({ ...consultForm, nextAppointment: e.target.value })} className="rounded-xl" /></div>
             </div>
             <div className="flex gap-3 pt-2">
