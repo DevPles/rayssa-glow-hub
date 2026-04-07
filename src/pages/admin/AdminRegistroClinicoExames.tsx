@@ -13,7 +13,7 @@ const AdminRegistroClinicoExames = () => {
   const record = records.find(r => r.id === selectedId);
 
   return (
-    <AdminLayout title="Exames Gestacionais">
+    <AdminLayout title="Exames Gestacionais" backTo="/admin/registro-clinico">
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Select value={selectedId} onValueChange={setSelectedId}>
