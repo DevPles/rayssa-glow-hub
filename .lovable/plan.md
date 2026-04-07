@@ -1,47 +1,79 @@
 
-# CPF sem trazer dados reais — Diagnóstico e Solução
 
-## Diagnóstico
+# Redesign do Registro Clínico — Cards + Backend
 
-Analisando os logs da edge function, o fluxo atual é:
+## Problema Atual
 
-1. **Consultar.io** — Pula porque não há `CPF_API_TOKEN` configurado
-2. **BrasilAPI** — Endpoint `/api/cpf/v1/` está **desativado/depreciado** (retorna erro)
-3. **SUS** — Valida que o CPF existe (retorna `true`), mas **não retorna nome nem dados pessoais**
-4. **AI (Gemini)** — Gera dados **fictícios** como fallback → é isso que está aparecendo ("Francisca Silva Lima" é inventado)
+1. **Layout confuso com abas**: 6 abas (Cartão, Timeline, Consultas, Exames, Vacinas, Dados) escondem informações e dificultam a visão geral
+2. **Sem backend**: Todos os dados clínicos estão apenas no localStorage (contexto React). Se o navegador limpar cache, tudo é perdido
+3. **Sem integração real**: Inputs de consultas, exames e vacinas não persistem no banco de dados
 
-O problema é que **não existe API gratuita no Brasil que retorne dados reais de CPF** (nome, nascimento) devido à LGPD. A BrasilAPI desativou esse endpoint há tempo.
+## Solução
 
-## Soluções disponíveis
+### Parte 1 — Criar tabelas no banco de dados
 
-### Opção A — Configurar API paga (recomendado)
-Configurar um token de API de um serviço de consulta de CPF como:
-- **Consultar.io** (já implementado no código, só falta o token)
-- **ReceitaWS** (plano pago)
-- **InfoSimples** ou **HubDev**
+Criar 4 tabelas com RLS:
 
-O código já suporta Consultar.io — basta adicionar o secret `CPF_API_TOKEN`.
+- **clinical_records** — dados do paciente e cartão gestacional (campos JSON para gestationalCard e vitalSigns)
+- **prenatal_consultations** — consultas vinculadas ao registro (foreign key para clinical_records)
+- **gestational_exams** — exames vinculados ao registro
+- **vaccines** — vacinas vinculadas ao registro
 
-### Opção B — Melhorar o fallback atual
-Manter o fluxo sem API paga, mas:
-1. Remover a mensagem enganosa "Dados encontrados!" quando os dados são simulados
-2. Mostrar claramente "Dados simulados — preencha manualmente" quando vem do AI
-3. Manter os campos editáveis para preenchimento manual
-4. Usar a validação SUS para confirmar que o CPF é real
+Todas com `tenant_id` e políticas de segurança para usuários autenticados.
 
-## Plano de Implementação (Opção B + suporte à Opção A)
+### Parte 2 — Redesign do ClinicalRecordDetail (Cards em vez de Abas)
 
-### Arquivo 1: `supabase/functions/cpf-lookup/index.ts`
-- Remover tentativa com BrasilAPI (endpoint morto, só atrasa)
-- No response, incluir campo `source` com valor claro: `"api_real"`, `"sus_validated_simulated"`, `"simulated"`
+Substituir as 6 abas por uma página de scroll contínuo com cards empilhados no estilo glassmorphism (mesmo padrão dos POPs):
 
-### Arquivo 2: `src/components/admin/clinical/constants.ts`
-- Retornar o campo `source` junto com os dados na função `lookupCPF`
+```text
+┌─────────────────────────────────────┐
+│  Header: Paciente + Stats rápidos   │
+├─────────────────────────────────────┤
+│  Card: Alertas (se houver)          │
+├─────────────────────────────────────┤
+│  Card: Cartão Gestacional           │
+│  (DUM, DPP, tipo sanguíneo, etc)   │
+├─────────────────────────────────────┤
+│  Card: Dados Pessoais               │
+│  (CPF, telefone, endereço, etc)     │
+├─────────────────────────────────────┤
+│  Card: Consultas Pré-Natal          │
+│  (lista + botão "Nova Consulta")    │
+├─────────────────────────────────────┤
+│  Card: Exames                       │
+│  (lista + botão "Novo Exame")       │
+├─────────────────────────────────────┤
+│  Card: Vacinas                      │
+│  (lista + botão "Nova Vacina")      │
+├─────────────────────────────────────┤
+│  Card: Timeline                     │
+│  (cronologia unificada)             │
+└─────────────────────────────────────┘
+```
 
-### Arquivo 3: `src/components/admin/clinical/ClinicalRecordForm.tsx`
-- Quando `source` é `"simulated"` ou `"sus_validated_simulated"`: mostrar toast "CPF válido — dados de preenchimento automático. Confira e corrija se necessário." em vez de "Dados encontrados!"
-- Quando `source` é `"api_real"`: mostrar "Dados da Receita Federal encontrados!"
-- Manter campos sempre editáveis após preenchimento simulado
+Cada card terá:
+- Título com contador (ex: "Consultas (3)")
+- Estado colapsável (expandir/recolher) para não sobrecarregar a tela
+- Botão de ação no canto superior direito
+- Estilo `bg-white/40 backdrop-blur-xl border-white/50 shadow-lg`
 
-### Arquivo 4 (opcional): Adicionar secret `CPF_API_TOKEN`
-- Se o usuário fornecer uma chave de API (Consultar.io), configurar como secret para ativar dados reais automaticamente
+### Parte 3 — Integrar Context com Supabase
+
+Atualizar o `ClinicalRecordContext.tsx` para:
+- Carregar dados do banco ao montar
+- Salvar no banco ao adicionar/atualizar/remover consultas, exames e vacinas
+- Manter fallback no localStorage para offline
+
+### Arquivos Modificados
+
+| Arquivo | Ação |
+|---|---|
+| Migration SQL | Criar 4 tabelas + RLS |
+| `ClinicalRecordContext.tsx` | CRUD via Supabase |
+| `ClinicalRecordDetail.tsx` | Remover Tabs, usar cards colapsáveis |
+| `ConsultationsTab.tsx` | Adaptar para funcionar como seção dentro de card |
+| `ExamsTab.tsx` | Idem |
+| `VaccinesTab.tsx` | Idem |
+| `GestationalCard.tsx` | Idem |
+| `TimelineTab.tsx` | Idem |
+
