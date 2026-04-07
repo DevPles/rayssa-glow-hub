@@ -102,7 +102,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
       </div>
 
       {filtered.length === 0 ? (
-        <Card className="clinical-card">
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
           <CardContent className="p-8 text-center"><p className="text-sm text-muted-foreground font-heading">Nenhum evento encontrado</p></CardContent>
         </Card>
       ) : (
@@ -110,7 +110,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
           {filtered.map((ev) => (
             <div
               key={ev.id}
-              className={`bg-card border border-border/50 rounded-xl p-3 border-l-4 ${colorMap[ev.type]} cursor-pointer hover:bg-accent/30 transition-colors`}
+              className={`bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 rounded-xl p-3 border-l-4 ${colorMap[ev.type]} cursor-pointer hover:bg-white/60 hover:shadow-xl transition-all`}
               onClick={() => {
                 if (ev.type === "consulta" && onConsultClick) {
                   const c = record.prenatalConsultations.find(c => c.id === ev.id);
