@@ -25,7 +25,7 @@ const TestimonialsSection = () => {
         </div>
 
         <div className="max-w-5xl mx-auto px-12">
-          <Carousel opts={{ align: "start", loop: true }}>
+          <Carousel opts={{ align: "start", loop: true }} plugins={[Autoplay({ delay: 4000, stopOnInteraction: false })]}>
             <CarouselContent>
               {testimonials.map((t) => (
                 <CarouselItem key={t.id} className="md:basis-1/2 lg:basis-1/2">
