@@ -50,27 +50,13 @@ const NucleoMaterno = () => {
         </div>
         <HeroLights />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-center">
-            <div>
-               <span className="inline-block text-xs font-heading font-semibold text-accent tracking-widest uppercase bg-accent/20 backdrop-blur-sm px-3 py-1 rounded-full border border-accent/30 mb-2">Cuidados Gestacionais</span>
-               <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Linha do Tempo & Cuidados Gestacionais"}</h1>
-               <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Acompanhe cada fase da gestação com serviços e orientações especializadas."}</p>
-              <Link to="/#servicos">
-                <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm"><ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar</Button>
-              </Link>
-            </div>
-            <div className="hidden lg:flex justify-center">
-              <div className="relative">
-                <div className="w-48 h-56 rounded-2xl overflow-hidden border-3 border-accent/30 shadow-xl shadow-accent/20 relative">
-                  <img src={cfg?.photoUrl || rayssaPortrait} alt={cfg?.expertName || "Especialista"} className="w-full h-full object-cover" />
-                  <Badge className="absolute top-2 left-2 bg-accent/90 text-accent-foreground text-[9px] font-heading border-0 px-2 py-0.5">Especialista</Badge>
-                  <div className="absolute bottom-0 inset-x-0 bg-black/20 backdrop-blur-md p-2">
-                    <p className="text-white font-heading font-bold text-xs">{cfg?.expertName || "Rayssa"}</p>
-                    <p className="text-white/80 text-[10px]">{cfg?.expertSubtitle || "Enfermeira Obstetra"}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div>
+            <span className="inline-block text-xs font-heading font-semibold text-accent tracking-widest uppercase bg-accent/20 backdrop-blur-sm px-3 py-1 rounded-full border border-accent/30 mb-2">Cuidados Gestacionais</span>
+            <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Linha do Tempo & Cuidados Gestacionais"}</h1>
+            <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Acompanhe cada fase da gestação com serviços e orientações especializadas."}</p>
+            <Link to="/#servicos">
+              <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm"><ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar</Button>
+            </Link>
           </div>
         </div>
       </div>
