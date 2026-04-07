@@ -50,27 +50,13 @@ const ProdutosProgramas = () => {
         </div>
         <HeroLights />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex items-center justify-between gap-6">
-            <div>
-               <span className="inline-block text-xs font-heading font-semibold text-primary tracking-widest uppercase bg-primary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-primary/30 mb-2">Loja para Gestantes</span>
-               <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Produtos para Gestantes"}</h1>
-               <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Produtos selecionados para gestantes e mamães: kits, cosméticos e itens de bem-estar."}</p>
-              <Link to="/#servicos">
-                <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm"><ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar</Button>
-              </Link>
-            </div>
-            <div className="hidden lg:flex justify-center">
-              <div className="relative">
-                <div className="w-48 h-56 rounded-2xl overflow-hidden border-3 border-primary/30 shadow-xl shadow-primary/20 relative">
-                  <img src={cfg?.photoUrl || perilaPortrait} alt={cfg?.expertName || "Expert"} className="w-full h-full object-cover" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/20 backdrop-blur-md border-t border-white/20 px-3 py-2">
-                    <p className="font-heading font-semibold text-white text-xs">{cfg?.expertName || "Perila Lobato"}</p>
-                    <p className="text-[10px] text-white/70">{cfg?.expertSubtitle || "Designer de Produtos"}</p>
-                  </div>
-                </div>
-                <Badge className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground border-0 text-[9px] font-heading px-3 py-1 rounded-xl shadow-lg">Expert</Badge>
-              </div>
-            </div>
+          <div>
+            <span className="inline-block text-xs font-heading font-semibold text-primary tracking-widest uppercase bg-primary/20 backdrop-blur-sm px-3 py-1 rounded-full border border-primary/30 mb-2">Loja para Gestantes</span>
+            <h1 className="text-2xl md:text-3xl font-heading font-bold text-card mb-2">{cfg?.pageTitle || "Produtos para Gestantes"}</h1>
+            <p className="text-card/70 max-w-xl text-sm leading-relaxed">{cfg?.pageDescription || "Produtos selecionados para gestantes e mamães: kits, cosméticos e itens de bem-estar."}</p>
+            <Link to="/#servicos">
+              <Button variant="ghost" size="sm" className="text-card hover:text-card bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 mt-3 font-heading rounded-full px-4 text-xs shadow-sm"><ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar</Button>
+            </Link>
           </div>
         </div>
       </div>
