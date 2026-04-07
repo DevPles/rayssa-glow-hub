@@ -75,6 +75,12 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin/registro-clinico" element={<AdminRegistroClinico />} />
+                <Route path="/admin/registro-clinico/fichas" element={<AdminRegistroClinicoFichas />} />
+                <Route path="/admin/registro-clinico/consultas" element={<AdminRegistroClinicoConsultas />} />
+                <Route path="/admin/registro-clinico/exames" element={<AdminRegistroClinicoExames />} />
+                <Route path="/admin/registro-clinico/vacinas" element={<AdminRegistroClinicoVacinas />} />
+                <Route path="/admin/registro-clinico/timeline" element={<AdminRegistroClinicoTimeline />} />
+                <Route path="/admin/registro-clinico/alertas" element={<AdminRegistroClinicoAlertas />} />
                 <Route path="/admin/pops" element={<AdminPOPs />} />
                 <Route path="/admin/servicos" element={<AdminServicos />} />
                 <Route path="/admin/estoque" element={<AdminEstoque />} />
