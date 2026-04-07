@@ -85,9 +85,9 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
             <p className="text-lg font-heading font-bold text-foreground">{completedExams.length}</p>
             <p className="text-[10px] text-muted-foreground">Com resultado</p>
           </div>
-          <div className="bg-secondary/10 rounded-xl px-3 py-2 text-center border border-secondary/20">
-            <p className="text-lg font-heading font-bold text-secondary-foreground">{pendingExams.length}</p>
-            <p className="text-[10px] text-secondary-foreground/80">Aguardando</p>
+          <div className="clinical-card px-3 py-2 text-center">
+            <p className="text-lg font-heading font-bold text-foreground">{pendingExams.length}</p>
+            <p className="text-[10px] text-muted-foreground">Aguardando</p>
           </div>
           {alteredExams.length > 0 && (
             <div className="clinical-card px-3 py-2 text-center">
@@ -105,7 +105,7 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
         const exams = examsByTrimester(tri);
         const isCurrentTri = tri === String(getTrimesterFromIG(igWeeks));
         return (
-          <Card key={tri} className={`border-border/50 ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
+          <Card key={tri} className={`bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5 ${isCurrentTri ? "ring-2 ring-secondary/30" : ""}`}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-heading flex items-center justify-between">
                 <span>{tri}º Trimestre {isCurrentTri ? "(atual)" : ""}</span>
@@ -120,7 +120,7 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                 })}
               </div>
               {exams.map(exam => (
-                <div key={exam.id} className="bg-muted/20 rounded-xl p-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedExam({ ...exam }); setEditMode(false); setDetailOpen(true); }}>
+                <div key={exam.id} className="bg-white/30 backdrop-blur-lg rounded-xl p-3 border border-white/40 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedExam({ ...exam }); setEditMode(false); setDetailOpen(true); }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-heading font-bold text-foreground">{exam.type}</p>
@@ -219,24 +219,24 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                       { label: "Solicitado por", value: selectedExam.requestedBy || "—" },
                       { label: "Interpretação", value: selectedExam.interpretation === "normal" ? "Normal" : selectedExam.interpretation === "alterado" ? "Alterado" : selectedExam.interpretation === "inconclusivo" ? "Inconclusivo" : "—" },
                     ].map(item => (
-                      <div key={item.label} className="bg-muted/20 rounded-xl p-3">
+                      <div key={item.label} className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                         <p className="text-[10px] text-muted-foreground font-heading uppercase">{item.label}</p>
                         <p className="text-sm font-heading font-semibold text-foreground">{item.value}</p>
                       </div>
                     ))}
                   </div>
                   {selectedExam.referenceValues && (
-                    <div className="bg-muted/20 rounded-xl p-3">
+                    <div className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                       <p className="text-[10px] text-muted-foreground font-heading uppercase">Valores de Referência</p>
                       <p className="text-sm text-foreground">{selectedExam.referenceValues}</p>
                     </div>
                   )}
-                  <div className={`rounded-xl p-3 ${selectedExam.result ? "bg-muted/20" : "bg-secondary/10 border border-secondary/20"}`}>
+                  <div className={`rounded-xl p-3 ${selectedExam.result ? "bg-muted/20" : "bg-white/30 backdrop-blur-lg border border-white/40"}`}>
                     <p className="text-[10px] text-muted-foreground font-heading uppercase">Resultado</p>
                     <p className="text-sm text-foreground">{selectedExam.result || "Aguardando resultado — clique em 'Inserir Resultado' para adicionar"}</p>
                   </div>
                   {selectedExam.observations && (
-                    <div className="bg-muted/20 rounded-xl p-3">
+                    <div className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                       <p className="text-[10px] text-muted-foreground font-heading uppercase">Observações</p>
                       <p className="text-sm text-foreground">{selectedExam.observations}</p>
                     </div>
@@ -244,7 +244,7 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
                 </>
               ) : (
                 <>
-                  <div className="bg-muted/20 rounded-xl p-3">
+                  <div className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-xl p-3">
                     <p className="text-xs font-heading font-bold text-foreground">{selectedExam.type}</p>
                     <p className="text-[10px] text-muted-foreground">{format(new Date(selectedExam.date), "dd/MM/yyyy")} · {selectedExam.trimester}º trimestre</p>
                   </div>

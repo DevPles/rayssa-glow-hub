@@ -53,11 +53,11 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
             <p className="text-lg font-heading font-bold text-foreground">{appliedCount}</p>
             <p className="text-[10px] text-muted-foreground">Aplicadas</p>
           </div>
-          <div className="bg-secondary/10 rounded-xl px-3 py-2 text-center border border-secondary/20">
-            <p className="text-lg font-heading font-bold text-secondary-foreground">{pendingCount}</p>
-            <p className="text-[10px] text-secondary-foreground/80">Pendentes</p>
+          <div className="clinical-card px-3 py-2 text-center">
+            <p className="text-lg font-heading font-bold text-foreground">{pendingCount}</p>
+            <p className="text-[10px] text-muted-foreground">Pendentes</p>
           </div>
-          <div className="bg-muted/30 rounded-xl px-3 py-2 text-center border border-border">
+          <div className="clinical-card px-3 py-2 text-center">
             <p className="text-lg font-heading font-bold text-foreground">{vaccines.length}</p>
             <p className="text-[10px] text-muted-foreground">Total Reg.</p>
           </div>
