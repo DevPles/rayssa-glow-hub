@@ -55,7 +55,7 @@ const HeroSection = () => {
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img src={heroBg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/70 to-foreground/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/30 to-transparent" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
