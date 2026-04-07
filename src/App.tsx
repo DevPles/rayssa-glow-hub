@@ -24,6 +24,12 @@ import ProdutosProgramas from "./pages/ProdutosProgramas";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import AdminRegistroClinico from "./pages/admin/AdminRegistroClinico";
+import AdminRegistroClinicoFichas from "./pages/admin/AdminRegistroClinicoFichas";
+import AdminRegistroClinicoConsultas from "./pages/admin/AdminRegistroClinicoConsultas";
+import AdminRegistroClinicoExames from "./pages/admin/AdminRegistroClinicoExames";
+import AdminRegistroClinicoVacinas from "./pages/admin/AdminRegistroClinicoVacinas";
+import AdminRegistroClinicoTimeline from "./pages/admin/AdminRegistroClinicoTimeline";
+import AdminRegistroClinicoAlertas from "./pages/admin/AdminRegistroClinicoAlertas";
 import AdminPOPs from "./pages/admin/AdminPOPs";
 import AdminServicos from "./pages/admin/AdminServicos";
 import AdminEstoque from "./pages/admin/AdminEstoque";
@@ -69,6 +75,12 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin/registro-clinico" element={<AdminRegistroClinico />} />
+                <Route path="/admin/registro-clinico/fichas" element={<AdminRegistroClinicoFichas />} />
+                <Route path="/admin/registro-clinico/consultas" element={<AdminRegistroClinicoConsultas />} />
+                <Route path="/admin/registro-clinico/exames" element={<AdminRegistroClinicoExames />} />
+                <Route path="/admin/registro-clinico/vacinas" element={<AdminRegistroClinicoVacinas />} />
+                <Route path="/admin/registro-clinico/timeline" element={<AdminRegistroClinicoTimeline />} />
+                <Route path="/admin/registro-clinico/alertas" element={<AdminRegistroClinicoAlertas />} />
                 <Route path="/admin/pops" element={<AdminPOPs />} />
                 <Route path="/admin/servicos" element={<AdminServicos />} />
                 <Route path="/admin/estoque" element={<AdminEstoque />} />
