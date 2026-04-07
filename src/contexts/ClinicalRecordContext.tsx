@@ -326,6 +326,14 @@ export const ClinicalRecordProvider = ({ children }: { children: ReactNode }) =>
     } : r));
   };
 
+  const updateGestationalExam = (recordId: string, examId: string, data: Partial<GestationalExam>) => {
+    setRecords((prev) => prev.map((r) => r.id === recordId ? {
+      ...r,
+      gestationalExams: r.gestationalExams.map((e) => e.id === examId ? { ...e, ...data } : e),
+      updatedAt: new Date().toISOString(),
+    } : r));
+  };
+
   const addVaccine = (recordId: string, vaccine: Omit<Vaccine, "id">) => {
     setRecords((prev) => prev.map((r) => r.id === recordId ? {
       ...r, vaccines: [...(r.vaccines || []), { ...vaccine, id: `v${Date.now()}` }], updatedAt: new Date().toISOString(),
