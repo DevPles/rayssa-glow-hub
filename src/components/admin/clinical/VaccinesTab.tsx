@@ -46,30 +46,32 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
   const pendingCount = recommended.length - appliedCount;
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-3">
-          <div className="clinical-card px-3 py-2 text-center">
-            <p className="text-lg font-heading font-bold text-foreground">{appliedCount}</p>
-            <p className="text-[10px] text-muted-foreground">Aplicadas</p>
-          </div>
-          <div className="clinical-card px-3 py-2 text-center">
-            <p className="text-lg font-heading font-bold text-foreground">{pendingCount}</p>
-            <p className="text-[10px] text-muted-foreground">Pendentes</p>
-          </div>
-          <div className="clinical-card px-3 py-2 text-center">
-            <p className="text-lg font-heading font-bold text-foreground">{vaccines.length}</p>
-            <p className="text-[10px] text-muted-foreground">Total Reg.</p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { value: appliedCount, label: "Aplicadas" },
+            { value: pendingCount, label: "Pendentes" },
+            { value: vaccines.length, label: "Total Reg." },
+          ].map((s) => (
+            <Card key={s.label} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-heading font-bold text-foreground">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <Button variant="secondary" size="sm" onClick={() => setDialogOpen(true)}>Registrar Vacina</Button>
+        <Button onClick={() => setDialogOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading shadow-md shadow-secondary/20">
+          Registrar Vacina
+        </Button>
       </div>
 
       {/* Calendar by category */}
       {VACCINE_CATEGORIES.map(({ key: cat, label: catLabel, color: catColor }) => {
         const catVaccines = VACCINES_BRAZIL.filter(v => v.category === cat);
         return (
-          <Card key={cat} className="clinical-card">
+          <Card key={cat} className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
             <CardHeader className="pb-2">
               <CardTitle className={`text-sm font-heading ${catColor}`}>{catLabel}</CardTitle>
               {cat === "contraindicada" && <p className="text-[10px] text-destructive/80">Vacinas de vírus vivo atenuado — NÃO aplicar na gestação</p>}
@@ -148,7 +150,7 @@ const VaccinesTab = ({ record, onRecordUpdate }: VaccinesTabProps) => {
 
       {/* Custom vaccines */}
       {vaccines.filter(v => v.name === "Outra" && v.customName).length > 0 && (
-        <Card className="clinical-card">
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Vacinas Adicionais</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
