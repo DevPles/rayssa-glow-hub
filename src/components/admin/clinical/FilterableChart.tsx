@@ -1,33 +1,37 @@
 import { useState, useMemo } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ChartProps {
-  data: { week: number; value: number }[];
+  data: { week: number; value: number; date?: string }[];
   label: string;
   color?: string;
   currentWeek?: number;
+  dum?: string;
 }
 
-const FilterableChart = ({ data, label, color = "hsl(var(--secondary))", currentWeek }: ChartProps) => {
-  const cw = currentWeek || 40;
-  const currentTrim = cw <= 13 ? 1 : cw <= 27 ? 2 : 3;
+const FilterableChart = ({ data, label, color = "hsl(var(--secondary))", currentWeek, dum }: ChartProps) => {
+  const today = new Date().toISOString().split("T")[0];
 
-  const filters = useMemo(() => [
-    { key: "current", label: `${currentTrim}º Tri (atual)`, from: currentTrim === 1 ? 1 : currentTrim === 2 ? 14 : 28, to: currentTrim === 1 ? 13 : currentTrim === 2 ? 27 : 42 },
-    { key: "last4", label: "Últ. 4 sem", from: Math.max(1, cw - 4), to: cw },
-    { key: "1tri", label: "1º Tri", from: 1, to: 13 },
-    { key: "2tri", label: "2º Tri", from: 14, to: 27 },
-    { key: "3tri", label: "3º Tri", from: 28, to: 42 },
-    { key: "all", label: "Toda gestação", from: 1, to: 42 },
-  ], [currentTrim, cw]);
-
-  const [active, setActive] = useState("current");
-
-  const activeFilter = filters.find(f => f.key === active) || filters[0];
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const filteredData = useMemo(() => {
     if (data.length === 0) return [];
-    return data.filter(d => d.week >= activeFilter.from && d.week <= activeFilter.to);
-  }, [data, activeFilter]);
+    if (!dateFrom && !dateTo) return data;
+
+    return data.filter(d => {
+      if (!d.date) return true;
+      if (dateFrom && d.date < dateFrom) return false;
+      if (dateTo && d.date > dateTo) return false;
+      return true;
+    });
+  }, [data, dateFrom, dateTo]);
+
+  const clearFilter = () => {
+    setDateFrom("");
+    setDateTo("");
+  };
 
   if (data.length < 2) return <p className="text-xs text-muted-foreground text-center py-4">Dados insuficientes para gráfico</p>;
 
@@ -41,23 +45,44 @@ const FilterableChart = ({ data, label, color = "hsl(var(--secondary))", current
   const scaleY = (v: number) => h - py - ((v - minV) / (maxV - minV || 1)) * (h - 2 * py);
   const points = chartData.map(d => `${scaleX(d.week)},${scaleY(d.value)}`).join(" ");
 
+  const hasFilter = dateFrom || dateTo;
+
   return (
     <div>
       <p className="text-xs font-heading font-semibold text-foreground mb-2">{label}</p>
-      <div className="flex flex-wrap items-center gap-1 mb-3">
-        {filters.map((f) => (
+      <div className="flex items-end gap-2 mb-3 flex-wrap">
+        <div className="space-y-1">
+          <Label className="text-[10px] text-muted-foreground">De</Label>
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={e => setDateFrom(e.target.value)}
+            max={dateTo || today}
+            className="h-7 text-xs rounded-lg w-[130px]"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] text-muted-foreground">Até</Label>
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={e => setDateTo(e.target.value)}
+            min={dateFrom}
+            max={today}
+            className="h-7 text-xs rounded-lg w-[130px]"
+          />
+        </div>
+        {hasFilter && (
           <button
-            key={f.key}
-            onClick={() => setActive(f.key)}
-            className={`text-[10px] px-2.5 py-1 rounded-full font-heading transition-colors ${
-              active === f.key
-                ? "bg-secondary text-secondary-foreground"
-                : "bg-muted/50 text-muted-foreground hover:bg-muted"
-            }`}
+            onClick={clearFilter}
+            className="text-[10px] text-muted-foreground hover:text-foreground font-heading px-2 py-1 rounded-lg bg-muted/50 h-7"
           >
-            {f.label}
+            Limpar
           </button>
-        ))}
+        )}
+        {!hasFilter && (
+          <span className="text-[10px] text-muted-foreground h-7 flex items-center">Toda a gestação</span>
+        )}
       </div>
       {filteredData.length < 2 ? (
         <p className="text-xs text-muted-foreground text-center py-4">Sem dados no período selecionado</p>
