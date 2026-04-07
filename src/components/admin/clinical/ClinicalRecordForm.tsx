@@ -112,148 +112,151 @@ const ClinicalRecordForm = ({ initialData, nextNumber, onSave, onCancel }: Clini
   const specialtyLabel = (s: string) => s === "medico_obstetra" ? "Médico(a) Obstetra" : s === "enfermeiro_obstetra" ? "Enfermeiro(a) Obstetra" : "Profissional";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Button onClick={onCancel} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">← Voltar</Button>
         <h2 className="font-heading font-bold text-foreground">{initialData ? "Editar Ficha" : "Nova Ficha Gestacional"}</h2>
         <Button onClick={handleSave} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full font-heading text-sm">Salvar</Button>
       </div>
 
-      {/* CPF */}
-      <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
-        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Identificação por CPF</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-end gap-3">
-            <div className="space-y-1 flex-1 max-w-xs">
-              <Label className="text-xs font-heading">CPF *</Label>
-              <Input value={formData.cpf || ""} onChange={e => handleCPFChange(e.target.value)} className="rounded-xl" placeholder="000.000.000-00" disabled={(cpfLocked && !!initialData) || cpfLoading} />
-              {cpfLoading && <span className="text-xs text-muted-foreground animate-pulse">Consultando CPF...</span>}
+      {/* CPF + Profissionais lado a lado */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+          <CardHeader className="pb-1 pt-3 px-4"><CardTitle className="text-xs font-heading">Identificação por CPF</CardTitle></CardHeader>
+          <CardContent className="px-4 pb-3">
+            <div className="flex items-end gap-2">
+              <div className="space-y-1 flex-1">
+                <Label className="text-[10px] font-heading">CPF *</Label>
+                <Input value={formData.cpf || ""} onChange={e => handleCPFChange(e.target.value)} className="rounded-xl h-9 text-sm" placeholder="000.000.000-00" disabled={(cpfLocked && !!initialData) || cpfLoading} />
+                {cpfLoading && <span className="text-[10px] text-muted-foreground animate-pulse">Consultando...</span>}
+              </div>
+              {cpfLocked && <Button variant="outline" size="sm" className="h-9 text-xs" onClick={() => setCpfLocked(false)}>Editar</Button>}
             </div>
-            {cpfLocked && <Button variant="outline" size="sm" onClick={() => setCpfLocked(false)}>Editar dados</Button>}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Professionals */}
-      <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
-        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Profissionais Responsáveis *</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-3 mb-2">
-            <Label className="text-xs font-heading">Filtrar por categoria:</Label>
-            <Select value={formSpecialtyFilter} onValueChange={setFormSpecialtyFilter}>
-              <SelectTrigger className="rounded-xl w-[220px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="medico_obstetra">Médico(a) Obstetra</SelectItem>
-                <SelectItem value="enfermeiro_obstetra">Enfermeiro(a) Obstetra</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {filteredProfessionals.map(p => {
-              const isSelected = formData.assignedProfessionals?.some(ap => ap.id === p.id);
-              return (
-                <Button key={p.id} type="button" size="sm" variant={isSelected ? "default" : "outline"} onClick={() => toggleProfessional(p.id, p.name)}>
-                  {p.name} {p.specialty ? `(${specialtyLabel(p.specialty)})` : ""}
-                </Button>
-              );
-            })}
-            {filteredProfessionals.length === 0 && <p className="text-xs text-muted-foreground">Nenhum profissional nesta categoria</p>}
-          </div>
-        </CardContent>
-      </Card>
+        <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
+          <CardHeader className="pb-1 pt-3 px-4"><CardTitle className="text-xs font-heading">Profissionais Responsáveis *</CardTitle></CardHeader>
+          <CardContent className="px-4 pb-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Label className="text-[10px] font-heading whitespace-nowrap">Categoria:</Label>
+              <Select value={formSpecialtyFilter} onValueChange={setFormSpecialtyFilter}>
+                <SelectTrigger className="rounded-xl h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="medico_obstetra">Médico(a) Obstetra</SelectItem>
+                  <SelectItem value="enfermeiro_obstetra">Enfermeiro(a) Obstetra</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {filteredProfessionals.map(p => {
+                const isSelected = formData.assignedProfessionals?.some(ap => ap.id === p.id);
+                return (
+                  <Button key={p.id} type="button" size="sm" className="h-7 text-[11px] px-2" variant={isSelected ? "default" : "outline"} onClick={() => toggleProfessional(p.id, p.name)}>
+                    {p.name} {p.specialty ? `(${specialtyLabel(p.specialty)})` : ""}
+                  </Button>
+                );
+              })}
+              {filteredProfessionals.length === 0 && <p className="text-[10px] text-muted-foreground">Nenhum profissional</p>}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Patient Data */}
       <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
-        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Dados da Gestante</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
-              {formData.patientPhoto ? <img src={formData.patientPhoto} alt="" className="w-16 h-16 rounded-full object-cover" /> : <span className="text-xs text-muted-foreground font-heading">Foto</span>}
+        <CardHeader className="pb-1 pt-3 px-4"><CardTitle className="text-xs font-heading">Dados da Gestante</CardTitle></CardHeader>
+        <CardContent className="px-4 pb-3 space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border shrink-0 overflow-hidden">
+              {formData.patientPhoto ? <img src={formData.patientPhoto} alt="" className="w-12 h-12 rounded-full object-cover" /> : <span className="text-[10px] text-muted-foreground font-heading">Foto</span>}
             </div>
-            <Button type="button" size="sm" variant="outline" onClick={() => handleFileUpload("image/*", urls => { if (urls[0]) updateForm("patientPhoto", urls[0]); })}>
+            <Button type="button" size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleFileUpload("image/*", urls => { if (urls[0]) updateForm("patientPhoto", urls[0]); })}>
               {formData.patientPhoto ? "Trocar" : "Foto"}
             </Button>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-            <div className="space-y-1 col-span-2"><Label className="text-xs font-heading">Nome Completo *</Label><Input value={formData.fullName} onChange={e => { updateForm("fullName", e.target.value); updateForm("patientName", e.target.value); }} className="rounded-xl" disabled={cpfLocked} /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Nº Registro</Label><Input value={formData.prontuarioNumber} readOnly className="rounded-xl bg-muted" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Nascimento</Label><Input type="date" value={formData.birthDate} onChange={e => updateForm("birthDate", e.target.value)} className="rounded-xl" disabled={cpfLocked} /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Telefone</Label><Input value={formData.phone} onChange={e => updateForm("phone", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Estado Civil</Label><Input value={formData.maritalStatus} onChange={e => updateForm("maritalStatus", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Profissão</Label><Input value={formData.profession} onChange={e => updateForm("profession", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Contato Emergência</Label><Input value={formData.emergencyContact} onChange={e => updateForm("emergencyContact", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1 col-span-2 md:col-span-4"><Label className="text-xs font-heading">Endereço</Label><Input value={formData.address} onChange={e => updateForm("address", e.target.value)} className="rounded-xl" disabled={cpfLocked} /></div>
-            <div className="col-span-2 md:col-span-4 flex items-center gap-3">
-              <Checkbox checked={formData.consentSigned} onCheckedChange={v => updateForm("consentSigned", !!v)} />
-              <Label className="text-xs font-heading font-semibold">Termo de consentimento assinado</Label>
-            </div>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+            <div className="space-y-0.5 col-span-2"><Label className="text-[10px] font-heading">Nome Completo *</Label><Input value={formData.fullName} onChange={e => { updateForm("fullName", e.target.value); updateForm("patientName", e.target.value); }} className="rounded-xl h-9 text-sm" disabled={cpfLocked} /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Nº Registro</Label><Input value={formData.prontuarioNumber} readOnly className="rounded-xl h-9 text-sm bg-muted" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Nascimento</Label><Input type="date" value={formData.birthDate} onChange={e => updateForm("birthDate", e.target.value)} className="rounded-xl h-9 text-sm" disabled={cpfLocked} /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Telefone</Label><Input value={formData.phone} onChange={e => updateForm("phone", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Estado Civil</Label><Input value={formData.maritalStatus} onChange={e => updateForm("maritalStatus", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Profissão</Label><Input value={formData.profession} onChange={e => updateForm("profession", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Contato Emergência</Label><Input value={formData.emergencyContact} onChange={e => updateForm("emergencyContact", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5 col-span-3 md:col-span-4"><Label className="text-[10px] font-heading">Endereço</Label><Input value={formData.address} onChange={e => updateForm("address", e.target.value)} className="rounded-xl h-9 text-sm" disabled={cpfLocked} /></div>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <Checkbox checked={formData.consentSigned} onCheckedChange={v => updateForm("consentSigned", !!v)} />
+            <Label className="text-[10px] font-heading font-semibold">Termo de consentimento assinado</Label>
           </div>
         </CardContent>
       </Card>
 
       {/* Gestational Card */}
       <Card className="bg-white/40 backdrop-blur-xl border-white/50 shadow-lg shadow-black/5">
-        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Cartão da Gestante</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-            <div className="space-y-1">
-              <Label className="text-xs font-heading">Tipo Sanguíneo</Label>
+        <CardHeader className="pb-1 pt-3 px-4"><CardTitle className="text-xs font-heading">Cartão da Gestante</CardTitle></CardHeader>
+        <CardContent className="px-4 pb-3 space-y-2">
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+            <div className="space-y-0.5">
+              <Label className="text-[10px] font-heading">Tipo Sang.</Label>
               <Select value={formData.gestationalCard.bloodType} onValueChange={v => updateGestCard("bloodType", v)}>
-                <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>{["A", "B", "AB", "O"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs font-heading">Rh</Label>
+            <div className="space-y-0.5">
+              <Label className="text-[10px] font-heading">Rh</Label>
               <Select value={formData.gestationalCard.rh} onValueChange={v => updateGestCard("rh", v)}>
-                <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent><SelectItem value="+">Positivo (+)</SelectItem><SelectItem value="-">Negativo (-)</SelectItem></SelectContent>
+                <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent><SelectItem value="+">+</SelectItem><SelectItem value="-">-</SelectItem></SelectContent>
               </Select>
             </div>
-            <div className="space-y-1"><Label className="text-xs font-heading">DUM</Label><Input type="date" value={formData.gestationalCard.dum} onChange={e => updateGestCard("dum", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">DPP (auto)</Label><Input value={formData.gestationalCard.dpp} readOnly className="rounded-xl bg-muted" /></div>
+            <div className="space-y-0.5 col-span-2"><Label className="text-[10px] font-heading">DUM</Label><Input type="date" value={formData.gestationalCard.dum} onChange={e => updateGestCard("dum", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5 col-span-2"><Label className="text-[10px] font-heading">DPP (auto)</Label><Input value={formData.gestationalCard.dpp} readOnly className="rounded-xl h-9 text-sm bg-muted" /></div>
+            {formData.gestationalCard.dum && (
+              <div className="space-y-0.5 col-span-2 flex items-end">
+                <span className="text-xs text-muted-foreground pb-2">IG: <span className="font-semibold text-foreground">{calcGestationalAge(formData.gestationalCard.dum)}</span></span>
+              </div>
+            )}
           </div>
-          {formData.gestationalCard.dum && (
-            <div className="text-xs text-muted-foreground">IG atual: <span className="font-semibold text-foreground">{calcGestationalAge(formData.gestationalCard.dum)}</span></div>
-          )}
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
-            <div className="space-y-1"><Label className="text-xs font-heading">G</Label><Input value={formData.gestationalCard.gravida} onChange={e => updateGestCard("gravida", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">P</Label><Input value={formData.gestationalCard.para} onChange={e => updateGestCard("para", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">A</Label><Input value={formData.gestationalCard.abortions} onChange={e => updateGestCard("abortions", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Peso Pré-gest. (kg)</Label><Input value={formData.gestationalCard.preGestationalWeight} onChange={e => updateGestCard("preGestationalWeight", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Altura (m)</Label><Input value={formData.gestationalCard.height} onChange={e => updateGestCard("height", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">IMC (auto)</Label><Input value={formData.gestationalCard.preGestationalBmi} readOnly className="rounded-xl bg-muted" /></div>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">G</Label><Input value={formData.gestationalCard.gravida} onChange={e => updateGestCard("gravida", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">P</Label><Input value={formData.gestationalCard.para} onChange={e => updateGestCard("para", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">A</Label><Input value={formData.gestationalCard.abortions} onChange={e => updateGestCard("abortions", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Peso Pré (kg)</Label><Input value={formData.gestationalCard.preGestationalWeight} onChange={e => updateGestCard("preGestationalWeight", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Altura (m)</Label><Input value={formData.gestationalCard.height} onChange={e => updateGestCard("height", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">IMC (auto)</Label><Input value={formData.gestationalCard.preGestationalBmi} readOnly className="rounded-xl h-9 text-sm bg-muted" /></div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-            <div className="space-y-1"><Label className="text-xs font-heading">Alergias</Label><Input value={formData.gestationalCard.allergies} onChange={e => updateGestCard("allergies", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Medicamentos</Label><Input value={formData.gestationalCard.medications} onChange={e => updateGestCard("medications", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Condições pré-existentes</Label><Input value={formData.gestationalCard.preExistingConditions} onChange={e => updateGestCard("preExistingConditions", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Cirurgias anteriores</Label><Input value={formData.gestationalCard.previousSurgeries} onChange={e => updateGestCard("previousSurgeries", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Histórico familiar</Label><Input value={formData.gestationalCard.familyHistory} onChange={e => updateGestCard("familyHistory", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1">
-              <Label className="text-xs font-heading">Classificação de Risco</Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Alergias</Label><Input value={formData.gestationalCard.allergies} onChange={e => updateGestCard("allergies", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Medicamentos</Label><Input value={formData.gestationalCard.medications} onChange={e => updateGestCard("medications", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Condições pré-existentes</Label><Input value={formData.gestationalCard.preExistingConditions} onChange={e => updateGestCard("preExistingConditions", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Cirurgias anteriores</Label><Input value={formData.gestationalCard.previousSurgeries} onChange={e => updateGestCard("previousSurgeries", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Histórico familiar</Label><Input value={formData.gestationalCard.familyHistory} onChange={e => updateGestCard("familyHistory", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5">
+              <Label className="text-[10px] font-heading">Classif. Risco</Label>
               <Select value={formData.gestationalCard.riskClassification} onValueChange={(v: any) => updateGestCard("riskClassification", v)}>
-                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="habitual">Risco Habitual</SelectItem><SelectItem value="alto_risco">Alto Risco</SelectItem></SelectContent>
               </Select>
             </div>
           </div>
-          <Separator />
-          <p className="text-xs font-heading font-semibold text-foreground">Plano de Parto e Apoio</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-            <div className="space-y-1"><Label className="text-xs font-heading">Acompanhante</Label><Input value={formData.gestationalCard.companion} onChange={e => updateGestCard("companion", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Tel. Acompanhante</Label><Input value={formData.gestationalCard.companionPhone} onChange={e => updateGestCard("companionPhone", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Pediatra</Label><Input value={formData.gestationalCard.pediatrician} onChange={e => updateGestCard("pediatrician", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1"><Label className="text-xs font-heading">Hospital/Maternidade</Label><Input value={formData.gestationalCard.hospital} onChange={e => updateGestCard("hospital", e.target.value)} className="rounded-xl" /></div>
-            <div className="space-y-1 col-span-1 md:col-span-2"><Label className="text-xs font-heading">Plano de Parto</Label><Textarea value={formData.gestationalCard.birthPlan} onChange={e => updateGestCard("birthPlan", e.target.value)} className="rounded-xl min-h-[60px]" /></div>
+          <Separator className="my-1" />
+          <p className="text-[10px] font-heading font-semibold text-foreground">Plano de Parto e Apoio</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Acompanhante</Label><Input value={formData.gestationalCard.companion} onChange={e => updateGestCard("companion", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Tel. Acompanhante</Label><Input value={formData.gestationalCard.companionPhone} onChange={e => updateGestCard("companionPhone", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Pediatra</Label><Input value={formData.gestationalCard.pediatrician} onChange={e => updateGestCard("pediatrician", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5"><Label className="text-[10px] font-heading">Hospital/Maternidade</Label><Input value={formData.gestationalCard.hospital} onChange={e => updateGestCard("hospital", e.target.value)} className="rounded-xl h-9 text-sm" /></div>
+            <div className="space-y-0.5 col-span-2 md:col-span-4"><Label className="text-[10px] font-heading">Plano de Parto</Label><Textarea value={formData.gestationalCard.birthPlan} onChange={e => updateGestCard("birthPlan", e.target.value)} className="rounded-xl min-h-[50px] text-sm" /></div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 pb-6">
-        <Button variant="outline" onClick={onCancel} className="flex-1">Cancelar</Button>
-        <Button variant="secondary" onClick={handleSave} className="flex-1">{initialData ? "Salvar Alterações" : "Criar Registro"}</Button>
+      <div className="flex gap-3 pb-4">
+        <Button variant="outline" onClick={onCancel} className="flex-1 h-9">Cancelar</Button>
+        <Button variant="secondary" onClick={handleSave} className="flex-1 h-9">{initialData ? "Salvar Alterações" : "Criar Registro"}</Button>
       </div>
     </div>
   );
