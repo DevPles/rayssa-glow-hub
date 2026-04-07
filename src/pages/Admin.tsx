@@ -60,9 +60,9 @@ const Admin = () => {
               <p className="text-xs text-muted-foreground">{user.name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="icon" onClick={() => setCartOpen(true)} className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90"><ShoppingBag className="h-4 w-4" /></Button>
-            <Button onClick={handleLogout} className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90"><LogOut className="h-4 w-4 mr-2" /> Sair</Button>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Button size="icon" onClick={() => setCartOpen(true)} className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-9 w-9 sm:h-10 sm:w-10"><ShoppingBag className="h-4 w-4" /></Button>
+            <Button onClick={handleLogout} className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10"><LogOut className="h-4 w-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Sair</span></Button>
           </div>
         </div>
       </div>

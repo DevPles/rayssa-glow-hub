@@ -509,11 +509,11 @@ const DashboardCliente = () => {
 
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <Card className="border border-border/50 hover:shadow-md transition-shadow cursor-pointer group" onClick={() => setBookingOpen(true)}>
-            <CardContent className="p-4 text-center">
-              <h3 className="font-heading font-semibold text-foreground text-sm">Agendar Serviço</h3>
-              <p className="text-xs text-muted-foreground mt-1">Explore o catálogo</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <h3 className="font-heading font-semibold text-foreground text-xs sm:text-sm">Agendar Serviço</h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Explore o catálogo</p>
             </CardContent>
           </Card>
           <Card className="border border-border/50 hover:shadow-md transition-shadow cursor-pointer group" onClick={() => navigate("/produtos-programas")}>
@@ -540,10 +540,10 @@ const DashboardCliente = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="historico" className="w-full">
-          <TabsList className="w-full md:w-auto">
-            <TabsTrigger value="historico">Histórico de Compras</TabsTrigger>
-            <TabsTrigger value="agendamentos">Próximos Agendamentos</TabsTrigger>
-            <TabsTrigger value="ficha" data-value="ficha">Ficha Digital</TabsTrigger>
+          <TabsList className="w-full md:w-auto flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="historico" className="text-xs sm:text-sm flex-1 sm:flex-none">Histórico</TabsTrigger>
+            <TabsTrigger value="agendamentos" className="text-xs sm:text-sm flex-1 sm:flex-none">Agendamentos</TabsTrigger>
+            <TabsTrigger value="ficha" data-value="ficha" className="text-xs sm:text-sm flex-1 sm:flex-none">Ficha Digital</TabsTrigger>
           </TabsList>
 
           <TabsContent value="historico">
@@ -552,39 +552,55 @@ const DashboardCliente = () => {
                 <CardTitle className="text-base font-heading">Suas últimas compras</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Serviço / Produto</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Rastreio</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockPurchases.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="text-muted-foreground text-sm">{p.date}</TableCell>
-                        <TableCell className="font-medium text-sm">{p.service}</TableCell>
-                        <TableCell className="text-sm">{p.value}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="text-xs">{p.status}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setTrackingOrder(p)}
-                            className="text-primary hover:text-primary/80 text-xs gap-1"
-                          >
-                            <Eye className="h-3.5 w-3.5" /> Ver
-                          </Button>
-                        </TableCell>
+                {/* Mobile: card list */}
+                <div className="block sm:hidden divide-y divide-border">
+                  {mockPurchases.map((p) => (
+                    <div key={p.id} className="p-4 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-sm text-foreground">{p.service}</p>
+                        <Badge variant="secondary" className="text-xs">{p.status}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{p.date}</span>
+                        <span className="font-medium text-foreground">{p.value}</span>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => setTrackingOrder(p)} className="text-primary hover:text-primary/80 text-xs gap-1 px-0 h-7">
+                        <Eye className="h-3.5 w-3.5" /> Rastrear
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                {/* Desktop: table */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Serviço / Produto</TableHead>
+                        <TableHead>Valor</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Rastreio</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {mockPurchases.map((p) => (
+                        <TableRow key={p.id}>
+                          <TableCell className="text-muted-foreground text-sm">{p.date}</TableCell>
+                          <TableCell className="font-medium text-sm">{p.service}</TableCell>
+                          <TableCell className="text-sm">{p.value}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-xs">{p.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm" onClick={() => setTrackingOrder(p)} className="text-primary hover:text-primary/80 text-xs gap-1">
+                              <Eye className="h-3.5 w-3.5" /> Ver
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -595,28 +611,47 @@ const DashboardCliente = () => {
                 <CardTitle className="text-base font-heading">Próximos procedimentos</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Serviço</TableHead>
-                      <TableHead>Horário</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockScheduled.map((s) => (
-                      <TableRow key={s.id}>
-                        <TableCell className="text-muted-foreground text-sm">{s.date}</TableCell>
-                        <TableCell className="font-medium text-sm">{s.service}</TableCell>
-                        <TableCell className="text-sm">{s.time}</TableCell>
-                        <TableCell>
-                          <Badge variant={s.status === "Confirmado" ? "default" : "outline"} className="text-xs">{s.status}</Badge>
-                        </TableCell>
+                {/* Mobile: card list */}
+                <div className="block sm:hidden divide-y divide-border">
+                  {mockScheduled.map((s) => (
+                    <div key={s.id} className="p-4 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-sm text-foreground">{s.service}</p>
+                        <Badge variant={s.status === "Confirmado" ? "default" : "outline"} className="text-xs">{s.status}</Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{s.date}</span>
+                        <span>•</span>
+                        <span>{s.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Desktop: table */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Serviço</TableHead>
+                        <TableHead>Horário</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {mockScheduled.map((s) => (
+                        <TableRow key={s.id}>
+                          <TableCell className="text-muted-foreground text-sm">{s.date}</TableCell>
+                          <TableCell className="font-medium text-sm">{s.service}</TableCell>
+                          <TableCell className="text-sm">{s.time}</TableCell>
+                          <TableCell>
+                            <Badge variant={s.status === "Confirmado" ? "default" : "outline"} className="text-xs">{s.status}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -632,32 +667,32 @@ const DashboardCliente = () => {
             ) : myRecords.map((record) => (
               <Card key={record.id} className="mb-4">
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {record.patientPhoto ? (
-                        <img src={record.patientPhoto} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary/20" />
+                        <img src={record.patientPhoto} alt="" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-primary/20" />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
                           <span className="text-sm text-muted-foreground font-heading font-bold">{record.fullName.charAt(0)}</span>
                         </div>
                       )}
                       <div>
-                        <CardTitle className="text-base font-heading">{record.fullName}</CardTitle>
+                        <CardTitle className="text-sm sm:text-base font-heading">{record.fullName}</CardTitle>
                         <p className="text-xs text-muted-foreground">Registro: {record.prontuarioNumber}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs font-heading">Gestacional</Badge>
-                      <Badge variant={record.status === "ativo" ? "default" : "secondary"} className="text-xs font-heading">{record.status}</Badge>
-                      <Button variant="secondary" size="sm" className="rounded-full text-xs text-secondary-foreground" onClick={() => exportRecordPDF(record)}>
-                        Exportar PDF
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                      <Badge variant="outline" className="text-[10px] sm:text-xs font-heading">Gestacional</Badge>
+                      <Badge variant={record.status === "ativo" ? "default" : "secondary"} className="text-[10px] sm:text-xs font-heading">{record.status}</Badge>
+                      <Button variant="secondary" size="sm" className="rounded-full text-[10px] sm:text-xs text-secondary-foreground h-7 sm:h-8 px-2.5 sm:px-3" onClick={() => exportRecordPDF(record)}>
+                        <FileDown className="h-3 w-3 mr-1" /> PDF
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Dados Pessoais */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                     {[
                       { label: "Nascimento", value: record.birthDate ? format(new Date(record.birthDate), "dd/MM/yyyy") : "—" },
                       { label: "Telefone", value: record.phone || "—" },
@@ -903,11 +938,11 @@ const DashboardCliente = () => {
 
         {/* Lightbox */}
         {lightboxOpen && (
-          <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightboxOpen(false)}>
+          <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-2 sm:p-4" onClick={() => setLightboxOpen(false)}>
             <div className="relative max-w-5xl w-full flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
-              <button onClick={() => setLightboxOpen(false)} className="absolute top-0 right-0 text-white/60 hover:text-white text-2xl p-2">×</button>
+              <button onClick={() => setLightboxOpen(false)} className="absolute -top-1 right-0 text-white/60 hover:text-white text-2xl p-2 z-10">×</button>
               {lightboxCompare.length > 0 ? (
-                <div className="flex gap-4 w-full">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
                   <div className="flex-1 flex flex-col items-center gap-2">
                     <span className="text-white/60 text-xs font-heading uppercase tracking-wider">Antes</span>
                     {lightboxPhotos[lightboxIndex] ? (
