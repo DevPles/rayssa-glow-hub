@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import HeroBookingDialog from "@/components/HeroBookingDialog";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
+import lematerLogoText from "@/assets/lemater-logo-text.png";
 import { useSystemSettings } from "@/contexts/SystemSettingsContext";
 
 const words = ["Privado", "Personalizado"];
@@ -63,15 +64,10 @@ const HeroSection = () => {
           {/* Left content */}
           <div className="relative">
             <img src={logo} alt="LeMater" className="absolute -top-[28rem] -left-10 w-[32rem] md:w-[40rem] lg:w-[48rem] object-contain opacity-60 pointer-events-none select-none drop-shadow-2xl" />
-            <h1 className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold text-card mb-6 leading-[1.15]">
-              <span className="animate-fade-in" style={{ animationDelay: '0ms' }}>Sistema de </span>
-              <span className="animate-fade-in text-primary" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>Experiência Exclusiva</span>
-              <br />
-              <span className="animate-fade-in" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>de Parto </span>
-              <span className="animate-fade-in text-accent" style={{ animationDelay: '900ms', animationFillMode: 'both' }}>{displayText}<span className="animate-pulse">|</span></span>
-            </h1>
-
-
+            <img src={lematerLogoText} alt="LeMater" className="relative z-10 w-[20rem] md:w-[28rem] lg:w-[34rem] mb-4 drop-shadow-lg" />
+            <p className="relative z-10 text-card/80 text-base md:text-lg mb-6 max-w-lg font-light">
+              Acompanhamento gestacional completo e personalizado
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <Button
                 size="lg"
