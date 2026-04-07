@@ -90,9 +90,9 @@ const ExamsTab = ({ record, onRecordUpdate }: ExamsTabProps) => {
             <p className="text-[10px] text-secondary-foreground/80">Aguardando</p>
           </div>
           {alteredExams.length > 0 && (
-            <div className="bg-destructive/10 rounded-xl px-3 py-2 text-center border border-destructive/20">
-              <p className="text-lg font-heading font-bold text-destructive">{alteredExams.length}</p>
-              <p className="text-[10px] text-destructive/80">Alterados</p>
+            <div className="clinical-card px-3 py-2 text-center">
+              <p className="text-lg font-heading font-bold text-foreground">{alteredExams.length}</p>
+              <p className="text-[10px] text-muted-foreground">Alterados</p>
             </div>
           )}
         </div>
