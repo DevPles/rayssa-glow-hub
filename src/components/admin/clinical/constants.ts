@@ -53,7 +53,7 @@ export const formatCPF = (value: string): string => {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 };
 
-export const lookupCPF = async (cpf: string): Promise<{ name: string; birthDate: string; address: string } | null> => {
+export const lookupCPF = async (cpf: string): Promise<{ name: string; birthDate: string; address: string; source: string } | null> => {
   const clean = cpf.replace(/\D/g, "");
   if (clean.length !== 11) return null;
   try {
@@ -65,6 +65,7 @@ export const lookupCPF = async (cpf: string): Promise<{ name: string; birthDate:
       name: data.data.name || "",
       birthDate: data.data.birthDate || "",
       address: data.data.address || "",
+      source: data.source || "validation",
     };
   } catch {
     return null;

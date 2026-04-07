@@ -79,10 +79,14 @@ const ClinicalRecordForm = ({ initialData, nextNumber, onSave, onCancel }: Clini
       if (data && data.name) {
         setFormData(prev => ({ ...prev, cpf: formatted, fullName: data.name, patientName: data.name, birthDate: data.birthDate, address: data.address }));
         setCpfLocked(true);
-        toast({ title: "Dados encontrados!", description: data.name });
+        if (data.source === "api_real") {
+          toast({ title: "✅ Dados da Receita Federal encontrados!", description: data.name });
+        } else {
+          toast({ title: "CPF válido — dados sugeridos", description: "Confira e corrija os dados se necessário." });
+        }
       } else if (data) {
         setCpfLocked(true);
-        toast({ title: "CPF válido", description: "Dados não encontrados. Preencha manualmente." });
+        toast({ title: "CPF válido", description: "Preencha os dados manualmente." });
       } else {
         toast({ title: "CPF inválido", description: "Verifique os dígitos informados.", variant: "destructive" });
       }
