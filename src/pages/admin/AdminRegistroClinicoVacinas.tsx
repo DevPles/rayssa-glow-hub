@@ -14,7 +14,7 @@ const AdminRegistroClinicoVacinas = () => {
 
   return (
     <AdminLayout title="Vacinas" backTo="/admin/registro-clinico">
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Select value={selectedId} onValueChange={setSelectedId}>
             <SelectTrigger className="rounded-xl max-w-sm">
