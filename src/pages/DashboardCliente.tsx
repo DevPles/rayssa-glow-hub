@@ -52,6 +52,25 @@ const DashboardCliente = () => {
   const myRecords = user ? getRecordsByPatient(user.id) : [];
   const myPOPs = user ? pops.filter(p => p.patientName === user.name) : [];
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [activeRooms, setActiveRooms] = useState<Awaited<ReturnType<typeof getActiveRooms>>>([]);
+
+  // Poll for active video rooms
+  useEffectImport(() => {
+    const fetchRooms = async () => {
+      const rooms = await getActiveRooms();
+      setActiveRooms(rooms);
+    };
+    fetchRooms();
+
+    const channel = supabase
+      .channel("dashboard-video-rooms")
+      .on("postgres_changes", { event: "*", schema: "public", table: "video_rooms" }, () => {
+        fetchRooms();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const exportRecordPDF = async (record: typeof myRecords[0]) => {
     const doc = new jsPDF();
