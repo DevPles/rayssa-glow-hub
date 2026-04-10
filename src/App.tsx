@@ -41,7 +41,9 @@ import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminParcerias from "./pages/admin/AdminParcerias";
 import AdminSuporte from "./pages/admin/AdminSuporte";
 import AdminSistema from "./pages/admin/AdminSistema";
+import AdminVideoCall from "./pages/admin/AdminVideoCall";
 import DashboardCliente from "./pages/DashboardCliente";
+import VideoRoom from "./pages/VideoRoom";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,7 +94,9 @@ const App = () => (
                 <Route path="/admin/parcerias" element={<AdminParcerias />} />
                 <Route path="/admin/suporte" element={<AdminSuporte />} />
                 <Route path="/admin/sistema" element={<AdminSistema />} />
+                <Route path="/admin/videochamada/:roomId" element={<AdminVideoCall />} />
                 <Route path="/dashboard" element={<DashboardCliente />} />
+                <Route path="/videochamada/:roomId" element={<VideoRoom />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
