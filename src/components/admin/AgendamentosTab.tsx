@@ -148,6 +148,16 @@ export const AgendamentosTab = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleStartVideoCall(b)}
+                        disabled={creatingCall === b.id}
+                        className="h-7 w-7 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full"
+                        title="Iniciar videochamada"
+                      >
+                        <Video className="h-3.5 w-3.5" />
+                      </Button>
                       {b.status === "pendente" && (
                         <>
                           <Button size="sm" variant="ghost" onClick={() => handleConfirm(b.id)} className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full">
