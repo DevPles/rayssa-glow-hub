@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect as useEffectImport } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Eye, User, MessageCircle, FileDown } from "lucide-react";
+import { ArrowLeft, LogOut, Eye, User, MessageCircle, FileDown, Video } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoImg from "@/assets/logo.png";
@@ -21,6 +21,8 @@ import { useClinicalRecords } from "@/contexts/ClinicalRecordContext";
 import { usePOPs } from "@/contexts/POPContext";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getActiveRooms } from "@/hooks/useVideoCall";
+import { supabase } from "@/integrations/supabase/client";
 
 const mockPurchases = [
   { id: 1, date: "18/02/2026", service: "Limpeza de Pele Profunda", value: "R$ 189,00", status: "Concluído" },
