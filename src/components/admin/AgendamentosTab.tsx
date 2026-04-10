@@ -9,6 +9,7 @@ import { Check, X, Bell, BellOff, Video } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { createVideoRoom } from "@/hooks/useVideoCall";
 import { useAuth } from "@/contexts/AuthContext";
+import { sendWhatsAppNotification } from "@/lib/whatsapp";
 
 const statusColors: Record<Booking["status"], string> = {
   pendente: "bg-yellow-100 text-yellow-800 border-yellow-300",
@@ -54,7 +55,32 @@ export const AgendamentosTab = () => {
     );
     setCreatingCall(null);
     if (roomId) {
-      navigate(`/admin/videochamada/${roomId}`);
+      const baseUrl = window.location.origin;
+      const patientLink = `${baseUrl}/videochamada/${roomId}`;
+
+      // Copy link to clipboard
+      try {
+        await navigator.clipboard.writeText(patientLink);
+      } catch {}
+
+      // Send WhatsApp to patient if phone available
+      if (b.clientPhone) {
+        const cleanPhone = b.clientPhone.replace(/\D/g, "");
+        const fullPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
+        sendWhatsAppNotification({
+          phone: fullPhone,
+          message: `📹 *Teleconsulta*\n\nOlá ${b.clientName}! Sua videochamada está pronta.\n\nAcesse pelo link:\n${patientLink}`,
+          type: "agendamento",
+          metadata: { roomId, service: b.serviceTitle },
+        }).catch((err) => console.error("Erro WhatsApp:", err));
+      }
+
+      toast({
+        title: "Videochamada criada!",
+        description: "Link copiado e enviado por WhatsApp. Entrando na sala...",
+      });
+
+      setTimeout(() => navigate(`/admin/videochamada/${roomId}`), 1500);
     } else {
       toast({ title: "Erro ao criar videochamada", variant: "destructive" });
     }
