@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect as useEffectImport } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Eye, User, MessageCircle, FileDown } from "lucide-react";
+import { ArrowLeft, LogOut, Eye, User, MessageCircle, FileDown, Video } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoImg from "@/assets/logo.png";
@@ -21,6 +21,8 @@ import { useClinicalRecords } from "@/contexts/ClinicalRecordContext";
 import { usePOPs } from "@/contexts/POPContext";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getActiveRooms } from "@/hooks/useVideoCall";
+import { supabase } from "@/integrations/supabase/client";
 
 const mockPurchases = [
   { id: 1, date: "18/02/2026", service: "Limpeza de Pele Profunda", value: "R$ 189,00", status: "Concluído" },
@@ -50,6 +52,25 @@ const DashboardCliente = () => {
   const myRecords = user ? getRecordsByPatient(user.id) : [];
   const myPOPs = user ? pops.filter(p => p.patientName === user.name) : [];
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [activeRooms, setActiveRooms] = useState<Awaited<ReturnType<typeof getActiveRooms>>>([]);
+
+  // Poll for active video rooms
+  useEffectImport(() => {
+    const fetchRooms = async () => {
+      const rooms = await getActiveRooms();
+      setActiveRooms(rooms);
+    };
+    fetchRooms();
+
+    const channel = supabase
+      .channel("dashboard-video-rooms")
+      .on("postgres_changes", { event: "*", schema: "public", table: "video_rooms" }, () => {
+        fetchRooms();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const exportRecordPDF = async (record: typeof myRecords[0]) => {
     const doc = new jsPDF();
@@ -537,6 +558,29 @@ const DashboardCliente = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Active Video Call Banner */}
+        {activeRooms.length > 0 && (
+          <Card className="border-2 border-primary bg-primary/5 animate-pulse-slow">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Video className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-heading font-semibold text-foreground text-sm">Teleconsulta Disponível</p>
+                  <p className="text-xs text-muted-foreground">Sua profissional está aguardando você</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => navigate(`/videochamada/${activeRooms[0].id}`)}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Video className="h-4 w-4 mr-2" /> Entrar na Chamada
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tabs */}
         <Tabs defaultValue="historico" className="w-full">

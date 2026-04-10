@@ -733,6 +733,82 @@ export type Database = {
           },
         ]
       }
+      video_rooms: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          patient_name: string
+          patient_phone: string | null
+          status: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          patient_name: string
+          patient_phone?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          patient_name?: string
+          patient_phone?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_rooms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_signals: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          room_id: string
+          sender_role: string
+          signal_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          room_id: string
+          sender_role: string
+          signal_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          room_id?: string
+          sender_role?: string
+          signal_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_signals_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "video_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_notifications: {
         Row: {
           created_at: string

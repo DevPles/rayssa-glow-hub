@@ -1,10 +1,14 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useBooking, type Booking } from "@/contexts/BookingContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Check, X, Bell, BellOff } from "lucide-react";
+import { Check, X, Bell, BellOff, Video } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { createVideoRoom } from "@/hooks/useVideoCall";
+import { useAuth } from "@/contexts/AuthContext";
 
 const statusColors: Record<Booking["status"], string> = {
   pendente: "bg-yellow-100 text-yellow-800 border-yellow-300",
@@ -22,6 +26,9 @@ const statusLabels: Record<Booking["status"], string> = {
 
 export const AgendamentosTab = () => {
   const { bookings, notifications, unreadCount, updateBookingStatus, markNotificationRead, markAllRead } = useBooking();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [creatingCall, setCreatingCall] = useState<string | null>(null);
 
   const handleConfirm = (id: string) => {
     updateBookingStatus(id, "confirmado");
@@ -36,6 +43,21 @@ export const AgendamentosTab = () => {
   const handleComplete = (id: string) => {
     updateBookingStatus(id, "concluido");
     toast({ title: "Agendamento marcado como concluído" });
+  };
+
+  const handleStartVideoCall = async (b: Booking) => {
+    setCreatingCall(b.id);
+    const roomId = await createVideoRoom(
+      user?.email || "admin",
+      b.clientName,
+      b.clientPhone
+    );
+    setCreatingCall(null);
+    if (roomId) {
+      navigate(`/admin/videochamada/${roomId}`);
+    } else {
+      toast({ title: "Erro ao criar videochamada", variant: "destructive" });
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -126,6 +148,16 @@ export const AgendamentosTab = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleStartVideoCall(b)}
+                        disabled={creatingCall === b.id}
+                        className="h-7 w-7 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-full"
+                        title="Iniciar videochamada"
+                      >
+                        <Video className="h-3.5 w-3.5" />
+                      </Button>
                       {b.status === "pendente" && (
                         <>
                           <Button size="sm" variant="ghost" onClick={() => handleConfirm(b.id)} className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full">
