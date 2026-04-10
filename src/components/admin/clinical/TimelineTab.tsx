@@ -84,7 +84,7 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
 
     // Add video recordings that match this patient
     videoRecordings
-      .filter(vr => vr.patient_name.toLowerCase() === record.patientName.toLowerCase() || record.clinical_record_id === vr.id)
+      .filter(vr => vr.patient_name.toLowerCase() === record.patientName.toLowerCase())
       .forEach(vr => {
         const durationMin = vr.duration_seconds ? Math.round(vr.duration_seconds / 60) : 0;
         result.push({
