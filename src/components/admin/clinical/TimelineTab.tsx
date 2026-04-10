@@ -1,20 +1,24 @@
 import { useMemo, useState } from "react";
+import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ClinicalRecord, PrenatalConsultation, GestationalExam, Vaccine } from "@/contexts/ClinicalRecordContext";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { calcGestationalAgeAtDate } from "./constants";
+import { supabase } from "@/integrations/supabase/client";
+import { Video } from "lucide-react";
 
 interface TimelineEvent {
   id: string;
   date: string;
-  type: "consulta" | "exame" | "vacina";
+  type: "consulta" | "exame" | "vacina" | "videochamada";
   title: string;
   subtitle: string;
   status?: string;
   badge?: { label: string; variant: "default" | "secondary" | "destructive" | "outline" };
   details?: Record<string, string>;
+  videoUrl?: string;
 }
 
 interface TimelineTabProps {
@@ -24,9 +28,22 @@ interface TimelineTabProps {
 }
 
 const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) => {
-  const [filter, setFilter] = useState<"all" | "consulta" | "exame" | "vacina">("all");
+  const [filter, setFilter] = useState<"all" | "consulta" | "exame" | "vacina" | "videochamada">("all");
   const [trimFilter, setTrimFilter] = useState<"all" | "1" | "2" | "3">("all");
+  const [videoRecordings, setVideoRecordings] = useState<Array<{ id: string; patient_name: string; file_url: string; duration_seconds: number | null; created_at: string }>>([]);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const dum = record.gestationalCard.dum;
+
+  useEffect(() => {
+    const fetchRecordings = async () => {
+      const { data } = await supabase
+        .from("video_recordings")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (data) setVideoRecordings(data);
+    };
+    fetchRecordings();
+  }, []);
 
   const events = useMemo(() => {
     const result: TimelineEvent[] = [];
@@ -65,8 +82,24 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
       });
     });
 
+    // Add video recordings that match this patient
+    videoRecordings
+      .filter(vr => vr.patient_name.toLowerCase() === record.patientName.toLowerCase() || record.clinical_record_id === vr.id)
+      .forEach(vr => {
+        const durationMin = vr.duration_seconds ? Math.round(vr.duration_seconds / 60) : 0;
+        result.push({
+          id: vr.id,
+          date: vr.created_at.split("T")[0],
+          type: "videochamada",
+          title: "Teleconsulta por Vídeo",
+          subtitle: `Duração: ${durationMin}min · ${vr.patient_name}`,
+          badge: { label: "Gravação", variant: "default" },
+          videoUrl: vr.file_url,
+        });
+      });
+
     return result.sort((a, b) => b.date.localeCompare(a.date));
-  }, [record, dum]);
+  }, [record, dum, videoRecordings]);
 
   const filtered = useMemo(() => {
     let result = events;
@@ -83,14 +116,14 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
     return result;
   }, [events, filter, trimFilter, dum]);
 
-  const colorMap = { consulta: "border-l-secondary", exame: "border-l-primary", vacina: "border-l-muted-foreground" };
+  const colorMap: Record<string, string> = { consulta: "border-l-secondary", exame: "border-l-primary", vacina: "border-l-muted-foreground", videochamada: "border-l-destructive" };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        {(["all", "consulta", "exame", "vacina"] as const).map(f => (
+        {(["all", "consulta", "exame", "vacina", "videochamada"] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} className={`text-[11px] px-3 py-1 rounded-full font-heading transition-colors ${filter === f ? "bg-secondary text-secondary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"}`}>
-            {f === "all" ? "Todos" : f === "consulta" ? "Consultas" : f === "exame" ? "Exames" : "Vacinas"}
+            {f === "all" ? "Todos" : f === "consulta" ? "Consultas" : f === "exame" ? "Exames" : f === "vacina" ? "Vacinas" : "Vídeos"}
           </button>
         ))}
         <span className="text-muted-foreground text-[10px]">|</span>
@@ -112,7 +145,9 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
               key={ev.id}
               className={`bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 rounded-xl p-3 border-l-4 ${colorMap[ev.type]} cursor-pointer hover:bg-white/60 hover:shadow-xl transition-all`}
               onClick={() => {
-                if (ev.type === "consulta" && onConsultClick) {
+                if (ev.type === "videochamada" && ev.videoUrl) {
+                  setPlayingVideo(playingVideo === ev.id ? null : ev.id);
+                } else if (ev.type === "consulta" && onConsultClick) {
                   const c = record.prenatalConsultations.find(c => c.id === ev.id);
                   if (c) onConsultClick(c);
                 } else if (ev.type === "exame" && onExamClick) {
@@ -123,6 +158,9 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2 flex-1 min-w-0">
+                  {ev.type === "videochamada" && (
+                    <Video className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-heading font-bold text-foreground">{ev.title}</p>
                     <p className="text-[11px] text-muted-foreground truncate">{ev.subtitle}</p>
@@ -133,6 +171,16 @@ const TimelineTab = ({ record, onConsultClick, onExamClick }: TimelineTabProps) 
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap">{format(new Date(ev.date), "dd/MM/yy")}</span>
                 </div>
               </div>
+              {ev.type === "videochamada" && playingVideo === ev.id && ev.videoUrl && (
+                <div className="mt-3">
+                  <video
+                    src={ev.videoUrl}
+                    controls
+                    className="w-full rounded-lg max-h-[300px]"
+                    autoPlay
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
