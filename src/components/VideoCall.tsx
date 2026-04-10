@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useVideoCall } from "@/hooks/useVideoCall";
+import { useMediaRecorder } from "@/hooks/useMediaRecorder";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import {
   Phone,
   Loader2,
   AlertTriangle,
+  Circle,
 } from "lucide-react";
 
 interface VideoCallProps {
@@ -29,17 +31,34 @@ const VideoCall = ({ roomId, role, onEnd }: VideoCallProps) => {
     error,
     localVideoRef,
     remoteVideoRef,
+    localStream,
+    remoteStream,
     startCall,
     toggleMute,
     toggleCamera,
     endCall,
   } = useVideoCall(roomId, role);
 
+  const { isRecording, isUploading, startRecording, stopAndUpload } = useMediaRecorder(
+    roomId,
+    room?.patient_name || "Paciente"
+  );
+
   useEffect(() => {
     startCall();
   }, [startCall]);
 
+  // Auto-start recording when admin connects and both streams are available
+  useEffect(() => {
+    if (role === "admin" && isConnected && localStream && remoteStream && !isRecording) {
+      startRecording([localStream, remoteStream]);
+    }
+  }, [role, isConnected, localStream, remoteStream, isRecording, startRecording]);
+
   const handleEnd = async () => {
+    if (isRecording) {
+      await stopAndUpload();
+    }
     await endCall();
     onEnd?.();
   };
@@ -121,6 +140,18 @@ const VideoCall = ({ roomId, role, onEnd }: VideoCallProps) => {
 
       {/* Controls */}
       <div className="flex items-center justify-center gap-3 px-4 py-4 bg-black/80">
+        {role === "admin" && isRecording && (
+          <div className="flex items-center gap-1.5 mr-2">
+            <Circle className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" />
+            <span className="text-red-400 text-xs font-medium">REC</span>
+          </div>
+        )}
+        {isUploading && (
+          <div className="flex items-center gap-1.5 mr-2">
+            <Loader2 className="h-3 w-3 text-white/70 animate-spin" />
+            <span className="text-white/70 text-xs">Salvando...</span>
+          </div>
+        )}
         <Button
           size="lg"
           variant={isMuted ? "destructive" : "secondary"}
