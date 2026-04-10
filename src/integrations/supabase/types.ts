@@ -733,6 +733,67 @@ export type Database = {
           },
         ]
       }
+      video_recordings: {
+        Row: {
+          clinical_record_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          file_url: string
+          id: string
+          patient_name: string
+          room_id: string | null
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          clinical_record_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          file_url: string
+          id?: string
+          patient_name?: string
+          room_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          clinical_record_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          file_url?: string
+          id?: string
+          patient_name?: string
+          room_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_recordings_clinical_record_id_fkey"
+            columns: ["clinical_record_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_recordings_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "video_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_recordings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_rooms: {
         Row: {
           created_at: string
