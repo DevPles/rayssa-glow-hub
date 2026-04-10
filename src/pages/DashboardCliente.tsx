@@ -559,6 +559,29 @@ const DashboardCliente = () => {
           </Card>
         </div>
 
+        {/* Active Video Call Banner */}
+        {activeRooms.length > 0 && (
+          <Card className="border-2 border-primary bg-primary/5 animate-pulse-slow">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Video className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-heading font-semibold text-foreground text-sm">Teleconsulta Disponível</p>
+                  <p className="text-xs text-muted-foreground">Sua profissional está aguardando você</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => navigate(`/videochamada/${activeRooms[0].id}`)}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Video className="h-4 w-4 mr-2" /> Entrar na Chamada
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Tabs */}
         <Tabs defaultValue="historico" className="w-full">
           <TabsList className="w-full md:w-auto flex-wrap h-auto gap-1 p-1">
